@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Comunidad – Inicio</title>
+
+  <!-- Quita estos links si ya cargas Bootstrap/FA en tu layout -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
+  <style>
+    :root{
+      --grad1:#6a00ff; --grad2:#ff3aa3;
+      --bg1:#0a0f1f; --bg2:#081a2b;
+      --text:#e9e9ef; --muted:#cfd2dc;
+      --card:#ffffff12; --card2:#ffffff1a;
+      --radius:18px; --shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    body{
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 80% 10%, #43136b55 0%, transparent 55%),
+        radial-gradient(1200px 600px at 20% 30%, #0b57d455 0%, transparent 60%),
+        linear-gradient(160deg, var(--bg1) 0%, var(--bg2) 100%);
+      min-height:100vh;
+    }
+    /* Navbar tema */
+    .navbar-gaming{background:#00000055 !important; backdrop-filter: blur(6px); border-bottom:1px solid #ffffff22;}
+    .navbar-gaming .nav-link{color:#ddd !important;}
+    .navbar-gaming .nav-link.active,.navbar-gaming .nav-link:hover{color:#fff !important;}
+
+    /* Chips + buscador */
+    .top-chips{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0 10px}
+    .pill{flex:1 1 260px;height:10px;border-radius:999px;background:linear-gradient(90deg,var(--grad1),var(--grad2));box-shadow:var(--shadow);opacity:.9}
+    .chip{padding:8px 14px;border-radius:999px;background:#ffffff20;font-weight:700}
+    .search{margin-left:auto;background:#ffffff1a;border:1px solid #ffffff30;border-radius:999px;padding:6px 10px;display:flex;align-items:center;gap:8px}
+    .search input{background:transparent;border:0;color:#fff;outline:0;width:150px}
+
+    /* Cards */
+    .glass{background:var(--card);border:1px solid var(--card2);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .cta{display:inline-block;background:linear-gradient(90deg,var(--grad1),var(--grad2));color:#fff;text-decoration:none;padding:10px 14px;border-radius:12px;font-weight:800;box-shadow:var(--shadow)}
+    .kpi{padding:18px;text-align:center;border-radius:16px;background:linear-gradient(180deg,#ffffff18,#ffffff0f);border:1px solid #ffffff1a}
+    .kpi strong{display:block;font-size:1.25rem}
+
+    /* Hero */
+    .hero-media{min-height:180px;border-radius:var(--radius);border:1px solid #ffffff1c;
+      background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="900" height="500"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="%236a00ff"/><stop offset="1" stop-color="%23ff3aa3"/></linearGradient></defs><rect width="100%" height="100%" fill="%23000022"/><circle cx="520" cy="240" r="180" fill="url(%23g)" opacity="0.65"/><rect x="180" y="120" width="300" height="200" rx="16" fill="%23ffffff11" stroke="%23ffffff22"/></svg>') center/cover no-repeat;}
+
+    /* Explore cards */
+    .meta .tag{background:#ffffff18;padding:.4rem .75rem;border-radius:999px;font-weight:700;margin-right:.5rem}
+    .btn-ghost{background:#ffffff20;border:1px solid #ffffff33;border-radius:10px;color:#fff;font-weight:700}
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR (tu mismo bloque tal cual) -->
+  <nav class="navbar navbar-expand-lg navbar-gaming">
+    <div class="container-fluid">
+      <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+        <i class="fas fa-gamepad me-2"></i>GAMING
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+              <i class="fas fa-home me-2"></i>Inicio
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" asp-area="" asp-controller="Comunidad" asp-action="Index">
+              <i class="fas fa-users me-2"></i>Comunidad
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" asp-area="" asp-controller="Rankings" asp-action="Index">
+              <i class="fas fa-trophy me-2"></i>Rankings
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" asp-area="" asp-controller="Estadisticas" asp-action="Index">
+              <i class="fas fa-chart-line me-2"></i>Estadísticas
+            </a>
+          </li>
+        </ul>
+        <div class="user-actions">
+          <a class="user-btn btn-login btn btn-sm btn-outline-light" asp-area="" asp-controller="Auth" asp-action="Login">
+            <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+          </a>
+          <a class="user-btn btn btn-sm btn-light text-dark" asp-area="" asp-controller="Auth" asp-action="Register">
+            <i class="fas fa-user-plus me-2"></i>Registrarse
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTENIDO: Pantalla inicial -->
+  <main class="container py-3">
+
+    <!-- Chips superiores -->
+    <div class="top-chips">
+      <div class="pill" aria-hidden="true"></div>
+      <span class="chip">Feed</span>
+      <span class="chip">Amigos</span>
+      <span class="chip">Grupos</span>
+      <div class="search ms-auto">
+        <i class="fas fa-search"></i>
+        <input type="search" placeholder="Buscar..." />
+      </div>
+    </div>
+
+    <!-- Hero -->
+    <div class="row g-3 align-items-stretch">
+      <div class="col-lg-7">
+        <div class="glass p-4 h-100">
+          <h3 class="fw-bold mb-2">Conecta con gamers como tú</h3>
+          <p class="text-light-50" style="color:var(--muted)">
+            Descubre una comunidad vibrante de jugadores, comparte tus logros, encuentra compañeros
+            para tus aventuras y mantente al día con las últimas tendencias en el mundo gaming.
+          </p>
+          <a class="cta mt-1" asp-area="" asp-controller="Comunidad" asp-action="Explorar">Explorar comunidades</a>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="hero-media w-100 h-100"></div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="row g-3 mt-3">
+      <div class="col-6 col-lg-3"><div class="kpi"><strong>+25K</strong><span>Usuarios Conectados</span></div></div>
+      <div class="col-6 col-lg-3"><div class="kpi"><strong>+8K</strong><span>Grupos Activos</span></div></div>
+      <div class="col-6 col-lg-3"><div class="kpi"><strong>+120K</strong><span>Publicaciones Mensuales</span></div></div>
+      <div class="col-6 col-lg-3"><div class="kpi"><strong>+95%</strong><span>Usuarios Satisfechos</span></div></div>
+    </div>
+
+    <!-- ¿Qué ofrece? -->
+    <h5 class="text-center mt-4 mb-2"><em>¿Qué ofrece nuestra comunidad?</em></h5>
+    <div class="row g-3">
+      <div class="col-lg-4">
+        <div class="glass p-3">
+          <h6 class="mb-1">Conecta con Jugadores</h6>
+          <p class="m-0" style="color:var(--muted)">Encuentra compañeros por plataformas y gustos similares.</p>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="glass p-3">
+          <h6 class="mb-1">Comparte Logros</h6>
+          <p class="m-0" style="color:var(--muted)">Sube clips, capturas y trofeos destacados.</p>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="glass p-3">
+          <h6 class="mb-1">Debates y Conversaciones</h6>
+          <p class="m-0" style="color:var(--muted)">Participa en foros, guías y estrategias.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Explora secciones -->
+    <h5 class="text-center mt-4 mb-2">Explora las secciones de la comunidad</h5>
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <div class="glass p-3">
+          <div class="d-flex align-items-center justify-content-between">
+            <h6 class="m-0">Feed de actividad</h6>
+          </div>
+          <div class="d-flex gap-2 my-2 meta">
+            <span class="tag">+25K</span>
+            <span class="tag">98% interacción</span>
+          </div>
+          <p class="m-0" style="color:var(--muted)">Mantente al día con lo que hacen tus amigos y los grupos.</p>
+          <div class="mt-3">
+            <a class="btn btn-ghost btn-sm" asp-controller="Comunidad" asp-action="Feed">Ver feed</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="glass p-3">
+          <h6 class="m-0">Amigos</h6>
+          <div class="d-flex gap-2 my-2 meta">
+            <span class="tag">169 amigos</span>
+            <span class="tag">14 en línea</span>
+          </div>
+          <p class="m-0" style="color:var(--muted)">Gestiona tu lista de amigos, chatea y juega con ellos.</p>
+          <div class="mt-3">
+            <a class="btn btn-ghost btn-sm" asp-controller="Comunidad" asp-action="Amigos">Ver amigos</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <div class="glass p-3">
+          <h6 class="m-0">Grupos</h6>
+          <div class="d-flex gap-2 my-2 meta">
+            <span class="tag">44 tus grupos</span>
+            <span class="tag">+8K activos</span>
+          </div>
+          <p class="m-0" style="color:var(--muted)">Únete a comunidades de tus juegos favoritos y conoce jugadores con los mismos intereses.</p>
+          <div class="mt-3">
+            <a class="btn btn-ghost btn-sm" asp-controller="Comunidad" asp-action="Grupos">Ver grupos</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="py-3"></div>
+  </main>
+
+  <!-- JS Bootstrap (quita si ya lo cargas en tu layout) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  @{
+    ViewData["Title"] = "Comunidad – Inicio";
+}
+
+<style>
+  :root{
+    --grad1:#6a00ff; --grad2:#ff3aa3;
+    --bg1:#0a0f1f; --bg2:#081a2b;
+    --text:#e9e9ef; --muted:#cfd2dc;
+    --card:#ffffff12; --card2:#ffffff1a;
+    --radius:18px; --shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  body{color:var(--text);}
+  .top-chips{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0 10px}
+  .pill{flex:1 1 260px;height:10px;border-radius:999px;background:linear-gradient(90deg,var(--grad1),var(--grad2));box-shadow:var(--shadow);opacity:.9}
+  .chip{padding:8px 14px;border-radius:999px;background:#ffffff20;font-weight:700}
+  .search{margin-left:auto;background:#ffffff1a;border:1px solid #ffffff30;border-radius:999px;padding:6px 10px;display:flex;align-items:center;gap:8px}
+  .search input{background:transparent;border:0;color:#fff;outline:0;width:150px}
+
+  .glass{background:var(--card);border:1px solid var(--card2);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .cta{display:inline-block;background:linear-gradient(90deg,var(--grad1),var(--grad2));color:#fff;text-decoration:none;padding:10px 14px;border-radius:12px;font-weight:800;box-shadow:var(--shadow)}
+  .kpi{padding:18px;text-align:center;border-radius:16px;background:linear-gradient(180deg,#ffffff18,#ffffff0f);border:1px solid #ffffff1a}
+  .kpi strong{display:block;font-size:1.25rem}
+
+  .hero-media{min-height:180px;border-radius:var(--radius);border:1px solid #ffffff1c;
+    background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="900" height="500"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="%236a00ff"/><stop offset="1" stop-color="%23ff3aa3"/></linearGradient></defs><rect width="100%" height="100%" fill="%23000022"/><circle cx="520" cy="240" r="180" fill="url(%23g)" opacity="0.65"/><rect x="180" y="120" width="300" height="200" rx="16" fill="%23ffffff11" stroke="%23ffffff22"/></svg>') center/cover no-repeat;}
+  .meta .tag{background:#ffffff18;padding:.4rem .75rem;border-radius:999px;font-weight:700;margin-right:.5rem}
+  .btn-ghost{background:#ffffff20;border:1px solid #ffffff33;border-radius:10px;color:#fff;font-weight:700}
+</style>
+
+<div class="container py-3">
+
+  <!-- Chips superiores -->
+  <div class="top-chips">
+    <div class="pill" aria-hidden="true"></div>
+    <span class="chip">Feed</span>
+    <span class="chip">Amigos</span>
+    <span class="chip">Grupos</span>
+    <form class="search ms-auto" role="search">
+      <i class="fas fa-search"></i>
+      <input type="search" placeholder="Buscar..." />
+    </form>
+  </div>
+
+  <!-- Hero -->
+  <div class="row g-3 align-items-stretch">
+    <div class="col-lg-7">
+      <div class="glass p-4 h-100">
+        <h3 class="fw-bold mb-2">Conecta con gamers como tú</h3>
+        <p class="mb-3" style="color:var(--muted)">
+          Descubre una comunidad vibrante de jugadores, comparte tus logros, encuentra compañeros
+          para tus aventuras y mantente al día con las últimas tendencias en el mundo gaming.
+        </p>
+        <a class="cta" asp-controller="Comunidad" asp-action="Grupos">Explorar comunidades</a>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="hero-media w-100 h-100"></div>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="row g-3 mt-3">
+    <div class="col-6 col-lg-3"><div class="kpi"><strong>+25K</strong><span>Usuarios Conectados</span></div></div>
+    <div class="col-6 col-lg-3"><div class="kpi"><strong>+8K</strong><span>Grupos Activos</span></div></div>
+    <div class="col-6 col-lg-3"><div class="kpi"><strong>+120K</strong><span>Publicaciones Mensuales</span></div></div>
+    <div class="col-6 col-lg-3"><div class="kpi"><strong>+95%</strong><span>Usuarios Satisfechos</span></div></div>
+  </div>
+
+  <!-- ¿Qué ofrece? -->
+  <h5 class="text-center mt-4 mb-2"><em>¿Qué ofrece nuestra comunidad?</em></h5>
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <div class="glass p-3">
+        <h6 class="mb-1">Conecta con Jugadores</h6>
+        <p class="m-0" style="color:var(--muted)">Encuentra compañeros por plataformas y gustos similares.</p>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="glass p-3">
+        <h6 class="mb-1">Comparte Logros</h6>
+        <p class="m-0" style="color:var(--muted)">Sube clips, capturas y trofeos destacados.</p>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="glass p-3">
+        <h6 class="mb-1">Debates y Conversaciones</h6>
+        <p class="m-0" style="color:var(--muted)">Participa en foros, guías y estrategias.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Explora secciones -->
+  <h5 class="text-center mt-4 mb-2">Explora las secciones de la comunidad</h5>
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="glass p-3">
+        <h6 class="m-0">Feed de actividad</h6>
+        <div class="d-flex gap-2 my-2 meta">
+          <span class="tag">+25K</span>
+          <span class="tag">98% interacción</span>
+        </div>
+        <p class="m-0" style="color:var(--muted)">Mantente al día con lo que hacen tus amigos y los grupos.</p>
+        <div class="mt-3">
+          <a class="btn btn-ghost btn-sm" asp-controller="Comunidad" asp-action="Feed">Ver feed</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="glass p-3">
+        <h6 class="m-0">Amigos</h6>
+        <div class="d-flex gap-2 my-2 meta">
+          <span class="tag">169 amigos</span>
+          <span class="tag">14 en línea</span>
+        </div>
+        <p class="m-0" style="color:var(--muted)">Gestiona tu lista de amigos, chatea y juega con ellos.</p>
+        <div class="mt-3">
+          <a class="btn btn-ghost btn-sm" asp-controller="Comunidad" asp-action="Amigos">Ver amigos</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="glass p-3">
+        <h6 class="m-0">Grupos</h6>
+        <div class="d-flex gap-2 my-2 meta">
+          <span class="tag">44 tus grupos</span>
+          <span class="tag">+8K activos</span>
+        </div>
+        <p class="m-0" style="color:var(--muted)">Únete a comunidades de tus juegos favoritos y conoce jugadores con los mismos intereses.</p>
+        <div class="mt-3">
+          <a class="btn btn-ghost btn-sm" asp-controller="Comunidad" asp-action="Grupos">Ver grupos</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="py-3"></div>
+</div>
+
+</body>
+</html>
+

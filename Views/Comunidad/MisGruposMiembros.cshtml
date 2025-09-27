@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Comunidad – Grupo / Miembros</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <style>
+    :root{--grad1:#6a00ff;--grad2:#ff3aa3;--bg1:#0a0f1f;--bg2:#081a2b;--text:#e9e9ef;--card:#ffffff14;--card2:#ffffff22;--radius:18px}
+    body{color:var(--text);background:radial-gradient(1200px 600px at 80% 10%,#43136b55 0,transparent 55%),radial-gradient(1200px 600px at 20% 30%,#0b57d455 0,transparent 60%),linear-gradient(160deg,var(--bg1),var(--bg2));min-height:100vh}
+    .navbar-gaming{background:#00000055!important;border-bottom:1px solid #ffffff22}
+    .glass{background:var(--card);border:1px solid var(--card2);border-radius:var(--radius)}
+    .subtab .nav-link{color:#e9e9ef;border:0;border-radius:10px}
+    .subtab .nav-link.active{background:linear-gradient(90deg,var(--grad1),var(--grad2))}
+    .member{display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;background:#ffffff12;border:1px solid #ffffff22}
+    .member+.member{margin-top:10px}
+    .avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#6a00ff,#ff3aa3)}
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-gaming">
+    <div class="container-fluid">
+      <a class="navbar-brand" asp-controller="Home" asp-action="Index"><i class="fas fa-gamepad me-2"></i>GAMING</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"><span class="navbar-toggler-icon"></span></button>
+    </div>
+  </nav>
+
+  <div class="container py-3">
+    <div class="glass p-3">
+      <div class="d-flex align-items-center gap-3 mb-2">
+        <div class="avatar" style="width:56px;height:56px"></div>
+        <div class="flex-grow-1">
+          <h5 class="m-0">Los Spartanos</h5>
+          <small class="text-muted">32.2k miembros</small>
+        </div>
+        <a class="btn btn-sm btn-outline-light" asp-controller="Comunidad" asp-action="ConfigGrupo">Configuración</a>
+      </div>
+
+      <ul class="nav subtab nav-pills mt-2 mb-3">
+        <li class="nav-item"><a class="nav-link" asp-controller="Comunidad" asp-action="MisGruposChat">Chat</a></li>
+        <li class="nav-item"><a class="nav-link" asp-controller="Comunidad" asp-action="MisGruposRanking">Ranking</a></li>
+        <li class="nav-item"><a class="nav-link active" asp-controller="Comunidad" asp-action="MisGruposMiembros">Miembros</a></li>
+        <li class="nav-item"><a class="nav-link" asp-controller="Comunidad" asp-action="MisGruposMultimedia">Multimedia</a></li>
+      </ul>
+
+      <div class="glass p-3">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <i class="fas fa-users"></i><h6 class="m-0">Todos los miembros</h6>
+        </div>
+        <div class="input-group input-group-sm mb-3">
+          <span class="input-group-text bg-dark text-white border-0"><i class="fas fa-search"></i></span>
+          <input class="form-control bg-dark text-white border-0" placeholder="Buscar miembro..." />
+        </div>
+
+        <div class="member">
+          <div class="avatar"></div>
+          <div class="flex-grow-1"><strong>JuanNub</strong></div>
+          <div class="d-flex gap-2">
+            <a class="btn btn-sm btn-outline-light">Ver perfil</a>
+            <a class="btn btn-sm btn-outline-light">Añadir amigo</a>
+          </div>
+        </div>
+
+        <div class="member">
+          <div class="avatar"></div>
+          <div class="flex-grow-1"><strong>Ngq</strong></div>
+          <div class="d-flex gap-2">
+            <a class="btn btn-sm btn-outline-light">Ver perfil</a>
+            <a class="btn btn-sm btn-outline-light">Añadir amigo</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
