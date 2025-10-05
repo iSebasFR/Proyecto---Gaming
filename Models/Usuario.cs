@@ -1,28 +1,12 @@
-using Microsoft.AspNetCore.Identity;
-using System.Collections.Generic;
+using Proyecto_Gaming.Models;  // Agregar esta línea
 
-namespace Proyecto_Gaming.Models
+public class Usuario
+
 {
-    public class Usuario : IdentityUser  // Asegúrate que herede de IdentityUser
-    {
-        // Propiedades personalizadas (mantén las que necesites)
-        public string? NombreReal { get; set; }
-        public DateTime FechaNacimiento { get; set; }
-        public string? Biografia { get; set; }
-        public string? Pais { get; set; }
-        public string? FotoPerfil { get; set; }
-        public string? PlataformaPreferida { get; set; }
-        public DateTime FechaRegistro { get; set; } = DateTime.UtcNow;
-        public string? Estado { get; set; }
+    public int IdUsuario { get; set; }
+    public string NombreUsuario { get; set; }
+    public string CorreoElectronico { get; set; }
+    public string Contraseña { get; set; }
 
-        // Relación con BibliotecaUsuario
-        public ICollection<BibliotecaUsuario> BibliotecaUsuarios { get; set; }
-
-        // IdentityUser ya proporciona:
-        // - Id (string) ✅
-        // - UserName (string)
-        // - Email (string)
-        // - PasswordHash (string)
-        // - Y muchas más propiedades
-    }
+    // Otras propiedades que tengas en tu modelo de usuario
 }

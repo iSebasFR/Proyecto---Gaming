@@ -4,9 +4,14 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Proyecto_Gaming.Data;
 using Proyecto_Gaming.Models;
+using Proyecto_Gaming.Services;
+using Proyecto_Gaming.ViewModels;
+using Proyecto_Gaming.Models.Rawg;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Rendering; // ← AGREGAR ESTA DIRECTIVA
+
 
 namespace Proyecto_Gaming.Controllers
 {
@@ -14,120 +19,92 @@ namespace Proyecto_Gaming.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<Usuario> _userManager;
-        private readonly string _connectionString;
+        private readonly IRawgService _rawgService;
 
         public BibliotecaController(ApplicationDbContext context, 
                                   UserManager<Usuario> userManager,
-                                  IConfiguration configuration)
+                                  IRawgService rawgService)
         {
             _context = context;
             _userManager = userManager;
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _rawgService = rawgService;
         }
 
-        // GET: Biblioteca
-        public async Task<IActionResult> Index(string categoria, string plataforma, string busqueda)
+        // GET: Biblioteca - ACTUALIZADO CON FILTROS DINÁMICOS
+        public async Task<IActionResult> Index(string search, string genre, string platform, int page = 1)
         {
-            // Verificar si el usuario está autenticado (con Identity)
+            // Verificar si el usuario está autenticado
             if (!User.Identity.IsAuthenticated)
             {
                 TempData["Error"] = "Debes iniciar sesión para acceder al catálogo.";
                 return RedirectToAction("Login", "Account");
             }
 
-            var juegos = new List<Juego>();
-            var categorias = new List<string>();
-            var plataformas = new List<string>();
-
-            await using (var connection = new NpgsqlConnection(_connectionString))
+            try
             {
-                await connection.OpenAsync();
+                // OBTENER FILTROS DESDE CACHÉ (MUCHO MÁS RÁPIDO)
+                var availableFilters = await _rawgService.GetAvailableFiltersAsync();
 
-                // Query base
-                var query = "SELECT id_juego, nombre, categoria, plataforma, imagen, puntuacion_media FROM Juegos WHERE 1=1";
-                var parameters = new List<NpgsqlParameter>();
+                // Obtener juegos con filtros aplicados
+                var gamesResponse = await _rawgService.GetGamesAsync(search, genre, platform, page);
 
-                if (!string.IsNullOrWhiteSpace(categoria) && categoria != "Todas")
+                var viewModel = new GameCatalogViewModel
                 {
-                    query += " AND categoria = @Categoria";
-                    parameters.Add(new NpgsqlParameter("@Categoria", categoria));
-                }
+                    Games = gamesResponse.Results,
+                    Genres = availableFilters.AvailableGenres,
+                    Platforms = availableFilters.AvailablePlatforms,
+                    Search = search,
+                    SelectedGenre = genre,
+                    SelectedPlatform = platform,
+                    CurrentPage = page,
+                    TotalPages = Math.Min((int)Math.Ceiling(gamesResponse.Count / 20.0), 5),
+                    HasNextPage = !string.IsNullOrEmpty(gamesResponse.Next) && page < 5,
+                    HasPreviousPage = !string.IsNullOrEmpty(gamesResponse.Previous) && page > 1,
+                    // Asignar los SelectListItem para los dropdowns
+                    AvailableGenres = availableFilters.AvailableGenres
+                        .Select(g => new SelectListItem 
+                        { 
+                            Value = g.Slug, 
+                            Text = g.Name,
+                            Selected = g.Slug == genre
+                        })
+                        .ToList(),
+                    AvailablePlatforms = availableFilters.AvailablePlatforms
+                        .Select(p => new SelectListItem 
+                        { 
+                            Value = p.Id.ToString(), 
+                            Text = p.Name,
+                            Selected = p.Id.ToString() == platform
+                        })
+                        .ToList()
+                };
 
-                if (!string.IsNullOrWhiteSpace(plataforma) && plataforma != "Todas")
-                {
-                    query += " AND plataforma = @Plataforma";
-                    parameters.Add(new NpgsqlParameter("@Plataforma", plataforma));
-                }
-
-                if (!string.IsNullOrWhiteSpace(busqueda))
-                {
-                    query += " AND nombre ILIKE @Busqueda";
-                    parameters.Add(new NpgsqlParameter("@Busqueda", $"%{busqueda}%"));
-                }
-
-                // Ejecutar query de juegos
-                await using (var command = new NpgsqlCommand(query, connection))
-                {
-                    command.Parameters.AddRange(parameters.ToArray());
-
-                    await using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            juegos.Add(new Juego
-                            {
-                                IdJuego = reader.GetInt32(0),
-                                Nombre = reader.GetString(1),
-                                Categoria = reader.GetString(2),
-                                Plataforma = reader.GetString(3),
-                                Imagen = reader.IsDBNull(4) ? null : reader.GetString(4),
-                                PuntuacionMedia = reader.IsDBNull(5) ? (decimal?)null : reader.GetDecimal(5)
-                            });
-                        }
-                    }
-                }
-
-                // Obtener categorías únicas
-                await using (var catCmd = new NpgsqlCommand("SELECT DISTINCT categoria FROM Juegos ORDER BY categoria", connection))
-                await using (var catReader = await catCmd.ExecuteReaderAsync())
-                {
-                    while (await catReader.ReadAsync())
-                    {
-                        categorias.Add(catReader.GetString(0));
-                    }
-                }
-
-                // Obtener plataformas únicas
-                await using (var platCmd = new NpgsqlCommand("SELECT DISTINCT plataforma FROM Juegos ORDER BY plataforma", connection))
-                await using (var platReader = await platCmd.ExecuteReaderAsync())
-                {
-                    while (await platReader.ReadAsync())
-                    {
-                        plataformas.Add(platReader.GetString(0));
-                    }
-                }
+                return View(viewModel);
             }
-
-            // Pasar las categorías, plataformas y juegos a la vista
-            ViewBag.Categorias = categorias;
-            ViewBag.Plataformas = plataformas;
-            ViewBag.CategoriaSeleccionada = categoria;
-            ViewBag.PlataformaSeleccionada = plataforma;
-            ViewBag.Busqueda = busqueda;
-
-            return View(juegos);
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                TempData["Error"] = $"Error al cargar los juegos: {ex.Message}";
+                
+                return View(new GameCatalogViewModel { 
+                    Games = new List<Game>(),
+                    Genres = new List<Genre>(),
+                    Platforms = new List<Platform>(),
+                    AvailableGenres = new List<SelectListItem>(),
+                    AvailablePlatforms = new List<SelectListItem>()
+                });
+            }
         }
 
-        public async Task<IActionResult> AddToLibrary(int id)
+        // AddToLibrary - MODIFICADO para trabajar con RAWG IDs
+        public async Task<IActionResult> AddToLibrary(int id)  // id ahora es de RAWG
         {
-            // Verificar si el usuario está autenticado (con Identity)
             if (!User.Identity.IsAuthenticated)
             {
                 TempData["Error"] = "Debes iniciar sesión para añadir juegos a tu biblioteca.";
                 return RedirectToAction("Login", "Account");
             }
 
-            // Obtener usuario actual con Identity
             var usuario = await _userManager.GetUserAsync(User);
             if (usuario == null)
             {
@@ -135,59 +112,68 @@ namespace Proyecto_Gaming.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Cargar entidades necesarias
-            var juego = await _context.Juegos.FindAsync(id);
-            if (juego == null)
+            try
             {
-                TempData["Error"] = "El juego no existe.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            // Evitar duplicados en la biblioteca
-            var existente = await _context.BibliotecaUsuario
-                .FirstOrDefaultAsync(b => b.IdUsuario == usuario.Id && b.IdJuego == juego.IdJuego);
-
-            if (existente == null)
-            {
-                _context.BibliotecaUsuario.Add(new BibliotecaUsuario
+                // Obtener detalles del juego desde RAWG
+                var gameDetails = await _rawgService.GetGameDetailsAsync(id);
+                
+                if (gameDetails == null)
                 {
-                    IdUsuario = usuario.Id,  // Usar Id de Identity (string)
-                    IdJuego = juego.IdJuego,
-                    Estado = "Pendiente"
-                });
+                    TempData["Error"] = "El juego no existe en RAWG API.";
+                    return RedirectToAction(nameof(Index));
+                }
 
-                await _context.SaveChangesAsync();
-                TempData["Ok"] = "Juego añadido a Pendientes.";
-            }
-            else
-            {
-                if (!string.Equals(existente.Estado, "Pendiente"))
+                // Verificar si ya existe en la biblioteca
+                var existente = await _context.BibliotecaUsuario
+                    .FirstOrDefaultAsync(b => b.IdUsuario == usuario.Id && b.RawgGameId == id);
+
+                if (existente == null)
                 {
-                    existente.Estado = "Pendiente";
-                    _context.Update(existente);
+                    _context.BibliotecaUsuario.Add(new BibliotecaUsuario
+                    {
+                        IdUsuario = usuario.Id,
+                        RawgGameId = id,  // Usar ID de RAWG
+                        Estado = "Pendiente",
+                        GameName = gameDetails.Name,
+                        GameImage = gameDetails.BackgroundImage
+                    });
+
                     await _context.SaveChangesAsync();
-                    TempData["Ok"] = "El juego ahora está en Pendientes.";
+                    TempData["Ok"] = $"{gameDetails.Name} añadido a Pendientes.";
                 }
                 else
                 {
-                    TempData["Ok"] = "Este juego ya está en tus Pendientes.";
+                    if (!string.Equals(existente.Estado, "Pendiente"))
+                    {
+                        existente.Estado = "Pendiente";
+                        _context.Update(existente);
+                        await _context.SaveChangesAsync();
+                        TempData["Ok"] = $"{gameDetails.Name} ahora está en Pendientes.";
+                    }
+                    else
+                    {
+                        TempData["Ok"] = $"{gameDetails.Name} ya está en tus Pendientes.";
+                    }
                 }
-            }
 
-            return RedirectToAction(nameof(Pendientes));
+                return RedirectToAction(nameof(Pendientes));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error al agregar el juego a la biblioteca.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
-        // GET: Biblioteca/Pendientes
+        // GET: Biblioteca/Pendientes - MODIFICADO para RAWG
         public async Task<IActionResult> Pendientes()
         {
-            // Verificar si el usuario está autenticado
             if (!User.Identity.IsAuthenticated)
             {
                 TempData["Error"] = "Debes iniciar sesión para ver tus juegos pendientes.";
                 return RedirectToAction("Login", "Account");
             }
 
-            // Obtener usuario actual
             var usuario = await _userManager.GetUserAsync(User);
             if (usuario == null)
             {
@@ -195,17 +181,34 @@ namespace Proyecto_Gaming.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            // Obtener juegos pendientes del usuario desde la base de datos
+            // Obtener juegos pendientes de la base de datos local
             var juegosPendientes = await _context.BibliotecaUsuario
                 .Where(bu => bu.IdUsuario == usuario.Id && bu.Estado == "Pendiente")
-                .Include(bu => bu.Juego)
-                .Select(bu => bu.Juego)
                 .ToListAsync();
 
             return View(juegosPendientes);
         }
 
-        // POST/GET: Biblioteca/MarkAsPlaying/5
+        // GET: Biblioteca/Detalles - AHORA CON RAWG API
+        public async Task<IActionResult> Detalles(int id)  // id de RAWG
+        {
+            try
+            {
+                var gameDetails = await _rawgService.GetGameDetailsAsync(id);
+                
+                if (gameDetails == null)
+                    return NotFound();
+
+                return View(gameDetails);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error al cargar los detalles del juego.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        // MarkAsPlaying - MANTENIDO igual
         public async Task<IActionResult> MarkAsPlaying(int id)
         {
             if (!User.Identity.IsAuthenticated)
@@ -223,7 +226,7 @@ namespace Proyecto_Gaming.Controllers
 
             var biblioteca = await _context.BibliotecaUsuario
                 .FirstOrDefaultAsync(b => b.IdUsuario == usuario.Id &&
-                                          b.IdJuego == id &&
+                                          b.RawgGameId == id &&  // Cambiado a RawgGameId
                                           b.Estado == "Pendiente");
 
             if (biblioteca == null)
@@ -240,45 +243,7 @@ namespace Proyecto_Gaming.Controllers
             return RedirectToAction(nameof(Pendientes));
         }
 
-        // GET: Biblioteca/Detalles/5 (detalle del juego con Npgsql)
-        public async Task<IActionResult> Detalles(int? id)
-        {
-            if (id == null) return NotFound();
-
-            Juego juego = null;
-
-            await using (var connection = new NpgsqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-
-                var query = "SELECT id_juego, nombre, categoria, plataforma, imagen, puntuacion_media FROM Juegos WHERE id_juego = @Id";
-                await using (var command = new NpgsqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@Id", id.Value);
-
-                    await using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        if (await reader.ReadAsync())
-                        {
-                            juego = new Juego
-                            {
-                                IdJuego = reader.GetInt32(0),
-                                Nombre = reader.GetString(1),
-                                Categoria = reader.GetString(2),
-                                Plataforma = reader.GetString(3),
-                                Imagen = reader.IsDBNull(4) ? null : reader.GetString(4),
-                                PuntuacionMedia = reader.IsDBNull(5) ? (decimal?)null : reader.GetDecimal(5)
-                            };
-                        }
-                    }
-                }
-            }
-
-            if (juego == null) return NotFound();
-            return View(juego);
-        }
-
-        // GET: Biblioteca/MiBiblioteca
+        // GET: Biblioteca/MiBiblioteca - MODIFICADO para RAWG
         public async Task<IActionResult> MiBiblioteca()
         {
             if (!User.Identity.IsAuthenticated)
@@ -296,7 +261,6 @@ namespace Proyecto_Gaming.Controllers
 
             var miBiblioteca = await _context.BibliotecaUsuario
                 .Where(bu => bu.IdUsuario == usuario.Id)
-                .Include(bu => bu.Juego)
                 .ToListAsync();
 
             return View(miBiblioteca);

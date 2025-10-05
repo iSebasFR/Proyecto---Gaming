@@ -7,12 +7,12 @@ namespace Proyecto_Gaming.Models
         [Key]
         public int Id { get; set; }
 
-        public string IdUsuario { get; set; }  // string para Identity
-        public int IdJuego { get; set; }
-        public string Estado { get; set; }  // "Jugando", "Completado", "En lista", etc.
+        public string IdUsuario { get; set; }
+        public int RawgGameId { get; set; }  // ID de RAWG
+        public string Estado { get; set; }   // "Pendiente", "Jugando", "Completado"
 
-        // Navigation properties
-        public Usuario Usuario { get; set; }
-        public Juego Juego { get; set; }
+        // Información básica del juego
+        public string GameName { get; set; }
+        public string GameImage { get; set; }
     }
 }

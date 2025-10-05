@@ -1,63 +1,95 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Proyecto_Gaming.Models;
 
 namespace Proyecto_Gaming.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<Usuario>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
 
-        // DbSet para la tabla Juegos
-        public DbSet<Juego> Juegos { get; set; }
-
-         // DbSet para Usuarios
-        public DbSet<Usuario> Usuarios { get; set; }
-
-        // DbSet para BibliotecaUsuario (para almacenar juegos en la biblioteca de cada usuario)
+        // SOLO BibliotecaUsuario - ELIMINAR Juegos ya que usamos RAWG API
         public DbSet<BibliotecaUsuario> BibliotecaUsuario { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(modelBuilder); // IMPORTANTE para Identity
 
-            // Configuración específica para la tabla Juegos
-            modelBuilder.Entity<Juego>(entity =>
+            // Configuración para la tabla BibliotecaUsuario (ACTUALIZADA PARA RAWG)
+            modelBuilder.Entity<BibliotecaUsuario>(entity =>
             {
-                entity.ToTable("Juegos"); // Nombre de la tabla en la base de datos
-                entity.HasKey(j => j.IdJuego); // Clave primaria
+                entity.ToTable("BibliotecaUsuario");
+                entity.HasKey(bu => bu.Id);
                 
-                entity.Property(j => j.IdJuego)
-                    .HasColumnName("id_juego")
-                    .ValueGeneratedOnAdd(); // SERIAL en PostgreSQL
-                
-                entity.Property(j => j.Nombre)
-                    .HasColumnName("nombre")
+                entity.Property(bu => bu.Id)
+                    .HasColumnName("id")
+                    .ValueGeneratedOnAdd();
+                    
+                entity.Property(bu => bu.IdUsuario)
+                    .HasColumnName("id_usuario")
                     .IsRequired()
-                    .HasMaxLength(255);
-                
-                entity.Property(j => j.Categoria)
-                    .HasColumnName("categoria")
-                    .IsRequired()
-                    .HasMaxLength(100);
-                
-                entity.Property(j => j.Plataforma)
-                    .HasColumnName("plataforma")
+                    .HasMaxLength(450);
+
+                // NUEVAS PROPIEDADES PARA RAWG API
+                entity.Property(bu => bu.RawgGameId)
+                    .HasColumnName("rawg_game_id")
+                    .IsRequired();
+
+                entity.Property(bu => bu.Estado)
+                    .HasColumnName("estado")
                     .IsRequired()
                     .HasMaxLength(50);
-                
-                entity.Property(j => j.Imagen)
-                    .HasColumnName("imagen")
+
+                entity.Property(bu => bu.GameName)
+                    .HasColumnName("game_name")
+                    .IsRequired()
+                    .HasMaxLength(255);
+
+                entity.Property(bu => bu.GameImage)
+                    .HasColumnName("game_image")
                     .HasMaxLength(500);
-                
-                entity.Property(j => j.PuntuacionMedia)
-                    .HasColumnName("puntuacion_media")
-                    .HasColumnType("decimal(2,1)")
-                    .HasPrecision(2, 1);
+
+                // Índice único para evitar duplicados (mismo usuario + mismo juego RAWG)
+                entity.HasIndex(bu => new { bu.IdUsuario, bu.RawgGameId })
+                    .IsUnique();
             });
 
-            // Aquí puedes agregar configuraciones para otras tablas...
+            // Configuración adicional para el modelo Usuario de Identity
+            modelBuilder.Entity<Usuario>(entity =>
+            {
+                entity.Property(u => u.NombreReal)
+                    .HasColumnName("nombre_real")
+                    .HasMaxLength(255);
+
+                entity.Property(u => u.FechaNacimiento)
+                    .HasColumnName("fecha_nacimiento");
+
+                entity.Property(u => u.Biografia)
+                    .HasColumnName("biografia")
+                    .HasMaxLength(500);
+
+                entity.Property(u => u.Pais)
+                    .HasColumnName("pais")
+                    .HasMaxLength(100);
+
+                entity.Property(u => u.FotoPerfil)
+                    .HasColumnName("foto_perfil")
+                    .HasMaxLength(500);
+
+                entity.Property(u => u.PlataformaPreferida)
+                    .HasColumnName("plataforma_preferida")
+                    .HasMaxLength(50);
+
+                entity.Property(u => u.FechaRegistro)
+                    .HasColumnName("fecha_registro")
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(u => u.Estado)
+                    .HasColumnName("estado")
+                    .HasMaxLength(50);
+            });
         }
     }
 }
