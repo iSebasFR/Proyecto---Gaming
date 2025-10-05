@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore; // EF Core async/extensiones
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Proyecto_Gaming.Data;
 using Proyecto_Gaming.Models;
@@ -12,17 +13,28 @@ namespace Proyecto_Gaming.Controllers
     public class BibliotecaController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<Usuario> _userManager;
         private readonly string _connectionString;
 
-        public BibliotecaController(ApplicationDbContext context, IConfiguration configuration)
+        public BibliotecaController(ApplicationDbContext context, 
+                                  UserManager<Usuario> userManager,
+                                  IConfiguration configuration)
         {
             _context = context;
+            _userManager = userManager;
             _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
         // GET: Biblioteca
         public async Task<IActionResult> Index(string categoria, string plataforma, string busqueda)
         {
+            // Verificar si el usuario está autenticado (con Identity)
+            if (!User.Identity.IsAuthenticated)
+            {
+                TempData["Error"] = "Debes iniciar sesión para acceder al catálogo.";
+                return RedirectToAction("Login", "Account");
+            }
+
             var juegos = new List<Juego>();
             var categorias = new List<string>();
             var plataformas = new List<string>();
@@ -96,6 +108,7 @@ namespace Proyecto_Gaming.Controllers
                 }
             }
 
+            // Pasar las categorías, plataformas y juegos a la vista
             ViewBag.Categorias = categorias;
             ViewBag.Plataformas = plataformas;
             ViewBag.CategoriaSeleccionada = categoria;
@@ -105,13 +118,20 @@ namespace Proyecto_Gaming.Controllers
             return View(juegos);
         }
 
-        // POST/GET: Biblioteca/AddToLibrary/5
         public async Task<IActionResult> AddToLibrary(int id)
         {
-            // Verificar sesión/identidad
-            if (User?.Identity?.IsAuthenticated != true || string.IsNullOrWhiteSpace(User.Identity.Name))
+            // Verificar si el usuario está autenticado (con Identity)
+            if (!User.Identity.IsAuthenticated)
             {
                 TempData["Error"] = "Debes iniciar sesión para añadir juegos a tu biblioteca.";
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Obtener usuario actual con Identity
+            var usuario = await _userManager.GetUserAsync(User);
+            if (usuario == null)
+            {
+                TempData["Error"] = "No se pudo identificar al usuario.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -123,24 +143,15 @@ namespace Proyecto_Gaming.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var usuario = await _context.Usuarios
-                .FirstOrDefaultAsync(u => u.NombreUsuario == User.Identity.Name);
-
-            if (usuario == null)
-            {
-                TempData["Error"] = "No se pudo identificar al usuario.";
-                return RedirectToAction(nameof(Index));
-            }
-
             // Evitar duplicados en la biblioteca
             var existente = await _context.BibliotecaUsuario
-                .FirstOrDefaultAsync(b => b.IdUsuario == usuario.IdUsuario && b.IdJuego == juego.IdJuego);
+                .FirstOrDefaultAsync(b => b.IdUsuario == usuario.Id && b.IdJuego == juego.IdJuego);
 
             if (existente == null)
             {
                 _context.BibliotecaUsuario.Add(new BibliotecaUsuario
                 {
-                    IdUsuario = usuario.IdUsuario,
+                    IdUsuario = usuario.Id,  // Usar Id de Identity (string)
                     IdJuego = juego.IdJuego,
                     Estado = "Pendiente"
                 });
@@ -150,7 +161,6 @@ namespace Proyecto_Gaming.Controllers
             }
             else
             {
-                // Si ya existía, opcionalmente lo forzamos a "Pendiente" otra vez
                 if (!string.Equals(existente.Estado, "Pendiente"))
                 {
                     existente.Estado = "Pendiente";
@@ -170,46 +180,41 @@ namespace Proyecto_Gaming.Controllers
         // GET: Biblioteca/Pendientes
         public async Task<IActionResult> Pendientes()
         {
-            // Obtener juegos pendientes del usuario
-            var juegosPendientes = new List<Juego>();
-
-            // Esto puede ser reemplazado por la base de datos, en este caso está solo como ejemplo.
-            juegosPendientes.Add(new Juego
+            // Verificar si el usuario está autenticado
+            if (!User.Identity.IsAuthenticated)
             {
-                IdJuego = 1,
-                Nombre = "Juego Ejemplo 1",
-                Categoria = "Acción",
-                Plataforma = "PC",
-                Imagen = "image_url_1.jpg",
-                PuntuacionMedia = 4.5m
-            });
+                TempData["Error"] = "Debes iniciar sesión para ver tus juegos pendientes.";
+                return RedirectToAction("Login", "Account");
+            }
 
-            juegosPendientes.Add(new Juego
+            // Obtener usuario actual
+            var usuario = await _userManager.GetUserAsync(User);
+            if (usuario == null)
             {
-                IdJuego = 2,
-                Nombre = "Juego Ejemplo 2",
-                Categoria = "Aventura",
-                Plataforma = "PlayStation",
-                Imagen = "image_url_2.jpg",
-                PuntuacionMedia = 4.0m
-            });
+                TempData["Error"] = "No se pudo identificar al usuario.";
+                return RedirectToAction("Login", "Account");
+            }
 
-            // Pasar los juegos a la vista
-            return View(juegosPendientes); // Ver los juegos pendientes de la biblioteca
+            // Obtener juegos pendientes del usuario desde la base de datos
+            var juegosPendientes = await _context.BibliotecaUsuario
+                .Where(bu => bu.IdUsuario == usuario.Id && bu.Estado == "Pendiente")
+                .Include(bu => bu.Juego)
+                .Select(bu => bu.Juego)
+                .ToListAsync();
+
+            return View(juegosPendientes);
         }
 
         // POST/GET: Biblioteca/MarkAsPlaying/5
         public async Task<IActionResult> MarkAsPlaying(int id)
         {
-            if (User?.Identity?.IsAuthenticated != true || string.IsNullOrWhiteSpace(User.Identity.Name))
+            if (!User.Identity.IsAuthenticated)
             {
                 TempData["Error"] = "Debes iniciar sesión.";
                 return RedirectToAction(nameof(Pendientes));
             }
 
-            var usuario = await _context.Usuarios
-                .FirstOrDefaultAsync(u => u.NombreUsuario == User.Identity.Name);
-
+            var usuario = await _userManager.GetUserAsync(User);
             if (usuario == null)
             {
                 TempData["Error"] = "No se pudo identificar al usuario.";
@@ -217,7 +222,7 @@ namespace Proyecto_Gaming.Controllers
             }
 
             var biblioteca = await _context.BibliotecaUsuario
-                .FirstOrDefaultAsync(b => b.IdUsuario == usuario.IdUsuario &&
+                .FirstOrDefaultAsync(b => b.IdUsuario == usuario.Id &&
                                           b.IdJuego == id &&
                                           b.Estado == "Pendiente");
 
@@ -271,6 +276,30 @@ namespace Proyecto_Gaming.Controllers
 
             if (juego == null) return NotFound();
             return View(juego);
+        }
+
+        // GET: Biblioteca/MiBiblioteca
+        public async Task<IActionResult> MiBiblioteca()
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                TempData["Error"] = "Debes iniciar sesión para ver tu biblioteca.";
+                return RedirectToAction("Login", "Account");
+            }
+
+            var usuario = await _userManager.GetUserAsync(User);
+            if (usuario == null)
+            {
+                TempData["Error"] = "No se pudo identificar al usuario.";
+                return RedirectToAction("Login", "Account");
+            }
+
+            var miBiblioteca = await _context.BibliotecaUsuario
+                .Where(bu => bu.IdUsuario == usuario.Id)
+                .Include(bu => bu.Juego)
+                .ToListAsync();
+
+            return View(miBiblioteca);
         }
     }
 }

@@ -1,11 +1,18 @@
-using Proyecto_Gaming.Models;  // Agregar esta línea
+using System.ComponentModel.DataAnnotations;
 
-public class BibliotecaUsuario
+namespace Proyecto_Gaming.Models
 {
-    public int IdUsuario { get; set; }
-    public int IdJuego { get; set; }
-    public string Estado { get; set; } // "Pendiente", "Jugando", "Completado"
+    public class BibliotecaUsuario
+    {
+        [Key]
+        public int Id { get; set; }
 
-    // Navegación a la entidad Juego
-    public virtual Juego Juego { get; set; }
+        public string IdUsuario { get; set; }  // string para Identity
+        public int IdJuego { get; set; }
+        public string Estado { get; set; }  // "Jugando", "Completado", "En lista", etc.
+
+        // Navigation properties
+        public Usuario Usuario { get; set; }
+        public Juego Juego { get; set; }
+    }
 }
