@@ -14,7 +14,7 @@
     @RenderSection("Styles", required: false)
 
     <style>
-        /* Estilos globales mejorados */
+        /* (Mantén todos tus estilos CSS existentes igual) */
         :root {
             --primary: #6c5ce7;
             --primary-dark: #5649c7;
@@ -44,7 +44,7 @@
             flex-direction: column;
         }
 
-        /* Navbar mejorada */
+        /* (Mantén todos los demás estilos igual) */
         .navbar-gaming {
             background: rgba(18, 20, 24, 0.98) !important;
             backdrop-filter: blur(10px);
@@ -87,7 +87,6 @@
             transform: translateY(-2px);
         }
 
-        /* Botones mejorados */
         .user-btn {
             padding: 0.6rem 1.2rem;
             border-radius: var(--border-radius);
@@ -123,7 +122,6 @@
             box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
         }
 
-        /* Perfil de usuario */
         .profile-pic {
             width: 45px;
             height: 45px;
@@ -156,7 +154,6 @@
             margin-right: 10px;
         }
 
-        /* Dropdown mejorado */
         .dropdown-menu {
             background: rgba(18, 20, 24, 0.98);
             backdrop-filter: blur(10px);
@@ -180,90 +177,14 @@
             color: var(--primary);
         }
 
-        /* Contenido principal mejorado */
-        .hero-section {
-            padding: 6rem 0 4rem;
-            text-align: center;
-            background: linear-gradient(135deg, rgba(108, 92, 231, 0.1) 0%, rgba(253, 121, 168, 0.05) 100%);
-            border-radius: var(--border-radius);
-            margin: 2rem 0;
-            position: relative;
-            overflow: hidden;
+        .alert-container {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            z-index: 1050;
+            min-width: 300px;
         }
 
-        .hero-section::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--primary-gradient);
-        }
-
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 800;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(to right, #fff 30%, var(--secondary) 70%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: var(--text-shadow);
-        }
-
-        .hero-subtitle {
-            font-size: 1.4rem;
-            color: rgba(255, 255, 255, 0.8);
-            max-width: 700px;
-            margin: 0 auto 2.5rem;
-            line-height: 1.6;
-        }
-
-        .cta-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .btn-primary-large {
-            padding: 1rem 2rem;
-            font-size: 1.2rem;
-            border-radius: var(--border-radius);
-            font-weight: 700;
-            text-decoration: none;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-primary-large.primary {
-            background: var(--primary-gradient);
-            color: white;
-            border: none;
-        }
-
-        .btn-primary-large.primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(108, 92, 231, 0.4);
-        }
-
-        .btn-primary-large.secondary {
-            background: transparent;
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .btn-primary-large.secondary:hover {
-            border-color: var(--accent);
-            background: rgba(253, 121, 168, 0.1);
-            color: var(--accent);
-            transform: translateY(-3px);
-        }
-
-        /* Footer mejorado */
         .footer-gaming {
             background: rgba(18, 20, 24, 0.98);
             border-top: 1px solid rgba(108, 92, 231, 0.3);
@@ -294,16 +215,6 @@
             background: var(--primary-gradient);
             transform: translateY(-3px);
         }
-
-        /* Mensajes de alerta */
-        .alert-container {
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            z-index: 1050;
-            min-width: 300px;
-        }
-
     </style>
 </head>
 <body>
@@ -334,13 +245,18 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Biblioteca" asp-action="Pendientes">
-                                    <i class="fas fa-clock me-2"></i>Pendientes
+                                <a class="nav-link" asp-area="" asp-controller="Comunidad" asp-action="Index">
+                                    <i class="fas fa-users me-2"></i>Comunidad
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Biblioteca" asp-action="MiBiblioteca">
-                                    <i class="fas fa-gamepad me-2"></i>Mi Biblioteca
+                                <a class="nav-link" asp-area="" asp-controller="Rankings" asp-action="Index">
+                                    <i class="fas fa-trophy me-2"></i>Rankings
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Estadisticas" asp-action="Index">
+                                    <i class="fas fa-chart-line me-2"></i>Estadísticas
                                 </a>
                             </li>
                         }
@@ -410,7 +326,7 @@
     
     <div class="container">
         <main role="main" class="pb-3">
-            @RenderBody()  <!-- Aquí se renderiza el contenido de cada página -->
+            @RenderBody()
         </main>
     </div>
 
@@ -441,7 +357,6 @@
     <!-- Script para auto-ocultar alerts -->
     <script>
         $(document).ready(function() {
-            // Auto-ocultar alerts después de 5 segundos
             setTimeout(function() {
                 $('.alert').alert('close');
             }, 5000);
