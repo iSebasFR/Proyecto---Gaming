@@ -1,19 +1,29 @@
-@model List<Proyecto_Gaming.Models.Juego>
+@model List<Proyecto_Gaming.Models.BibliotecaUsuario>
 
-<h2>Mis Juegos Pendientes</h2>
+@{
+    ViewData["Title"] = "Mis Juegos Pendientes";
+}
+
+<h2 class="text-center mb-4">Mis Juegos Pendientes</h2>
 
 @if (Model.Any())
 {
     <div class="row">
-        @foreach (var juego in Model)
+        @foreach (var item in Model)
         {
-            <div class="col-md-4 mb-3">
-                <div class="card">
-                    <img src="@juego.Imagen" class="card-img-top" alt="@juego.Nombre">
+            <div class="col-md-4 mb-4">
+                <div class="game-card card h-100 shadow">
+                    <img src="@item.GameImage" class="card-img-top" alt="@item.GameName" style="height: 200px; object-fit: cover;">
                     <div class="card-body">
-                        <h5 class="card-title">@juego.Nombre</h5>
-                        <p class="card-text">@juego.Categoria - @juego.Plataforma</p>
-                        <a href="@Url.Action("MarkAsPlaying", new { id = juego.IdJuego })" class="btn btn-success">Comenzar a Jugar</a>
+                        <h5 class="card-title">@item.GameName</h5>
+                        <p class="card-text">
+                            <span class="badge bg-info">@item.Estado</span>
+                        </p>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="MarkAsPlaying" asp-route-id="@item.RawgGameId" class="btn btn-success w-48">Comenzar a Jugar</a>
+                            <a asp-action="Detalles" asp-route-id="@item.RawgGameId" class="btn btn-primary w-48">Ver Detalles</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -22,5 +32,25 @@
 }
 else
 {
-    <p>No tienes juegos pendientes.</p>
+    <div class="alert alert-info text-center">
+        <h4>No tienes juegos pendientes</h4>
+        <p>¡Explora el catálogo y añade algunos juegos a tu lista!</p>
+        <a asp-action="Index" class="btn btn-primary">Ir al Catálogo</a>
+    </div>
+}
+
+@section Styles {
+    <style>
+        .game-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 15px;
+            color: white;
+        }
+        
+        .w-48 {
+            width: 48% !important;
+        }
+    </style>
 }

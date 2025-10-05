@@ -10,30 +10,14 @@ namespace Proyecto_Gaming.Data
         {
         }
 
-        // SOLO estos DbSets
-        public DbSet<Juego> Juegos { get; set; }
+        // SOLO BibliotecaUsuario - ELIMINAR Juegos ya que usamos RAWG API
         public DbSet<BibliotecaUsuario> BibliotecaUsuario { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder); // IMPORTANTE para Identity
 
-            // Configuración de Juegos (tu catálogo)
-            modelBuilder.Entity<Juego>(entity =>
-            {
-                entity.ToTable("Juegos");
-                entity.HasKey(j => j.IdJuego);
-                entity.Property(j => j.IdJuego)
-                    .HasColumnName("id_juego")
-                    .ValueGeneratedOnAdd();
-                entity.Property(j => j.Nombre)
-                    .HasColumnName("nombre")
-                    .IsRequired()
-                    .HasMaxLength(255);
-                // ... resto de configuración de Juegos
-            });
-
-            // Configuración de BibliotecaUsuario
+            // Configuración para la tabla BibliotecaUsuario (ACTUALIZADA PARA RAWG)
             modelBuilder.Entity<BibliotecaUsuario>(entity =>
             {
                 entity.ToTable("BibliotecaUsuario");
@@ -46,10 +30,11 @@ namespace Proyecto_Gaming.Data
                 entity.Property(bu => bu.IdUsuario)
                     .HasColumnName("id_usuario")
                     .IsRequired()
-                    .HasMaxLength(450); // Tamaño para IDs de Identity
+                    .HasMaxLength(450);
 
-                entity.Property(bu => bu.IdJuego)
-                    .HasColumnName("id_juego")
+                // NUEVAS PROPIEDADES PARA RAWG API
+                entity.Property(bu => bu.RawgGameId)
+                    .HasColumnName("rawg_game_id")
                     .IsRequired();
 
                 entity.Property(bu => bu.Estado)
@@ -57,19 +42,21 @@ namespace Proyecto_Gaming.Data
                     .IsRequired()
                     .HasMaxLength(50);
 
-                // Relaciones
-                entity.HasOne(bu => bu.Usuario)
-                    .WithMany(u => u.BibliotecaUsuarios)
-                    .HasForeignKey(bu => bu.IdUsuario)
-                    .OnDelete(DeleteBehavior.Cascade);
+                entity.Property(bu => bu.GameName)
+                    .HasColumnName("game_name")
+                    .IsRequired()
+                    .HasMaxLength(255);
 
-                entity.HasOne(bu => bu.Juego)
-                    .WithMany(j => j.BibliotecaUsuarios)
-                    .HasForeignKey(bu => bu.IdJuego)
-                    .OnDelete(DeleteBehavior.Cascade);
+                entity.Property(bu => bu.GameImage)
+                    .HasColumnName("game_image")
+                    .HasMaxLength(500);
+
+                // Índice único para evitar duplicados (mismo usuario + mismo juego RAWG)
+                entity.HasIndex(bu => new { bu.IdUsuario, bu.RawgGameId })
+                    .IsUnique();
             });
 
-            // Configuración de propiedades personalizadas de Usuario
+            // Configuración adicional para el modelo Usuario de Identity
             modelBuilder.Entity<Usuario>(entity =>
             {
                 entity.Property(u => u.NombreReal)
