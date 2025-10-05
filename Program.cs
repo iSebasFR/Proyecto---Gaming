@@ -1,25 +1,37 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Proyecto_Gaming.Data;
+using Proyecto_Gaming.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Configurar el contexto de base de datos
+// Configurar PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Habilitar soporte para sesiones
-builder.Services.AddDistributedMemoryCache();  // Usar almacenamiento en memoria para la sesión
-builder.Services.AddSession(options =>
+// Configurar Identity
+builder.Services.AddDefaultIdentity<Usuario>(options => 
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);  // Tiempo de inactividad de la sesión
-});
+    options.SignIn.RequireConfirmedAccount = false;
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = true;
+    options.Password.RequiredLength = 6;
+    options.User.RequireUniqueEmail = true;
+})
+.AddEntityFrameworkStores<ApplicationDbContext>();
+
+// Sessions (opcional)
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -28,16 +40,17 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
+// IMPORTANTE: Authentication antes de Authorization
+app.UseAuthentication();
 app.UseAuthorization();
 
-// Habilitar el uso de sesiones
 app.UseSession();
+app.MapRazorPages();  // Para las páginas de Identity
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

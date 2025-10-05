@@ -10,10 +10,10 @@ namespace Proyecto_Gaming.Models
         public string Nombre { get; set; }
         public string Categoria { get; set; }
         public string Plataforma { get; set; }
-        public string Imagen { get; set; }
+        public string? Imagen { get; set; }
         public decimal? PuntuacionMedia { get; set; }
 
-        // Relación uno a muchos con BibliotecaUsuario
+        // Relación con BibliotecaUsuario
         public ICollection<BibliotecaUsuario> BibliotecaUsuarios { get; set; }
     }
 }

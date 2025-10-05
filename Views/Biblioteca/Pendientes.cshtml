@@ -1,43 +1,26 @@
-@model IEnumerable<Proyecto_Gaming.Models.Juego>
+@model List<Proyecto_Gaming.Models.Juego>
 
-@{
-    ViewData["Title"] = "Pendientes";
-}
+<h2>Mis Juegos Pendientes</h2>
 
-<!-- Juegos Pendientes -->
-<div class="row">
-    @foreach (var item in Model)
-    {
-        <div class="col-md-4 mb-4">
-            <div class="game-card card h-100 shadow">
-                <img src="@item.Imagen" class="card-img-top" alt="@item.Nombre" style="height: 200px; object-fit: cover;">
-                <div class="card-body">
-                    <h5 class="card-title">@item.Nombre</h5>
-                    <p class="card-text">
-                        <span class="badge bg-primary">@item.Categoria</span>
-                    </p>
-                    <a asp-action="MarkAsPlaying" asp-route-id="@item.IdJuego" class="btn btn-primary w-100 mb-2">Marcar como jugando</a>
+@if (Model.Any())
+{
+    <div class="row">
+        @foreach (var juego in Model)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <img src="@juego.Imagen" class="card-img-top" alt="@juego.Nombre">
+                    <div class="card-body">
+                        <h5 class="card-title">@juego.Nombre</h5>
+                        <p class="card-text">@juego.Categoria - @juego.Plataforma</p>
+                        <a href="@Url.Action("MarkAsPlaying", new { id = juego.IdJuego })" class="btn btn-success">Comenzar a Jugar</a>
+                    </div>
                 </div>
             </div>
-        </div>
-    }
-</div>
-
-@section Styles {
-    <style>
-        .game-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: none;
-            border-radius: 15px;
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            color: white;
         }
-
-        .game-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-    </style>
+    </div>
+}
+else
+{
+    <p>No tienes juegos pendientes.</p>
 }

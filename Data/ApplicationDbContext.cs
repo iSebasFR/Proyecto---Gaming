@@ -1,136 +1,107 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Proyecto_Gaming.Models;
 
 namespace Proyecto_Gaming.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<Usuario>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
 
-        // DbSet para la tabla Juegos
+        // SOLO estos DbSets
         public DbSet<Juego> Juegos { get; set; }
-
-        // DbSet para Usuarios
-        public DbSet<Usuario> Usuarios { get; set; }
-
-        // DbSet para BibliotecaUsuario (para almacenar juegos en la biblioteca de cada usuario)
         public DbSet<BibliotecaUsuario> BibliotecaUsuario { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(modelBuilder); // IMPORTANTE para Identity
 
-            // Configuración específica para la tabla Juegos
+            // Configuración de Juegos (tu catálogo)
             modelBuilder.Entity<Juego>(entity =>
             {
-                entity.ToTable("Juegos"); // Nombre de la tabla en la base de datos
-                entity.HasKey(j => j.IdJuego); // Clave primaria
+                entity.ToTable("Juegos");
+                entity.HasKey(j => j.IdJuego);
                 entity.Property(j => j.IdJuego)
                     .HasColumnName("id_juego")
-                    .ValueGeneratedOnAdd(); // SERIAL en PostgreSQL
+                    .ValueGeneratedOnAdd();
                 entity.Property(j => j.Nombre)
                     .HasColumnName("nombre")
                     .IsRequired()
                     .HasMaxLength(255);
-                entity.Property(j => j.Categoria)
-                    .HasColumnName("categoria")
-                    .IsRequired()
-                    .HasMaxLength(100);
-                entity.Property(j => j.Plataforma)
-                    .HasColumnName("plataforma")
-                    .IsRequired()
-                    .HasMaxLength(50);
-                entity.Property(j => j.Imagen)
-                    .HasColumnName("imagen")
-                    .HasMaxLength(500);
-                entity.Property(j => j.PuntuacionMedia)
-                    .HasColumnName("puntuacion_media")
-                    .HasColumnType("decimal(2,1)")
-                    .HasPrecision(2, 1);
+                // ... resto de configuración de Juegos
             });
 
-            // Configuración para la tabla Usuarios
-            modelBuilder.Entity<Usuario>(entity =>
-            {
-                entity.ToTable("Usuarios"); // Nombre de la tabla en la base de datos
-                entity.HasKey(u => u.id_usuario); // Clave primaria
-
-                entity.Property(u => u.id_usuario)
-                    .HasColumnName("id_usuario")
-                    .ValueGeneratedOnAdd(); // SERIAL en PostgreSQL
-
-                entity.Property(u => u.nombre_usuario)
-                    .HasColumnName("nombre_usuario")
-                    .IsRequired()
-                    .HasMaxLength(255);
-
-                entity.Property(u => u.nombre_real)
-                    .HasColumnName("nombre_real")
-                    .IsRequired()
-                    .HasMaxLength(255);
-
-                entity.Property(u => u.correo_electronico)
-                    .HasColumnName("correo_electronico")
-                    .IsRequired()
-                    .HasMaxLength(255);
-
-                entity.Property(u => u.contraseña)
-                    .HasColumnName("contraseña")
-                    .IsRequired();
-
-                entity.Property(u => u.fecha_nacimiento)
-                    .HasColumnName("fecha_nacimiento")
-                    .IsRequired();
-
-                entity.Property(u => u.biografia)
-                    .HasColumnName("biografia")
-                    .HasMaxLength(500);
-
-                entity.Property(u => u.pais)
-                    .HasColumnName("pais")
-                    .HasMaxLength(100);
-
-                entity.Property(u => u.foto_perfil)
-                    .HasColumnName("foto_perfil")
-                    .HasMaxLength(500);
-
-                entity.Property(u => u.plataforma_preferida)
-                    .HasColumnName("plataforma_preferida")
-                    .IsRequired()
-                    .HasMaxLength(50);
-
-                entity.Property(u => u.fecha_registro)
-                    .HasColumnName("fecha_registro")
-                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                entity.Property(u => u.estado)
-                    .HasColumnName("estado")
-                    .IsRequired()
-                    .HasMaxLength(50);
-            });
-
-            // Configuración para la tabla BibliotecaUsuario
+            // Configuración de BibliotecaUsuario
             modelBuilder.Entity<BibliotecaUsuario>(entity =>
             {
-                entity.HasKey(bu => new { bu.IdUsuario, bu.IdJuego }); // Clave primaria compuesta
-
                 entity.ToTable("BibliotecaUsuario");
+                entity.HasKey(bu => bu.Id);
+                
+                entity.Property(bu => bu.Id)
+                    .HasColumnName("id")
+                    .ValueGeneratedOnAdd();
+                    
+                entity.Property(bu => bu.IdUsuario)
+                    .HasColumnName("id_usuario")
+                    .IsRequired()
+                    .HasMaxLength(450); // Tamaño para IDs de Identity
+
+                entity.Property(bu => bu.IdJuego)
+                    .HasColumnName("id_juego")
+                    .IsRequired();
 
                 entity.Property(bu => bu.Estado)
                     .HasColumnName("estado")
                     .IsRequired()
                     .HasMaxLength(50);
 
-                // Configuración de las relaciones
+                // Relaciones
                 entity.HasOne(bu => bu.Usuario)
                     .WithMany(u => u.BibliotecaUsuarios)
-                    .HasForeignKey(bu => bu.IdUsuario);
+                    .HasForeignKey(bu => bu.IdUsuario)
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(bu => bu.Juego)
                     .WithMany(j => j.BibliotecaUsuarios)
-                    .HasForeignKey(bu => bu.IdJuego);
+                    .HasForeignKey(bu => bu.IdJuego)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configuración de propiedades personalizadas de Usuario
+            modelBuilder.Entity<Usuario>(entity =>
+            {
+                entity.Property(u => u.NombreReal)
+                    .HasColumnName("nombre_real")
+                    .HasMaxLength(255);
+
+                entity.Property(u => u.FechaNacimiento)
+                    .HasColumnName("fecha_nacimiento");
+
+                entity.Property(u => u.Biografia)
+                    .HasColumnName("biografia")
+                    .HasMaxLength(500);
+
+                entity.Property(u => u.Pais)
+                    .HasColumnName("pais")
+                    .HasMaxLength(100);
+
+                entity.Property(u => u.FotoPerfil)
+                    .HasColumnName("foto_perfil")
+                    .HasMaxLength(500);
+
+                entity.Property(u => u.PlataformaPreferida)
+                    .HasColumnName("plataforma_preferida")
+                    .HasMaxLength(50);
+
+                entity.Property(u => u.FechaRegistro)
+                    .HasColumnName("fecha_registro")
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(u => u.Estado)
+                    .HasColumnName("estado")
+                    .HasMaxLength(50);
             });
         }
     }
