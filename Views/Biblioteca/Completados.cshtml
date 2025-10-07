@@ -1,0 +1,207 @@
+@model List<Proyecto_Gaming.Models.BibliotecaUsuario>
+
+@{
+    ViewData["Title"] = "Juegos Completados";
+}
+
+<!-- Segunda Navbar (Secundaria) -->
+<nav class="navbar navbar-expand-lg mb-4" style="background-color: #B62DCE; border-radius: 25px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); height: 50px; padding: 5px 0; max-width: 650px; margin: 0 auto;">
+    <div class="container-fluid justify-content-center">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link text-white fw-bold" asp-action="Pendientes">Pendiente</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white fw-bold" asp-action="Jugando">Jugando</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white fw-bold active" asp-action="Completados">Completados</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white fw-bold" asp-action="Index">Catálogo</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<h2 class="text-center mb-4">Juegos Completados</h2>
+
+@if (Model.Any())
+{
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-6 mb-4">
+                <div class="game-card card h-100 shadow">
+                    <img src="@item.GameImage" class="card-img-top" alt="@item.GameName" style="height: 250px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">@item.GameName</h5>
+                        <p class="card-text">
+                            <span class="badge bg-success">@item.Estado</span>
+                            @if (item.FechaCompletado.HasValue)
+                            {
+                                <br><small class="text-muted">Completado: @item.FechaCompletado.Value.ToString("dd/MM/yyyy")</small>
+                            }
+                        </p>
+
+                        <!-- Mostrar reseña existente -->
+                        @if (!string.IsNullOrEmpty(item.Resena))
+                        {
+                            <div class="mb-3">
+                                <h6>Tu Reseña:</h6>
+                                <div class="star-rating mb-2">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="fas fa-star @(i <= item.Calificacion ? "text-warning" : "text-secondary")"></i>
+                                    }
+                                </div>
+                                <p class="resena-text">"@item.Resena"</p>
+                                <small class="text-muted">Publicado: @item.FechaResena?.ToString("dd/MM/yyyy")</small>
+                            </div>
+                        }
+
+                        <!-- Botón para agregar/editar reseña -->
+                        <button class="btn btn-info w-100 mb-2" 
+                                onclick="showReviewModal(@item.RawgGameId, '@item.GameName', @item.Calificacion, '@item.Resena')">
+                            @(string.IsNullOrEmpty(item.Resena) ? "Agregar Reseña" : "Editar Reseña")
+                        </button>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Detalles" asp-route-id="@item.RawgGameId" class="btn btn-primary w-48">Ver Detalles</a>
+                            <a asp-action="Jugando" class="btn btn-secondary w-48">Volver a Jugando</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-info text-center">
+        <h4>No tienes juegos completados</h4>
+        <p>¡Completa algunos de tus juegos en progreso!</p>
+        <a asp-action="Jugando" class="btn btn-primary">Ver Juegos en Progreso</a>
+    </div>
+}
+
+<!-- Modal para reseñas -->
+<div class="modal fade" id="reviewModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Reseña de <span id="gameName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Calificación:</label>
+                    <div class="star-rating" id="starRating">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <i class="fas fa-star text-secondary" data-rating="@i" style="cursor: pointer; font-size: 1.5rem;"></i>
+                        }
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Reseña:</label>
+                    <textarea class="form-control" id="resenaText" rows="4" placeholder="Comparte tu experiencia con este juego..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="submitReview()">Publicar Reseña</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentGameId = 0;
+        let currentRating = 0;
+
+        function showReviewModal(gameId, gameName, currentCalificacion, currentResena) {
+            currentGameId = gameId;
+            currentRating = currentCalificacion;
+            
+            $('#gameName').text(gameName);
+            $('#resenaText').val(currentResena || '');
+            
+            // Resetear estrellas
+            $('#starRating .fa-star').removeClass('text-warning').addClass('text-secondary');
+            
+            // Marcar estrellas según calificación actual
+            for (let i = 1; i <= currentCalificacion; i++) {
+                $(`#starRating .fa-star[data-rating="${i}"]`).removeClass('text-secondary').addClass('text-warning');
+            }
+            
+            $('#reviewModal').modal('show');
+        }
+
+        // Manejar clic en estrellas
+        $('#starRating .fa-star').on('click', function() {
+            const rating = $(this).data('rating');
+            currentRating = rating;
+            
+            // Actualizar visualización de estrellas
+            $('#starRating .fa-star').each(function() {
+                if ($(this).data('rating') <= rating) {
+                    $(this).removeClass('text-secondary').addClass('text-warning');
+                } else {
+                    $(this).removeClass('text-warning').addClass('text-secondary');
+                }
+            });
+        });
+
+        function submitReview() {
+            const resena = $('#resenaText').val();
+            
+            if (currentRating === 0) {
+                alert('Por favor selecciona una calificación');
+                return;
+            }
+
+            $.post('@Url.Action("AddReview", "Biblioteca")', {
+                id: currentGameId,
+                resena: resena,
+                calificacion: currentRating
+            }, function(response) {
+                if (response.success) {
+                    $('#reviewModal').modal('hide');
+                    location.reload(); // Recargar para mostrar la nueva reseña
+                } else {
+                    alert(response.message);
+                }
+            });
+        }
+    </script>
+}
+
+@section Styles {
+    <style>
+        .game-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 15px;
+            color: white;
+        }
+        
+        .w-48 {
+            width: 48% !important;
+        }
+        
+        .resena-text {
+            font-style: italic;
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #B62DCE;
+        }
+        
+        .star-rating {
+            font-size: 1.2rem;
+        }
+    </style>
+}

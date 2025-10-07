@@ -1,7 +1,7 @@
 @model List<Proyecto_Gaming.Models.BibliotecaUsuario>
 
 @{
-    ViewData["Title"] = "Mis Juegos Pendientes";
+    ViewData["Title"] = "Juegos en Progreso";
 }
 
 <!-- Segunda Navbar (Secundaria) -->
@@ -9,10 +9,10 @@
     <div class="container-fluid justify-content-center">
         <ul class="navbar-nav">
             <li class="nav-item">
-                <a class="nav-link text-white fw-bold active" asp-action="Pendientes">Pendiente</a>
+                <a class="nav-link text-white fw-bold" asp-action="Pendientes">Pendiente</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-white fw-bold" asp-action="Jugando">Jugando</a>
+                <a class="nav-link text-white fw-bold active" asp-action="Jugando">Jugando</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link text-white fw-bold" asp-action="Completados">Completados</a>
@@ -24,7 +24,7 @@
     </div>
 </nav>
 
-<h2 class="text-center mb-4">Mis Juegos Pendientes</h2>
+<h2 class="text-center mb-4">Juegos en Progreso</h2>
 
 @if (Model.Any())
 {
@@ -37,12 +37,13 @@
                     <div class="card-body">
                         <h5 class="card-title">@item.GameName</h5>
                         <p class="card-text">
-                            <span class="badge bg-info">@item.Estado</span>
+                            <span class="badge bg-warning">@item.Estado</span>
                         </p>
                         
-                        <div class="d-flex justify-content-between">
-                            <a asp-action="MarkAsPlaying" asp-route-id="@item.RawgGameId" class="btn btn-success w-48">Comenzar a Jugar</a>
+                        <div class="d-flex justify-content-between flex-wrap">
+                            <a asp-action="MarkAsCompleted" asp-route-id="@item.RawgGameId" class="btn btn-success mb-2 w-100">Marcar como Completado</a>
                             <a asp-action="Detalles" asp-route-id="@item.RawgGameId" class="btn btn-primary w-48">Ver Detalles</a>
+                            <a asp-action="Pendientes" class="btn btn-secondary w-48">Volver a Pendientes</a>
                         </div>
                     </div>
                 </div>
@@ -53,9 +54,9 @@
 else
 {
     <div class="alert alert-info text-center">
-        <h4>No tienes juegos pendientes</h4>
-        <p>¡Explora el catálogo y añade algunos juegos a tu lista!</p>
-        <a asp-action="Index" class="btn btn-primary">Ir al Catálogo</a>
+        <h4>No tienes juegos en progreso</h4>
+        <p>¡Comienza a jugar algunos de tus juegos pendientes!</p>
+        <a asp-action="Pendientes" class="btn btn-primary">Ver Pendientes</a>
     </div>
 }
 
