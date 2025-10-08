@@ -1,0 +1,569 @@
+@model Proyecto_Gaming.ViewModels.ConfiguracionViewModel
+@{
+    ViewData["Title"] = "Configuración del Perfil";
+}
+
+<!-- Segunda Navbar (Secundaria) -->
+<nav class="navbar navbar-expand-lg mb-4" style="background-color: #B62DCE; border-radius: 25px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); height: 50px; padding: 5px 0; max-width: 650px; margin: 0 auto;">
+    <div class="container-fluid justify-content-center">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link text-white fw-bold" asp-controller="Biblioteca" asp-action="Pendientes">Biblioteca</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white fw-bold" href="#">Comunidad</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white fw-bold" href="#">Rankings</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white fw-bold" href="#">Estadísticas</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <!-- Sidebar de Navegación -->
+        <div class="col-md-3">
+            <div class="card config-sidebar" style="background: rgba(35, 40, 48, 0.9); border: none; border-radius: 15px;">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="avatar-container mb-3">
+                            @if (!string.IsNullOrEmpty(Model.FotoPerfilUrl))
+                            {
+                                <img src="@Model.FotoPerfilUrl" class="avatar-img" alt="Avatar">
+                            }
+                            else
+                            {
+                                <div class="avatar-placeholder">
+                                    <i class="fas fa-user fa-2x text-white"></i>
+                                </div>
+                            }
+                        </div>
+                        <h5 class="text-white mb-1">@Model.UserName</h5>
+                        <small class="text-white">Miembro desde @DateTime.Now.ToString("MM/yyyy")</small>
+                    </div>
+
+                    <nav class="nav flex-column">
+                        <a class="nav-link config-nav-link active" href="#editar-perfil" data-bs-toggle="tab">
+                            <i class="fas fa-user-edit me-2"></i>Editar Perfil
+                        </a>
+                        <a class="nav-link config-nav-link" href="#plataformas" data-bs-toggle="tab">
+                            <i class="fas fa-gamepad me-2"></i>Plataformas Preferidas
+                        </a>
+                        <a class="nav-link config-nav-link" href="#seguridad" data-bs-toggle="tab">
+                            <i class="fas fa-shield-alt me-2"></i>Seguridad y Privacidad
+                        </a>
+                        <hr class="my-3">
+                        <a class="nav-link config-nav-link text-danger" href="#zona-peligrosa" data-bs-toggle="tab">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Zona Peligrosa
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="col-md-9">
+            <div class="tab-content">
+                <!-- Pestaña: Editar Perfil -->
+                <div class="tab-pane fade show active" id="editar-perfil">
+                    <div class="card" style="background: rgba(35, 40, 48, 0.9); border: none; border-radius: 15px;">
+                        <div class="card-header bg-transparent border-bottom">
+                            <h4 class="text-white mb-0"><i class="fas fa-user-edit me-2"></i>Información Personal</h4>
+                        </div>
+                        <div class="card-body">
+                            <form asp-action="ActualizarPerfil" method="post" enctype="multipart/form-data">
+                                @Html.AntiForgeryToken()
+                                
+                                <!-- Avatar -->
+                                <div class="row mb-4">
+                                    <div class="col-12 text-center">
+                                        <div class="avatar-upload-container mb-3">
+                                            @if (!string.IsNullOrEmpty(Model.FotoPerfilUrl))
+                                            {
+                                                <img src="@Model.FotoPerfilUrl" class="avatar-preview" id="avatarPreview" alt="Avatar">
+                                            }
+                                            else
+                                            {
+                                                <div class="avatar-preview placeholder" id="avatarPreview">
+                                                    <i class="fas fa-user fa-3x text-white"></i>
+                                                </div>
+                                            }
+                                        </div>
+                                        <label for="fotoPerfil" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-camera me-2"></i>Cambiar avatar
+                                        </label>
+                                        <input type="file" asp-for="FotoPerfil" id="fotoPerfil" class="d-none" accept="image/*">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="resetAvatar()">
+                                            <i class="fas fa-sync me-2"></i>Restablecer
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Información Básica -->
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label text-white">Nombre de usuario *</label>
+                                        <input type="text" asp-for="UserName" class="form-control config-input" 
+                                            placeholder="Ej: iSebasFR" value="@Model.UserName">
+                                        <span asp-validation-for="UserName" class="text-danger small"></span>
+                                        <small class="text-white opacity-75">Este será tu nombre público en la plataforma</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label text-white">Nombre real</label>
+                                        <input type="text" asp-for="NombreReal" class="form-control config-input" 
+                                            placeholder="Ej: Sebastian Fernandez" value="@Model.NombreReal">
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label text-white">Correo electrónico</label>
+                                        <input type="email" value="@Model.Email" class="form-control config-input" readonly disabled>
+                                        <small class="text-white opacity-75">El email no se puede modificar</small>
+                                        <!-- Campo oculto para mantener el valor en el modelo -->
+                                        <input type="hidden" asp-for="Email">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label text-white">Fecha de nacimiento</label>
+                                        <input type="date" asp-for="FechaNacimiento" class="form-control config-input" 
+                                            value="@(Model.FechaNacimiento?.ToString("yyyy-MM-dd"))">
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label text-white">Biografía</label>
+                                    <textarea asp-for="Biografia" class="form-control config-input" rows="4" 
+                                              placeholder="Cuéntanos sobre ti...">@Model.Biografia</textarea>
+                                    <div class="form-text text-white">@(Model.Biografia?.Length ?? 0)/500 caracteres</div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label text-white">País</label>
+                                    <select asp-for="Pais" class="form-select config-input">
+                                        <option value="">Seleccionar país</option>
+                                        <option value="Argentina">Argentina</option>
+                                        <option value="Chile">Chile</option>
+                                        <option value="Colombia">Colombia</option>
+                                        <option value="España">España</option>
+                                        <option value="México">México</option>
+                                        <option value="Perú">Perú</option>
+                                        <option value="Estados Unidos">Estados Unidos</option>
+                                        <option value="Otro">Otro</option>
+                                    </select>
+                                </div>
+
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>Guardar cambios
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pestaña: Plataformas Preferidas -->
+                <div class="tab-pane fade" id="plataformas">
+                    <div class="card" style="background: rgba(35, 40, 48, 0.9); border: none; border-radius: 15px;">
+                        <div class="card-header bg-transparent border-bottom">
+                            <h4 class="text-white mb-0"><i class="fas fa-gamepad me-2"></i>Plataformas Preferidas</h4>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-white mb-4">Selecciona tus plataformas de juego preferidas.</p>
+                            
+                            <form asp-action="ActualizarPlataformas" method="post" id="plataformasForm">
+                                @Html.AntiForgeryToken()
+                                
+                                <div class="row">
+                                    @foreach (var plataforma in Model.PlataformasPreferidas)
+                                    {
+                                        <div class="col-md-6 mb-3">
+                                            <div class="platform-card @(plataforma.Seleccionada ? "selected" : "")">
+                                                <input type="checkbox" name="plataformasSeleccionadas" value="@plataforma.Id" 
+                                                       id="platform-@plataforma.Id" @(plataforma.Seleccionada ? "checked" : "") class="d-none">
+                                                <label for="platform-@plataforma.Id" class="platform-label w-100">
+                                                    <div class="platform-icon mb-2">
+                                                        <i class="fas @GetPlatformIcon(plataforma.Id) fa-2x"></i>
+                                                    </div>
+                                                    <h6 class="text-white mb-1">@plataforma.Nombre</h6>
+                                                    <small class="text-white">@GetPlatformDescription(plataforma.Id)</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="text-end mt-4">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>Guardar plataformas
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pestaña: Seguridad y Privacidad -->
+                <div class="tab-pane fade" id="seguridad">
+                    <div class="card" style="background: rgba(35, 40, 48, 0.9); border: none; border-radius: 15px;">
+                        <div class="card-header bg-transparent border-bottom">
+                            <h4 class="text-white mb-0"><i class="fas fa-shield-alt me-2"></i>Configuración de Seguridad</h4>
+                        </div>
+                        <div class="card-body">
+                            <!-- Cambiar Contraseña -->
+                            <div class="security-section mb-5">
+                                <h5 class="text-white mb-3">Cambiar Contraseña</h5>
+                                <form asp-action="CambiarContrasena" method="post" id="passwordForm">
+                                    @Html.AntiForgeryToken()
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-white">Contraseña actual</label>
+                                            <div class="password-input-group">
+                                                <input type="password" name="currentPassword" class="form-control config-input" 
+                                                       placeholder="Ingresa tu contraseña actual">
+                                                <button type="button" class="btn btn-outline-secondary toggle-password">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-white">Nueva contraseña</label>
+                                            <div class="password-input-group">
+                                                <input type="password" name="newPassword" class="form-control config-input" 
+                                                       placeholder="Ingresa nueva contraseña">
+                                                <button type="button" class="btn btn-outline-secondary toggle-password">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-white">Confirmar nueva contraseña</label>
+                                            <div class="password-input-group">
+                                                <input type="password" name="confirmPassword" class="form-control config-input" 
+                                                       placeholder="Confirma nueva contraseña">
+                                                <button type="button" class="btn btn-outline-secondary toggle-password">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-key me-2"></i>Cambiar contraseña
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Cerrar Sesión -->
+                            <div class="security-section">
+                                <h5 class="text-white mb-3">Sesión</h5>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-white mb-1">Cerrar sesión en todos los dispositivos</h6>
+                                        <p class="text-white mb-0">Terminará tu sesión en este y todos los demás dispositivos.</p>
+                                    </div>
+                                    <form asp-area="Identity" asp-page="/Account/Logout" method="post">
+                                        <button type="submit" class="btn btn-outline-warning">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pestaña: Zona Peligrosa -->
+                <div class="tab-pane fade" id="zona-peligrosa">
+                    <div class="card border-danger" style="background: rgba(35, 40, 48, 0.9); border: 2px solid #dc3545 !important; border-radius: 15px;">
+                        <div class="card-header bg-transparent border-bottom border-danger">
+                            <h4 class="text-danger mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Zona Peligrosa</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-4">
+                                <i class="fas fa-skull-crossbones fa-3x text-danger mb-3"></i>
+                                <h4 class="text-danger">¡Precaución!</h4>
+                                <p class="text-white">Esta acción es irreversible. Por favor, procede con precaución.</p>
+                            </div>
+
+                            <!-- Eliminar Cuenta -->
+                            <div class="danger-section p-4 rounded" style="background: rgba(220, 53, 69, 0.1);">
+                                <h5 class="text-danger mb-3">Eliminar Cuenta Permanentemente</h5>
+                                <p class="text-white mb-3">
+                                    Una vez que elimines tu cuenta, no podrás recuperarla. Se perderán todos tus datos, 
+                                    incluyendo tu biblioteca de juegos, reseñas y estadísticas.
+                                </p>
+                                
+                                <form asp-action="EliminarCuenta" method="post" id="deleteAccountForm" onsubmit="return confirmDelete()">
+                                    @Html.AntiForgeryToken()
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label text-white">
+                                            Escribe <strong class="text-danger">ELIMINAR</strong> para confirmar:
+                                        </label>
+                                        <input type="text" name="confirmacion" class="form-control config-input" 
+                                               placeholder="ELIMINAR" required>
+                                    </div>
+
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-danger">
+                                            <i class="fas fa-trash me-2"></i>Eliminar Cuenta Permanentemente
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Preview de avatar
+        document.getElementById('fotoPerfil').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('avatarPreview');
+                    preview.innerHTML = `<img src="${e.target.result}" class="avatar-preview-img" alt="Preview">`;
+                    preview.classList.remove('placeholder');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function resetAvatar() {
+            const preview = document.getElementById('avatarPreview');
+            preview.innerHTML = '<i class="fas fa-user fa-3x text-white"></i>';
+            preview.classList.add('placeholder');
+            document.getElementById('fotoPerfil').value = '';
+        }
+
+        // Toggle password visibility
+        document.querySelectorAll('.toggle-password').forEach(button => {
+            button.addEventListener('click', function() {
+                const input = this.parentElement.querySelector('input');
+                const icon = this.querySelector('i');
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        });
+
+        // Platform selection
+        document.querySelectorAll('.platform-label').forEach(label => {
+            label.addEventListener('click', function() {
+                const card = this.parentElement;
+                card.classList.toggle('selected');
+            });
+        });
+
+        // Tab navigation
+        document.querySelectorAll('.config-nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.getAttribute('href');
+                
+                // Update active states
+                document.querySelectorAll('.config-nav-link').forEach(nav => {
+                    nav.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // Show target tab
+                document.querySelectorAll('.tab-pane').forEach(tab => {
+                    tab.classList.remove('show', 'active');
+                });
+                document.querySelector(target).classList.add('show', 'active');
+            });
+        });
+
+        function confirmDelete() {
+            const confirmation = document.querySelector('input[name="confirmacion"]').value;
+            if (confirmation.toLowerCase() !== 'eliminar') {
+                alert('Debes escribir "ELIMINAR" para confirmar la eliminación.');
+                return false;
+            }
+            return confirm('¿Estás absolutamente seguro? Esta acción no se puede deshacer.');
+        }
+    </script>
+}
+
+@functions {
+    private string GetPlatformIcon(string platformId)
+    {
+        return platformId switch
+        {
+            "pc" => "fa-desktop",
+            "playstation" => "fa-gamepad",
+            "xbox" => "fa-xbox",
+            "nintendo" => "fa-game-console",
+            "mobile" => "fa-mobile-alt",
+            _ => "fa-gamepad"
+        };
+    }
+
+    private string GetPlatformDescription(string platformId)
+    {
+        return platformId switch
+        {
+            "pc" => "Computadora personal",
+            "playstation" => "Consola PlayStation",
+            "xbox" => "Consola Xbox",
+            "nintendo" => "Consola Nintendo",
+            "mobile" => "Dispositivos móviles",
+            _ => "Plataforma de juego"
+        };
+    }
+}
+
+@section Styles {
+    <style>
+        .config-sidebar {
+            position: sticky;
+            top: 20px;
+        }
+
+        .config-nav-link {
+            color: rgba(255, 255, 255, 0.7);
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .config-nav-link:hover,
+        .config-nav-link.active {
+            color: white;
+            background: rgba(108, 92, 231, 0.2);
+        }
+
+        .config-nav-link.text-danger:hover {
+            background: rgba(220, 53, 69, 0.2);
+        }
+
+        .config-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 8px;
+        }
+
+        .config-input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 0 0 0.2rem rgba(108, 92, 231, 0.25);
+        }
+
+        .avatar-upload-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .avatar-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary);
+        }
+
+        .avatar-preview.placeholder {
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .avatar-preview-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .platform-card {
+            padding: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .platform-card:hover,
+        .platform-card.selected {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .platform-icon {
+            color: var(--primary);
+        }
+
+        .platform-card.selected .platform-icon {
+            color: white;
+        }
+
+        .password-input-group {
+            position: relative;
+        }
+
+        .password-input-group .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .security-section {
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .security-section:last-child {
+            border-bottom: none;
+        }
+
+        .danger-section {
+            border-left: 4px solid #dc3545;
+        }
+
+        .form-text {
+            font-size: 0.8rem;
+        }
+
+        .text-white {
+            color: white !important;
+        }
+    </style>
+}

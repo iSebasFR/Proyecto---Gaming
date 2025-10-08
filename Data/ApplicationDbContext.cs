@@ -12,12 +12,12 @@ namespace Proyecto_Gaming.Data
 
         // SOLO BibliotecaUsuario - ELIMINAR Juegos ya que usamos RAWG API
         public DbSet<BibliotecaUsuario> BibliotecaUsuario { get; set; }
-
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder); // IMPORTANTE para Identity
+            base.OnModelCreating(modelBuilder);
 
-            // Configuración para la tabla BibliotecaUsuario (ACTUALIZADA PARA RAWG)
+            // Configuración para la tabla BibliotecaUsuario
             modelBuilder.Entity<BibliotecaUsuario>(entity =>
             {
                 entity.ToTable("BibliotecaUsuario");
@@ -32,7 +32,6 @@ namespace Proyecto_Gaming.Data
                     .IsRequired()
                     .HasMaxLength(450);
 
-                // NUEVAS PROPIEDADES PARA RAWG API
                 entity.Property(bu => bu.RawgGameId)
                     .HasColumnName("rawg_game_id")
                     .IsRequired();
@@ -51,7 +50,7 @@ namespace Proyecto_Gaming.Data
                     .HasColumnName("game_image")
                     .HasMaxLength(500);
 
-                // Índice único para evitar duplicados (mismo usuario + mismo juego RAWG)
+                // Índice único para evitar duplicados
                 entity.HasIndex(bu => new { bu.IdUsuario, bu.RawgGameId })
                     .IsUnique();
             });
@@ -62,6 +61,11 @@ namespace Proyecto_Gaming.Data
                 entity.Property(u => u.NombreReal)
                     .HasColumnName("nombre_real")
                     .HasMaxLength(255);
+
+                // NUEVO: Configuración para DisplayName
+                entity.Property(u => u.DisplayName)
+                    .HasColumnName("display_name")
+                    .HasMaxLength(50);
 
                 entity.Property(u => u.FechaNacimiento)
                     .HasColumnName("fecha_nacimiento");
@@ -80,7 +84,7 @@ namespace Proyecto_Gaming.Data
 
                 entity.Property(u => u.PlataformaPreferida)
                     .HasColumnName("plataforma_preferida")
-                    .HasMaxLength(50);
+                    .HasMaxLength(200);
 
                 entity.Property(u => u.FechaRegistro)
                     .HasColumnName("fecha_registro")

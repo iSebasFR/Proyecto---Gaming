@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Identity;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Proyecto_Gaming.Models
 {
@@ -7,6 +7,11 @@ namespace Proyecto_Gaming.Models
     {
         // Propiedades personalizadas
         public string? NombreReal { get; set; }
+        
+        [Display(Name = "Nombre para mostrar")]
+        [StringLength(50)]
+        public string? DisplayName { get; set; }  // NUEVO: Nombre público
+        
         public DateTime FechaNacimiento { get; set; }
         public string? Biografia { get; set; }
         public string? Pais { get; set; }
