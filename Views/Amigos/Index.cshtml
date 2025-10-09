@@ -1,0 +1,380 @@
+@model Proyecto_Gaming.ViewModels.AmigosViewModel
+@{
+    ViewData["Title"] = "Amigos";
+}
+
+<!-- Navbar Secundaria para Comunidad -->
+<nav class="navbar navbar-expand-lg comunidad-navbar mb-4">
+    <div class="container">
+        <div class="navbar-nav">
+            <a class="nav-link" asp-controller="Comunidad" asp-action="Index">
+                <i class="fas fa-home me-2"></i>Feed
+            </a>
+            <a class="nav-link active" asp-controller="Amigos" asp-action="Index">
+                <i class="fas fa-user-friends me-2"></i>Amigos
+            </a>
+            <a class="nav-link" asp-controller="Grupos" asp-action="Index">
+                <i class="fas fa-users me-2"></i>Grupos
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="sidebar-comunidad">
+            <h5 class="mb-3">Navegación</h5>
+            <a class="sidebar-link @(Model.SeccionActiva == "Todos" ? "active" : "")" 
+               asp-action="Index" asp-route-seccion="Todos">
+                <i class="fas fa-users me-2"></i>Todos los Amigos
+            </a>
+            <a class="sidebar-link @(Model.SeccionActiva == "Solicitudes" ? "active" : "")" 
+               asp-action="Index" asp-route-seccion="Solicitudes">
+                <i class="fas fa-user-plus me-2"></i>Solicitudes
+                @if (Model.SolicitudesPendientes.Count > 0)
+                {
+                    <span class="badge bg-primary ms-2">@Model.SolicitudesPendientes.Count</span>
+                }
+            </a>
+            <a class="sidebar-link @(Model.SeccionActiva == "Conocer" ? "active" : "")" 
+               asp-action="Index" asp-route-seccion="Conocer">
+                <i class="fas fa-search me-2"></i>Conocer Nuevos
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        @if (Model.SeccionActiva == "Todos")
+        {
+            <h3 class="mb-4">Mis Amigos</h3>
+            
+            @if (!Model.Amigos.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-users fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">Aún no tienes amigos</h4>
+                    <p class="text-muted">Agrega amigos para verlos aquí</p>
+                </div>
+            }
+            else
+            {
+                foreach (var amigo in Model.Amigos)
+                {
+                    var usuarioAmigo = amigo.UsuarioId == ViewBag.UsuarioActualId ? amigo.AmigoUsuario : amigo.Usuario;
+                    
+                    <div class="amigo-card">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <div class="profile-pic-sm">
+                                    @if (!string.IsNullOrEmpty(usuarioAmigo.FotoPerfil))
+                                    {
+                                        <img src="@usuarioAmigo.FotoPerfil" class="rounded-circle" width="60" height="60" alt="Foto">
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold" style="width: 60px; height: 60px;">
+                                            @{
+                                                // CORREGIDO: Usando bloque de código Razor
+                                                var inicial = !string.IsNullOrEmpty(usuarioAmigo.UserName) ? usuarioAmigo.UserName[0].ToString().ToUpper() : "U";
+                                            }
+                                            @inicial
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="col">
+                                <h5 class="mb-1">@usuarioAmigo.DisplayName</h5>
+                                <p class="text-white mb-1">@@@usuarioAmigo.UserName</p>
+                                @if (!string.IsNullOrEmpty(usuarioAmigo.Biografia))
+                                {
+                                    <p class="mb-2 text-white">@usuarioAmigo.Biografia</p>
+                                }
+                            </div>
+                            <div class="col-auto">
+                                <div class="btn-group">
+                                    <a asp-controller="Perfil" asp-action="Index" asp-route-userId="@usuarioAmigo.Id" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye me-1"></i>Ver Perfil
+                                    </a>
+                                    <button class="btn btn-outline-danger btn-sm" onclick="eliminarAmigo('@usuarioAmigo.Id')">
+                                        <i class="fas fa-user-times me-1"></i>Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        }
+        else if (Model.SeccionActiva == "Solicitudes")
+        {
+            <h3 class="mb-4">Solicitudes de Amistad</h3>
+            
+            @if (!Model.SolicitudesPendientes.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">No tienes solicitudes pendientes</h4>
+                </div>
+            }
+            else
+            {
+                foreach (var solicitud in Model.SolicitudesPendientes)
+                {
+                    <div class="amigo-card">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <div class="profile-pic-sm">
+                                    @if (!string.IsNullOrEmpty(solicitud.Usuario.FotoPerfil))
+                                    {
+                                        <img src="@solicitud.Usuario.FotoPerfil" class="rounded-circle" width="60" height="60" alt="Foto">
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold" style="width: 60px; height: 60px;">
+                                            @{
+                                                // CORREGIDO: Usando bloque de código Razor
+                                                var inicial = !string.IsNullOrEmpty(solicitud.Usuario.UserName) ? solicitud.Usuario.UserName[0].ToString().ToUpper() : "U";
+                                            }
+                                            @inicial
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="col">
+                                <h5 class="mb-1">@solicitud.Usuario.DisplayName</h5>
+                                <p class="text-white mb-1">@@@solicitud.Usuario.UserName</p>
+                                <small class="text-white">Enviado el @solicitud.FechaSolicitud.ToString("dd/MM/yyyy")</small>
+                            </div>
+                            <div class="col-auto">
+                                <div class="btn-group">
+                                    <button class="btn btn-success btn-sm" onclick="aceptarSolicitud(@solicitud.Id)">
+                                        <i class="fas fa-check me-1"></i>Aceptar
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="rechazarSolicitud(@solicitud.Id)">
+                                        <i class="fas fa-times me-1"></i>Rechazar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        }
+        else if (Model.SeccionActiva == "Conocer")
+        {
+            <h3 class="mb-4">Conocer Nuevos Usuarios</h3>
+            
+            @if (!Model.UsuariosSugeridos.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">No hay usuarios sugeridos</h4>
+                </div>
+            }
+            else
+            {
+                foreach (var usuario in Model.UsuariosSugeridos)
+                {
+                    <div class="amigo-card">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <div class="profile-pic-sm">
+                                    @if (!string.IsNullOrEmpty(usuario.FotoPerfil))
+                                    {
+                                        <img src="@usuario.FotoPerfil" class="rounded-circle" width="60" height="60" alt="Foto">
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold" style="width: 60px; height: 60px;">
+                                            @{
+                                                // CORREGIDO: Usando bloque de código Razor
+                                                var inicial = !string.IsNullOrEmpty(usuario.UserName) ? usuario.UserName[0].ToString().ToUpper() : "U";
+                                            }
+                                            @inicial
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="col">
+                                <h5 class="mb-1">@usuario.DisplayName</h5>
+                                <p class="text-white mb-1">@@@usuario.UserName</p>
+                                @if (!string.IsNullOrEmpty(usuario.Biografia))
+                                {
+                                    <p class="mb-2 text-white">@usuario.Biografia</p>
+                                }
+                                @if (!string.IsNullOrEmpty(usuario.PlataformaPreferida))
+                                {
+                                    <small class="text-white"><i class="fas fa-gamepad me-1"></i>@usuario.PlataformaPreferida</small>
+                                }
+                            </div>
+                            <div class="col-auto">
+                                <div class="btn-group">
+                                    <a asp-controller="Perfil" asp-action="Index" asp-route-userId="@usuario.Id" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye me-1"></i>Ver Perfil
+                                    </a>
+                                    <button class="btn btn-primary btn-sm" onclick="enviarSolicitud('@usuario.Id')">
+                                        <i class="fas fa-user-plus me-1"></i>Agregar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        }
+    </div>
+</div>
+
+<style>
+    .comunidad-navbar {
+        background: rgba(35, 40, 48, 0.95) !important;
+        backdrop-filter: blur(10px);
+        border-bottom: 2px solid var(--primary);
+        padding: 0.8rem 0;
+        margin-top: -1rem;
+    }
+
+    .comunidad-navbar .nav-link {
+        color: rgba(255, 255, 255, 0.8) !important;
+        font-weight: 600;
+        padding: 0.7rem 1.5rem !important;
+        border-radius: 25px;
+        margin: 0 0.3rem;
+        transition: all 0.3s ease;
+    }
+
+    .comunidad-navbar .nav-link:hover,
+    .comunidad-navbar .nav-link.active {
+        color: white !important;
+        background: var(--primary-gradient);
+        transform: translateY(-2px);
+    }
+
+    .sidebar-comunidad {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        border: 1px solid rgba(108, 92, 231, 0.2);
+    }
+
+    .sidebar-link {
+        display: block;
+        padding: 0.8rem 1rem;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .sidebar-link:hover,
+    .sidebar-link.active {
+        background: rgba(108, 92, 231, 0.2);
+        color: var(--primary);
+    }
+
+    .amigo-card {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(108, 92, 231, 0.2);
+        color: white;
+    }
+
+    .amigo-card p,
+    .amigo-card .text-muted,
+    .amigo-card small {
+        color: white !important;
+    }
+
+    .amigo-card .text-white {
+        color: white !important;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        async function enviarSolicitud(amigoId) {
+            try {
+                const response = await fetch('/Amigos/EnviarSolicitud', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ amigoId: amigoId })
+                });
+                
+                const result = await response.json();
+                alert(result.message);
+                if (result.success) {
+                    location.reload();
+                }
+            } catch (error) {
+                alert('Error al enviar solicitud: ' + error.message);
+            }
+        }
+
+        async function aceptarSolicitud(solicitudId) {
+            try {
+                const response = await fetch('/Amigos/AceptarSolicitud', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ solicitudId: solicitudId })
+                });
+                
+                const result = await response.json();
+                alert(result.message);
+                if (result.success) {
+                    location.reload();
+                }
+            } catch (error) {
+                alert('Error al aceptar solicitud: ' + error.message);
+            }
+        }
+
+        async function rechazarSolicitud(solicitudId) {
+            try {
+                const response = await fetch('/Amigos/RechazarSolicitud', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ solicitudId: solicitudId })
+                });
+                
+                const result = await response.json();
+                alert(result.message);
+                if (result.success) {
+                    location.reload();
+                }
+            } catch (error) {
+                alert('Error al rechazar solicitud: ' + error.message);
+            }
+        }
+
+        async function eliminarAmigo(amigoId) {
+            if (confirm('¿Estás seguro de que quieres eliminar a este amigo?')) {
+                try {
+                    const response = await fetch('/Amigos/EliminarAmigo', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ amigoId: amigoId })
+                    });
+                    
+                    const result = await response.json();
+                    alert(result.message);
+                    if (result.success) {
+                        location.reload();
+                    }
+                } catch (error) {
+                    alert('Error al eliminar amigo: ' + error.message);
+                }
+            }
+        }
+    </script>
+}

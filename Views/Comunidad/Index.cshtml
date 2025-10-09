@@ -1,0 +1,142 @@
+@model Proyecto_Gaming.ViewModels.ComunidadViewModel
+@{
+    ViewData["Title"] = "Comunidad Gaming";
+}
+
+<!-- Navbar Secundaria para Comunidad -->
+<nav class="navbar navbar-expand-lg comunidad-navbar mb-4">
+    <div class="container">
+        <div class="navbar-nav">
+            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" && ViewContext.RouteData.Values["controller"]?.ToString() == "Comunidad" ? "active" : "")" 
+               asp-controller="Comunidad" asp-action="Index">
+                <i class="fas fa-home me-2"></i>Feed
+            </a>
+            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Amigos" ? "active" : "")" 
+               asp-controller="Amigos" asp-action="Index">
+                <i class="fas fa-user-friends me-2"></i>Amigos
+            </a>
+            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Grupos" ? "active" : "")" 
+               asp-controller="Grupos" asp-action="Index">
+                <i class="fas fa-users me-2"></i>Grupos
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="row">
+    <div class="col-12">
+        <div class="stats-card text-center">
+            <h1 class="display-4 mb-4">🎮 Bienvenido a la Comunidad Gaming</h1>
+            <p class="lead mb-5">Conecta con otros gamers, únete a grupos y comparte tu pasión por los videojuegos</p>
+            
+            <div class="row">
+                <div class="col-md-3 col-6 mb-4">
+                    <div class="stat-number">@Model.UsuariosConectados</div>
+                    <p class="mb-0">Usuarios Conectados</p>
+                </div>
+                <div class="col-md-3 col-6 mb-4">
+                    <div class="stat-number">@Model.GruposActivos</div>
+                    <p class="mb-0">Grupos Activos</p>
+                </div>
+                <div class="col-md-3 col-6 mb-4">
+                    <div class="stat-number">@Model.PublicacionesMensuales</div>
+                    <p class="mb-0">Publicaciones Mensuales</p>
+                </div>
+                <div class="col-md-3 col-6 mb-4">
+                    <div class="stat-number">@Model.UsuariosSatisfechos</div>
+                    <p class="mb-0">Usuarios Satisfechos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="stats-card">
+            <h3 class="mb-4">🌟 ¿Qué ofrece nuestra comunidad?</h3>
+            <p class="mb-4">Nuestra plataforma está diseñada para conectar a gamers de todo el mundo. Comparte tus logros, descubre nuevos juegos, únete a grupos temáticos y haz amigos que compartan tus mismos intereses gaming.</p>
+            
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="feature-card text-center">
+                        <i class="fas fa-user-friends fa-3x mb-3 text-primary"></i>
+                        <h4>Feed de Amigos</h4>
+                        <p class="mb-0">Mantente al día con las actividades de tus amigos, sus logros en juegos y sus publicaciones.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="feature-card text-center">
+                        <i class="fas fa-users fa-3x mb-3 text-primary"></i>
+                        <h4>Sistema de Amigos</h4>
+                        <p class="mb-0">Agrega amigos, envía solicitudes y construye tu red gaming personalizada.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="feature-card text-center">
+                        <i class="fas fa-layer-group fa-3x mb-3 text-primary"></i>
+                        <h4>Grupos Temáticos</h4>
+                        <p class="mb-0">Únete a grupos por juego, género o plataforma. Comparte estrategias y organiza partidas.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .comunidad-navbar {
+        background: rgba(35, 40, 48, 0.95) !important;
+        backdrop-filter: blur(10px);
+        border-bottom: 2px solid var(--primary);
+        padding: 0.8rem 0;
+        margin-top: -1rem;
+    }
+
+    .comunidad-navbar .nav-link {
+        color: rgba(255, 255, 255, 0.8) !important;
+        font-weight: 600;
+        padding: 0.7rem 1.5rem !important;
+        border-radius: 25px;
+        margin: 0 0.3rem;
+        transition: all 0.3s ease;
+    }
+
+    .comunidad-navbar .nav-link:hover,
+    .comunidad-navbar .nav-link.active {
+        color: white !important;
+        background: var(--primary-gradient);
+        transform: translateY(-2px);
+    }
+
+    .stats-card {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(108, 92, 231, 0.3);
+    }
+
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 800;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .feature-card {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        height: 100%;
+        border: 1px solid rgba(108, 92, 231, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary);
+    }
+</style>

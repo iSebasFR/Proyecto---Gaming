@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Proyecto_Gaming.Data;
@@ -11,9 +12,11 @@ using Proyecto_Gaming.Data;
 namespace Proyecto_Gaming.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251008201400_AddComunidad")]
+    partial class AddComunidad
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -460,12 +463,6 @@ namespace Proyecto_Gaming.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Angry")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("angry");
-
                     b.Property<string>("Descripcion")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -488,18 +485,6 @@ namespace Proyecto_Gaming.Migrations
                         .HasDefaultValue(0)
                         .HasColumnName("likes");
 
-                    b.Property<int>("Love")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("love");
-
-                    b.Property<int>("Sad")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("sad");
-
                     b.Property<string>("TipoArchivo")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -517,12 +502,6 @@ namespace Proyecto_Gaming.Migrations
                         .HasMaxLength(450)
                         .HasColumnType("character varying(450)")
                         .HasColumnName("usuario_id");
-
-                    b.Property<int>("Wow")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("wow");
 
                     b.HasKey("Id");
 
@@ -580,47 +559,6 @@ namespace Proyecto_Gaming.Migrations
                     b.HasIndex("UsuarioId");
 
                     b.ToTable("PublicacionesGrupo", (string)null);
-                });
-
-            modelBuilder.Entity("Proyecto_Gaming.Models.Comunidad.ReaccionMultimedia", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("FechaReaccion")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("fecha_reaccion")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<int>("MultimediaId")
-                        .HasColumnType("integer")
-                        .HasColumnName("multimedia_id");
-
-                    b.Property<string>("TipoReaccion")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("tipo_reaccion");
-
-                    b.Property<string>("UsuarioId")
-                        .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("character varying(450)")
-                        .HasColumnName("usuario_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UsuarioId");
-
-                    b.HasIndex("MultimediaId", "UsuarioId")
-                        .IsUnique();
-
-                    b.ToTable("ReaccionesMultimedia", (string)null);
                 });
 
             modelBuilder.Entity("Proyecto_Gaming.Models.Usuario", b =>
@@ -915,25 +853,6 @@ namespace Proyecto_Gaming.Migrations
                     b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("Proyecto_Gaming.Models.Comunidad.ReaccionMultimedia", b =>
-                {
-                    b.HasOne("Proyecto_Gaming.Models.Comunidad.MultimediaGrupo", "Multimedia")
-                        .WithMany("Reacciones")
-                        .HasForeignKey("MultimediaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Proyecto_Gaming.Models.Usuario", "Usuario")
-                        .WithMany()
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Multimedia");
-
-                    b.Navigation("Usuario");
-                });
-
             modelBuilder.Entity("Proyecto_Gaming.Models.Comunidad.Grupo", b =>
                 {
                     b.Navigation("Miembros");
@@ -946,8 +865,6 @@ namespace Proyecto_Gaming.Migrations
             modelBuilder.Entity("Proyecto_Gaming.Models.Comunidad.MultimediaGrupo", b =>
                 {
                     b.Navigation("Comentarios");
-
-                    b.Navigation("Reacciones");
                 });
 
             modelBuilder.Entity("Proyecto_Gaming.Models.Comunidad.PublicacionGrupo", b =>

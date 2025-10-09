@@ -1,0 +1,131 @@
+@model Proyecto_Gaming.ViewModels.CrearGrupoViewModel
+@{
+    ViewData["Title"] = "Crear Nuevo Grupo";
+}
+
+<!-- Navbar Secundaria para Comunidad -->
+<nav class="navbar navbar-expand-lg comunidad-navbar mb-4">
+    <div class="container">
+        <div class="navbar-nav">
+            <a class="nav-link" asp-controller="Comunidad" asp-action="Index">
+                <i class="fas fa-home me-2"></i>Feed
+            </a>
+            <a class="nav-link" asp-controller="Amigos" asp-action="Index">
+                <i class="fas fa-user-friends me-2"></i>Amigos
+            </a>
+            <a class="nav-link active" asp-controller="Grupos" asp-action="Index">
+                <i class="fas fa-users me-2"></i>Grupos
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="stats-card">
+            <h2 class="text-center mb-4">Crear Nuevo Grupo</h2>
+            
+            <form asp-action="Crear" method="post" enctype="multipart/form-data">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Nombre" class="form-label">Nombre del Grupo *</label>
+                            <input asp-for="Nombre" class="form-control" placeholder="Ej: Amantes del RPG">
+                            <span asp-validation-for="Nombre" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Categoria" class="form-label">Categoría *</label>
+                            <select asp-for="Categoria" class="form-select">
+                                <option value="">Seleccionar categoría</option>
+                                <option value="RPG">RPG</option>
+                                <option value="Aventura">Aventura</option>
+                                <option value="Acción">Acción</option>
+                                <option value="Estrategia">Estrategia</option>
+                                <option value="Deportes">Deportes</option>
+                                <option value="Cooperativo">Cooperativo</option>
+                                <option value="Competitivo">Competitivo</option>
+                                <option value="Casual">Casual</option>
+                            </select>
+                            <span asp-validation-for="Categoria" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Descripcion" class="form-label">Descripción</label>
+                    <textarea asp-for="Descripcion" class="form-control" rows="4" placeholder="Describe el propósito y temas del grupo..."></textarea>
+                    <span asp-validation-for="Descripcion" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="FotoGrupo" class="form-label">Foto del Grupo</label>
+                            <input asp-for="FotoGrupo" type="file" class="form-control" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="BannerGrupo" class="form-label">Banner del Grupo</label>
+                            <input asp-for="BannerGrupo" type="file" class="form-control" accept="image/*">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3 form-check">
+                    <input asp-for="EsPublico" class="form-check-input" checked="checked">
+                    <label asp-for="EsPublico" class="form-check-label">Grupo público (cualquiera puede ver y unirse)</label>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus me-2"></i>Crear Grupo
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary btn-lg ms-2">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .comunidad-navbar {
+        background: rgba(35, 40, 48, 0.95) !important;
+        backdrop-filter: blur(10px);
+        border-bottom: 2px solid var(--primary);
+        padding: 0.8rem 0;
+        margin-top: -1rem;
+    }
+
+    .comunidad-navbar .nav-link {
+        color: rgba(255, 255, 255, 0.8) !important;
+        font-weight: 600;
+        padding: 0.7rem 1.5rem !important;
+        border-radius: 25px;
+        margin: 0 0.3rem;
+        transition: all 0.3s ease;
+    }
+
+    .comunidad-navbar .nav-link:hover,
+    .comunidad-navbar .nav-link.active {
+        color: white !important;
+        background: var(--primary-gradient);
+        transform: translateY(-2px);
+    }
+
+    .stats-card {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(108, 92, 231, 0.3);
+    }
+</style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

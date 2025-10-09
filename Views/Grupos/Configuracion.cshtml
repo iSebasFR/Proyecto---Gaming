@@ -1,0 +1,433 @@
+@model Proyecto_Gaming.ViewModels.ConfiguracionGrupoViewModel
+@{
+    ViewData["Title"] = "Configuración del Grupo";
+}
+
+<!-- Navbar Secundaria para Comunidad -->
+<nav class="navbar navbar-expand-lg comunidad-navbar mb-4">
+    <div class="container">
+        <div class="navbar-nav">
+            <a class="nav-link" asp-controller="Comunidad" asp-action="Index">
+                <i class="fas fa-home me-2"></i>Feed
+            </a>
+            <a class="nav-link" asp-controller="Amigos" asp-action="Index">
+                <i class="fas fa-user-friends me-2"></i>Amigos
+            </a>
+            <a class="nav-link active" asp-controller="Grupos" asp-action="Index">
+                <i class="fas fa-users me-2"></i>Grupos
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="row">
+    <!-- Sidebar de Configuración -->
+    <div class="col-md-3">
+        <div class="sidebar-configuracion">
+            <!-- Info del Grupo -->
+            <div class="text-center mb-4 p-3" style="border-bottom: 1px solid rgba(108, 92, 231, 0.3);">
+                @if (!string.IsNullOrEmpty(Model.FotoGrupoActual))
+                {
+                    <img src="@Model.FotoGrupoActual" class="rounded-circle mb-3" width="80" height="80" alt="Foto Grupo">
+                }
+                else
+                {
+                    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold mx-auto mb-3" style="width: 80px; height: 80px;">
+                        @{
+                            var inicial = !string.IsNullOrEmpty(Model.Nombre) ? Model.Nombre[0].ToString().ToUpper() : "G";
+                        }
+                        @inicial
+                    </div>
+                }
+                <h5 class="mb-1 text-white">@Model.Nombre</h5> <!-- Cambiado a text-white -->
+                <small class="text-white">Configuración</small> <!-- Cambiado a text-white -->
+            </div>
+
+            <!-- Navegación -->
+            <div class="config-nav">
+                <a class="config-nav-link @(ViewBag.SeccionActiva == "configuracion" ? "active" : "")" 
+                   href="?seccion=configuracion">
+                    <i class="fas fa-cog me-2"></i>Configuración
+                </a>
+                <a class="config-nav-link @(ViewBag.SeccionActiva == "miembros" ? "active" : "")" 
+                   href="?seccion=miembros">
+                    <i class="fas fa-users me-2"></i>Miembros
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div class="col-md-9">
+        <!-- Sección Configuración -->
+        @if (ViewBag.SeccionActiva != "miembros")
+        {
+            <div class="stats-card">
+                <h3 class="mb-4 text-white">Configuración del Grupo</h3> <!-- Cambiado a text-white -->
+                
+                <!-- Mostrar mensajes de error -->
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @if (TempData["Ok"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>@TempData["Ok"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                
+                <form asp-action="ActualizarConfiguracion" method="post" enctype="multipart/form-data">
+                    <input type="hidden" asp-for="GrupoId" />
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Nombre" class="form-label text-white">Nombre del Grupo *</label> <!-- Cambiado a text-white -->
+                                <input asp-for="Nombre" class="form-control">
+                                <span asp-validation-for="Nombre" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Categoria" class="form-label text-white">Categoría *</label> <!-- Cambiado a text-white -->
+                                <select asp-for="Categoria" class="form-select">
+                                    <option value="">Seleccionar categoría</option>
+                                    <option value="RPG">RPG</option>
+                                    <option value="Aventura">Aventura</option>
+                                    <option value="Acción">Acción</option>
+                                    <option value="Estrategia">Estrategia</option>
+                                    <option value="Deportes">Deportes</option>
+                                    <option value="Cooperativo">Cooperativo</option>
+                                    <option value="Competitivo">Competitivo</option>
+                                    <option value="Casual">Casual</option>
+                                </select>
+                                <span asp-validation-for="Categoria" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Descripcion" class="form-label text-white">Descripción</label> <!-- Cambiado a text-white -->
+                        <textarea asp-for="Descripcion" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Descripcion" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="FotoGrupo" class="form-label text-white">Foto del Grupo</label> <!-- Cambiado a text-white -->
+                                <input asp-for="FotoGrupo" type="file" class="form-control" accept="image/*">
+                                @if (!string.IsNullOrEmpty(Model.FotoGrupoActual))
+                                {
+                                    <small class="text-white">Foto actual: <img src="@Model.FotoGrupoActual" width="30" height="30" class="rounded-circle ms-2"></small> <!-- Cambiado a text-white -->
+                                }
+                                <small class="text-white">Dejar vacío para mantener la foto actual</small> <!-- Cambiado a text-white -->
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="BannerGrupo" class="form-label text-white">Banner del Grupo</label> <!-- Cambiado a text-white -->
+                                <input asp-for="BannerGrupo" type="file" class="form-control" accept="image/*">
+                                @if (!string.IsNullOrEmpty(Model.BannerGrupoActual))
+                                {
+                                    <small class="text-white">Banner actual disponible</small> <!-- Cambiado a text-white -->
+                                }
+                                <small class="text-white">Dejar vacío para mantener el banner actual</small> <!-- Cambiado a text-white -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input asp-for="EsPublico" class="form-check-input">
+                        <label asp-for="EsPublico" class="form-check-label text-white">Grupo público (cualquiera puede ver y unirse)</label> <!-- Cambiado a text-white -->
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>Guardar Cambios
+                        </button>
+                        <a asp-action="Detalle" asp-route-id="@Model.GrupoId" class="btn btn-secondary btn-lg ms-2">
+                            <i class="fas fa-arrow-left me-2"></i>Volver al Grupo
+                        </a>
+                    </div>
+                </form>
+
+                <!-- Botón para eliminar grupo -->
+                <div class="mt-5 pt-4 border-top">
+                    <h5 class="text-danger mb-3">Zona de peligro</h5>
+                    <p class="text-white mb-3">Esta acción no se puede deshacer. Se eliminará el grupo y todos sus datos permanentemente.</p> <!-- Cambiado a text-white -->
+                    <button class="btn btn-danger" onclick="eliminarGrupo(@Model.GrupoId, '@Model.Nombre')">
+                        <i class="fas fa-trash me-2"></i>Eliminar Grupo
+                    </button>
+                </div>
+            </div>
+        }
+
+        <!-- Sección Miembros -->
+        @if (ViewBag.SeccionActiva == "miembros")
+        {
+            <div class="stats-card">
+                <h3 class="mb-4 text-white">Gestión de Miembros</h3> <!-- Cambiado a text-white -->
+                
+                @if (!Model.Miembros.Any())
+                {
+                    <div class="text-center py-4">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <h5 class="text-white">No hay miembros en el grupo</h5> <!-- Cambiado a text-white -->
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-dark">
+                            <thead>
+                                <tr>
+                                    <th class="text-white">Usuario</th> <!-- Cambiado a text-white -->
+                                    <th class="text-white">Rol</th> <!-- Cambiado a text-white -->
+                                    <th class="text-white">Fecha de Unión</th> <!-- Cambiado a text-white -->
+                                    <th class="text-white">Acciones</th> <!-- Cambiado a text-white -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var miembro in Model.Miembros)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                @if (!string.IsNullOrEmpty(miembro.Usuario.FotoPerfil))
+                                                {
+                                                    <img src="@miembro.Usuario.FotoPerfil" class="rounded-circle me-2" width="40" height="40" alt="Foto">
+                                                }
+                                                else
+                                                {
+                                                    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold me-2" style="width: 40px; height: 40px;">
+                                                        @{
+                                                            var inicial = !string.IsNullOrEmpty(miembro.Usuario.UserName) ? miembro.Usuario.UserName[0].ToString().ToUpper() : "U";
+                                                        }
+                                                        @inicial
+                                                    </div>
+                                                }
+                                                <div>
+                                                    <strong class="text-white">@miembro.Usuario.DisplayName</strong> <!-- Cambiado a text-white -->
+                                                    <br>
+                                                    <small class="text-white">@@@miembro.Usuario.UserName</small> <!-- Cambiado a text-white -->
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge @(miembro.Rol == "Administrador" ? "bg-warning" : "bg-secondary")">
+                                                @miembro.Rol
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small class="text-white">@miembro.FechaUnion.ToString("dd/MM/yyyy")</small> <!-- Cambiado a text-white -->
+                                        </td>
+                                        <td>
+                                            @if (miembro.Rol != "Administrador")
+                                            {
+                                                <button class="btn btn-danger btn-sm" onclick="expulsarMiembro('@miembro.UsuarioId', '@miembro.Usuario.DisplayName')">
+                                                    <i class="fas fa-user-times me-1"></i>Expulsar
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <small class="text-white">Administrador</small> <!-- Cambiado a text-white -->
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .comunidad-navbar {
+        background: rgba(35, 40, 48, 0.95) !important;
+        backdrop-filter: blur(10px);
+        border-bottom: 2px solid var(--primary);
+        padding: 0.8rem 0;
+        margin-top: -1rem;
+    }
+
+    .comunidad-navbar .nav-link {
+        color: rgba(255, 255, 255, 0.8) !important;
+        font-weight: 600;
+        padding: 0.7rem 1.5rem !important;
+        border-radius: 25px;
+        margin: 0 0.3rem;
+        transition: all 0.3s ease;
+    }
+
+    .comunidad-navbar .nav-link:hover,
+    .comunidad-navbar .nav-link.active {
+        color: white !important;
+        background: var(--primary-gradient);
+        transform: translateY(-2px);
+    }
+
+    .sidebar-configuracion {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        border: 1px solid rgba(108, 92, 231, 0.3);
+        overflow: hidden;
+    }
+
+    .config-nav {
+        padding: 1rem;
+    }
+
+    .config-nav-link {
+        display: block;
+        padding: 0.8rem 1rem;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .config-nav-link:hover,
+    .config-nav-link.active {
+        background: rgba(108, 92, 231, 0.2);
+        color: var(--primary);
+    }
+
+    .stats-card {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(108, 92, 231, 0.3);
+        color: white; /* Asegura que todo el texto sea blanco */
+    }
+
+    .table-dark {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+    }
+
+    .table-dark th {
+        border-bottom: 2px solid var(--primary);
+        background: rgba(108, 92, 231, 0.1);
+    }
+
+    /* Asegurar que todo el texto dentro de las tarjetas sea blanco */
+    .stats-card h1,
+    .stats-card h2,
+    .stats-card h3,
+    .stats-card h4,
+    .stats-card h5,
+    .stats-card h6,
+    .stats-card p,
+    .stats-card small,
+    .stats-card span:not(.badge) {
+        color: white !important;
+    }
+
+    .form-label {
+        color: white !important;
+    }
+
+    .form-check-label {
+        color: white !important;
+    }
+
+    .table-dark td {
+        color: white !important;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Inicializar select con la categoría actual
+        document.addEventListener('DOMContentLoaded', function() {
+            const categoriaActual = '@Model.Categoria';
+            if (categoriaActual) {
+                const select = document.querySelector('select[name="Categoria"]');
+                if (select) {
+                    select.value = categoriaActual;
+                }
+            }
+
+            // Inicializar checkbox con el valor actual
+            const esPublicoActual = @Json.Serialize(Model.EsPublico);
+            const esPublicoCheckbox = document.querySelector('input[name="EsPublico"]');
+            if (esPublicoCheckbox) {
+                esPublicoCheckbox.checked = esPublicoActual;
+            }
+
+            // Auto-ocultar alertas después de 5 segundos
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+
+        async function expulsarMiembro(usuarioId, nombreUsuario) {
+            if (confirm(`¿Estás seguro de que quieres expulsar a ${nombreUsuario} del grupo?`)) {
+                try {
+                    const response = await fetch('/Grupos/ExpulsarMiembro', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            grupoId: @Model.GrupoId,
+                            usuarioId: usuarioId
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    alert(result.message);
+                    if (result.success) {
+                        location.reload();
+                    }
+                } catch (error) {
+                    alert('Error al expulsar miembro: ' + error.message);
+                }
+            }
+        }
+
+        // Función para eliminar grupo
+        async function eliminarGrupo(grupoId, nombreGrupo) {
+            if (confirm(`¿ESTÁS ABSOLUTAMENTE SEGURO de que quieres eliminar el grupo "${nombreGrupo}"?\n\nEsta acción NO se puede deshacer y se perderán todos los datos del grupo permanentemente.`)) {
+                try {
+                    const response = await fetch('/Grupos/EliminarGrupo', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ grupoId: grupoId })
+                    });
+                    
+                    const result = await response.json();
+                    alert(result.message);
+                    if (result.success) {
+                        window.location.href = '/Grupos';
+                    }
+                } catch (error) {
+                    alert('Error al eliminar grupo: ' + error.message);
+                }
+            }
+        }
+    </script>
+    
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

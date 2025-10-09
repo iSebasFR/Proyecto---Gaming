@@ -1,0 +1,806 @@
+@model Proyecto_Gaming.ViewModels.DetalleGrupoViewModel
+@{
+    ViewData["Title"] = Model.Grupo.Nombre;
+}
+
+<!-- Navbar Secundaria para Comunidad -->
+<nav class="navbar navbar-expand-lg comunidad-navbar mb-4">
+    <div class="container">
+        <div class="navbar-nav">
+            <a class="nav-link" asp-controller="Comunidad" asp-action="Index">
+                <i class="fas fa-home me-2"></i>Feed
+            </a>
+            <a class="nav-link" asp-controller="Amigos" asp-action="Index">
+                <i class="fas fa-user-friends me-2"></i>Amigos
+            </a>
+            <a class="nav-link active" asp-controller="Grupos" asp-action="Index">
+                <i class="fas fa-users me-2"></i>Grupos
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="row">
+    <!-- Sidebar con Mis Grupos -->
+    <div class="col-md-3">
+        <div class="sidebar-comunidad mb-4">
+            <h5 class="mb-3">Mis Grupos</h5>
+            
+            @if (!Model.MisGrupos.Any())
+            {
+                <div class="text-center py-3">
+                    <i class="fas fa-users fa-2x text-muted mb-2"></i>
+                    <p class="text-white small">No perteneces a ningún grupo</p> <!-- Cambiado a text-white -->
+                </div>
+            }
+            else
+            {
+                foreach (var grupo in Model.MisGrupos)
+                {
+                    <a asp-action="Detalle" asp-route-id="@grupo.Id" 
+                       class="sidebar-link @(grupo.Id == Model.Grupo.Id ? "active" : "")">
+                        <div class="d-flex align-items-center">
+                            @if (!string.IsNullOrEmpty(grupo.FotoGrupo))
+                            {
+                                <img src="@grupo.FotoGrupo" class="rounded-circle me-2" width="40" height="40" alt="Foto Grupo">
+                            }
+                            else
+                            {
+                                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold me-2" style="width: 40px; height: 40px;">
+                                    @{
+                                        var inicial = !string.IsNullOrEmpty(grupo.Nombre) ? grupo.Nombre[0].ToString().ToUpper() : "G";
+                                    }
+                                    @inicial
+                                </div>
+                            }
+                            <div>
+                                <strong class="d-block text-white">@grupo.Nombre</strong> <!-- Cambiado a text-white -->
+                                <small class="text-white">@grupo.Miembros?.Count miembros</small> <!-- Cambiado a text-white -->
+                            </div>
+                        </div>
+                    </a>
+                }
+            }
+            
+            <hr>
+            <a class="sidebar-link text-success" asp-action="Crear">
+                <i class="fas fa-plus me-2"></i>Crear Nuevo Grupo
+            </a>
+        </div>
+    </div>
+
+    <!-- Contenido Principal del Grupo -->
+    <div class="col-md-9">
+        <!-- Header del Grupo -->
+        <div class="stats-card mb-4">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    @if (!string.IsNullOrEmpty(Model.Grupo.FotoGrupo))
+                    {
+                        <img src="@Model.Grupo.FotoGrupo" class="rounded-circle" width="80" height="80" alt="Foto Grupo">
+                    }
+                    else
+                    {
+                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold" style="width: 80px; height: 80px;">
+                            @{
+                                var inicial = !string.IsNullOrEmpty(Model.Grupo.Nombre) ? Model.Grupo.Nombre[0].ToString().ToUpper() : "G";
+                            }
+                            @inicial
+                        </div>
+                    }
+                </div>
+                <div class="col">
+                    <h2 class="mb-1 text-white">@Model.Grupo.Nombre</h2> <!-- Cambiado a text-white -->
+                    <p class="text-white mb-2">@Model.Grupo.Descripcion</p> <!-- Cambiado a text-white -->
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge bg-primary">@Model.Grupo.Categoria</span>
+                        <small class="text-white"> <!-- Cambiado a text-white -->
+                            <i class="fas fa-users me-1"></i>@Model.Miembros.Count miembros
+                        </small>
+                        <small class="text-white"> <!-- Cambiado a text-white -->
+                            <i class="fas fa-calendar me-1"></i>Creado el @Model.Grupo.FechaCreacion.ToString("dd/MM/yyyy")
+                        </small>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    @if (!Model.EsMiembro)
+                    {
+                        <button class="btn btn-primary" onclick="unirseGrupo(@Model.Grupo.Id)">
+                            <i class="fas fa-plus me-1"></i>Unirse al Grupo
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-success" disabled>
+                            <i class="fas fa-check me-1"></i>Ya eres miembro
+                        </button>
+
+                        <!-- NUEVO: Botón para salir del grupo -->
+                        @if (!Model.EsAdministrador)
+                        {
+                            <button class="btn btn-outline-danger" onclick="salirDelGrupo(@Model.Grupo.Id, '@Model.Grupo.Nombre')">
+                                <i class="fas fa-sign-out-alt me-1"></i>Salir del Grupo
+                            </button>
+                        }
+                    }
+                    @if (Model.EsAdministrador)
+                    {
+                        <a asp-action="Configuracion" asp-route-id="@Model.Grupo.Id" class="btn btn-outline-warning">
+                            <i class="fas fa-cog me-1"></i>Configuración
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Navegación del Grupo -->
+        <div class="stats-card mb-4">
+            <div class="grupo-navigation">
+                <button class="nav-btn @(ViewBag.SeccionActiva == "miembros" ? "active" : "")" onclick="mostrarSeccion('miembros')">
+                    <i class="fas fa-users me-2"></i>Miembros
+                </button>
+                <button class="nav-btn @(ViewBag.SeccionActiva == "multimedia" ? "active" : "")" onclick="mostrarSeccion('multimedia')">
+                    <i class="fas fa-images me-2"></i>Multimedia
+                </button>
+            </div>
+        </div>
+
+        <!-- Contenido de Miembros -->
+        <div id="seccion-miembros" class="seccion-contenido @(ViewBag.SeccionActiva != "multimedia" ? "d-block" : "d-none")">
+            <div class="stats-card">
+                <h4 class="mb-4 text-white">Miembros del Grupo (@Model.Miembros.Count)</h4> <!-- Cambiado a text-white -->
+                
+                @if (!Model.Miembros.Any())
+                {
+                    <div class="text-center py-4">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <h5 class="text-white">No hay miembros en el grupo</h5> <!-- Cambiado a text-white -->
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        @foreach (var miembro in Model.Miembros)
+                        {
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="miembro-card p-3">
+                                    <div class="d-flex align-items-center mb-3">
+                                        @if (!string.IsNullOrEmpty(miembro.Usuario.FotoPerfil))
+                                        {
+                                            <img src="@miembro.Usuario.FotoPerfil" class="rounded-circle me-3" width="60" height="60" alt="Foto">
+                                        }
+                                        else
+                                        {
+                                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold me-3" style="width: 60px; height: 60px;">
+                                                @{
+                                                    var inicial = !string.IsNullOrEmpty(miembro.Usuario.UserName) ? miembro.Usuario.UserName[0].ToString().ToUpper() : "U";
+                                                }
+                                                @inicial
+                                            </div>
+                                        }
+                                        <div>
+                                            <h6 class="mb-1 text-white">@miembro.Usuario.DisplayName</h6> <!-- Cambiado a text-white -->
+                                            <small class="text-white">@@@miembro.Usuario.UserName</small> <!-- Cambiado a text-white -->
+                                            <br>
+                                            <span class="badge bg-secondary">@miembro.Rol</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="btn-group w-100">
+                                        <a asp-controller="Perfil" asp-action="Index" asp-route-userId="@miembro.Usuario.Id" 
+                                           class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye me-1"></i>Ver Perfil
+                                        </a>
+                                        @if (miembro.Usuario.Id != ViewBag.UsuarioActualId)
+                                        {
+                                            <button class="btn btn-outline-success btn-sm" onclick="agregarAmigo('@miembro.Usuario.Id')">
+                                                <i class="fas fa-user-plus me-1"></i>Añadir Amigo
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Reemplazar la sección Multimedia existente con esta versión mejorada -->
+        <div id="seccion-multimedia" class="seccion-contenido @(ViewBag.SeccionActiva == "multimedia" ? "d-block" : "d-none")">
+            <div class="stats-card">
+                <h4 class="mb-4 text-white">Multimedia del Grupo</h4> <!-- Cambiado a text-white -->
+                
+                @if (Model.EsMiembro)
+                {
+                    <!-- Formulario para subir multimedia -->
+                    <div class="mb-4 p-4" style="background: rgba(255,255,255,0.05); border-radius: var(--border-radius);">
+                        <h5 class="mb-3 text-white"><i class="fas fa-upload me-2"></i>Subir Multimedia</h5> <!-- Cambiado a text-white -->
+                        <form id="formMultimedia" enctype="multipart/form-data">
+                            <input type="hidden" name="GrupoId" value="@Model.Grupo.Id" />
+                            
+                            <div class="mb-3">
+                                <label class="form-label text-white">Seleccionar archivo (imagen)</label> <!-- Cambiado a text-white -->
+                                <input type="file" name="Archivo" class="form-control" accept="image/*" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label text-white">Descripción (opcional)</label> <!-- Cambiado a text-white -->
+                                <textarea name="Descripcion" class="form-control" rows="2" placeholder="Añade una descripción..."></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload me-1"></i>Subir Multimedia
+                            </button>
+                        </form>
+                    </div>
+                }
+
+                <!-- Galería de Multimedia -->
+                <div id="galeria-multimedia">
+                    @if (!Model.Multimedia.Any())
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-images fa-3x text-muted mb-3"></i>
+                            <h5 class="text-white">No hay multimedia en el grupo</h5> <!-- Cambiado a text-white -->
+                            @if (Model.EsMiembro)
+                            {
+                                <p class="text-white">Sé el primero en compartir una imagen</p> <!-- Cambiado a text-white -->
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row" id="contenedor-multimedia">
+                            @foreach (var item in Model.Multimedia)
+                            {
+                                <div class="col-md-6 col-lg-4 mb-4" id="multimedia-@item.Id">
+                                    <div class="multimedia-card">
+                                        <!-- Imagen -->
+                                        <div class="multimedia-imagen">
+                                            <img src="@item.UrlArchivo" class="img-fluid" alt="@item.Descripcion" 
+                                                style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px 8px 0 0;">
+                                        </div>
+                                        
+                                        <!-- Información -->
+                                        <div class="multimedia-info p-3">
+                                            <div class="d-flex align-items-center mb-2">
+                                                @if (!string.IsNullOrEmpty(item.Usuario.FotoPerfil))
+                                                {
+                                                    <img src="@item.Usuario.FotoPerfil" class="rounded-circle me-2" width="30" height="30" alt="Foto">
+                                                }
+                                                else
+                                                {
+                                                    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold me-2" style="width: 30px; height: 30px;">
+                                                        @{
+                                                            var inicial = !string.IsNullOrEmpty(item.Usuario.UserName) ? item.Usuario.UserName[0].ToString().ToUpper() : "U";
+                                                        }
+                                                        @inicial
+                                                    </div>
+                                                }
+                                                <small class="text-white">@item.Usuario.DisplayName</small> <!-- Cambiado a text-white -->
+                                                <small class="text-white ms-auto">@item.FechaSubida.ToString("dd/MM/yyyy")</small> <!-- Cambiado a text-white -->
+                                            </div>
+                                            
+                                            @if (!string.IsNullOrEmpty(item.Descripcion))
+                                            {
+                                                <p class="multimedia-descripcion mb-2 text-white">@item.Descripcion</p> <!-- Cambiado a text-white -->
+                                            }
+                                            
+                                            <!-- Reacciones -->
+                                            <div class="reacciones mb-2">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div class="reacciones-contadores">
+                                                        @if (item.Likes > 0)
+                                                        {
+                                                            <span class="badge bg-primary me-1">👍 @item.Likes</span>
+                                                        }
+                                                        @if (item.Love > 0)
+                                                        {
+                                                            <span class="badge bg-danger me-1">❤️ @item.Love</span>
+                                                        }
+                                                        @if (item.Wow > 0)
+                                                        {
+                                                            <span class="badge bg-warning me-1">😮 @item.Wow</span>
+                                                        }
+                                                        @if (item.Sad > 0)
+                                                        {
+                                                            <span class="badge bg-info me-1">😢 @item.Sad</span>
+                                                        }
+                                                        @if (item.Angry > 0)
+                                                        {
+                                                            <span class="badge bg-dark me-1">😠 @item.Angry</span>
+                                                        }
+                                                    </div>
+                                                    <small class="text-white">@item.Comentarios?.Count comentarios</small> <!-- Cambiado a text-white -->
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Botones de interacción -->
+                                            <div class="botones-interaccion">
+                                                <div class="btn-group w-100" role="group">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary reaccion-btn" 
+                                                            data-multimedia-id="@item.Id" data-reaccion="like">
+                                                        <i class="fas fa-thumbs-up"></i> Me gusta
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" 
+                                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                                        <i class="fas fa-smile"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu">
+                                                        <li><button class="dropdown-item reaccion-btn" data-multimedia-id="@item.Id" data-reaccion="like">👍 Me gusta</button></li>
+                                                        <li><button class="dropdown-item reaccion-btn" data-multimedia-id="@item.Id" data-reaccion="love">❤️ Me encanta</button></li>
+                                                        <li><button class="dropdown-item reaccion-btn" data-multimedia-id="@item.Id" data-reaccion="wow">😮 Wow</button></li>
+                                                        <li><button class="dropdown-item reaccion-btn" data-multimedia-id="@item.Id" data-reaccion="sad">😢 Triste</button></li>
+                                                        <li><button class="dropdown-item reaccion-btn" data-multimedia-id="@item.Id" data-reaccion="angry">😠 Enfadado</button></li>
+                                                    </ul>
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary comentario-btn" 
+                                                            data-multimedia-id="@item.Id">
+                                                        <i class="fas fa-comment"></i> Comentar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Sección de comentarios (inicialmente oculta) -->
+                                            <div class="comentarios-section mt-3 d-none" id="comentarios-@item.Id">
+                                                <div class="comentarios-lista mb-2" id="lista-comentarios-@item.Id">
+                                                    @if (item.Comentarios?.Any() == true)
+                                                    {
+                                                        foreach (var comentario in item.Comentarios.OrderBy(c => c.FechaComentario))
+                                                        {
+                                                            <div class="comentario-item mb-2 p-2" style="background: rgba(255,255,255,0.05); border-radius: 5px;">
+                                                                <div class="d-flex align-items-center mb-1">
+                                                                    @if (!string.IsNullOrEmpty(comentario.Usuario.FotoPerfil))
+                                                                    {
+                                                                        <img src="@comentario.Usuario.FotoPerfil" class="rounded-circle me-2" width="20" height="20" alt="Foto">
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold me-2" style="width: 20px; height: 20px; font-size: 0.7rem;">
+                                                                            @{
+                                                                                var inicial = !string.IsNullOrEmpty(comentario.Usuario.UserName) ? comentario.Usuario.UserName[0].ToString().ToUpper() : "U";
+                                                                            }
+                                                                            @inicial
+                                                                        </div>
+                                                                    }
+                                                                    <strong class="small text-white">@comentario.Usuario.DisplayName</strong> <!-- Cambiado a text-white -->
+                                                                    <small class="text-white ms-2">@comentario.FechaComentario.ToString("dd/MM/yyyy HH:mm")</small> <!-- Cambiado a text-white -->
+                                                                </div>
+                                                                <p class="small mb-0 text-white">@comentario.Contenido</p> <!-- Cambiado a text-white -->
+                                                            </div>
+                                                        }
+                                                    }
+                                                </div>
+                                                
+                                                @if (Model.EsMiembro)
+                                                {
+                                                    <div class="nuevo-comentario">
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control form-control-sm" 
+                                                                placeholder="Escribe un comentario..." id="input-comentario-@item.Id">
+                                                            <button class="btn btn-primary btn-sm" type="button" 
+                                                                    onclick="agregarComentario(@item.Id)">
+                                                                <i class="fas fa-paper-plane"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <style>
+                    .multimedia-card {
+                        background: var(--card-bg);
+                        border-radius: 8px;
+                        border: 1px solid rgba(108, 92, 231, 0.2);
+                        transition: all 0.3s ease;
+                    }
+
+                    .multimedia-card:hover {
+                        transform: translateY(-2px);
+                        border-color: var(--primary);
+                    }
+
+                    .multimedia-descripcion {
+                        font-size: 0.9rem;
+                        color: white; /* Cambiado a blanco */
+                    }
+
+                    .reacciones-contadores .badge {
+                        font-size: 0.7rem;
+                    }
+
+                    .botones-interaccion .btn-group {
+                        border-radius: 6px;
+                    }
+
+                    .comentario-item {
+                        font-size: 0.85rem;
+                    }
+
+                    .dropdown-menu {
+                        background: rgba(35, 40, 48, 0.95);
+                        border: 1px solid var(--primary);
+                    }
+
+                    .dropdown-item {
+                        color: rgba(255, 255, 255, 0.8);
+                    }
+
+                    .dropdown-item:hover {
+                        background: rgba(108, 92, 231, 0.2);
+                        color: var(--primary);
+                    }
+                </style>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .comunidad-navbar {
+        background: rgba(35, 40, 48, 0.95) !important;
+        backdrop-filter: blur(10px);
+        border-bottom: 2px solid var(--primary);
+        padding: 0.8rem 0;
+        margin-top: -1rem;
+    }
+
+    .comunidad-navbar .nav-link {
+        color: rgba(255, 255, 255, 0.8) !important;
+        font-weight: 600;
+        padding: 0.7rem 1.5rem !important;
+        border-radius: 25px;
+        margin: 0 0.3rem;
+        transition: all 0.3s ease;
+    }
+
+    .comunidad-navbar .nav-link:hover,
+    .comunidad-navbar .nav-link.active {
+        color: white !important;
+        background: var(--primary-gradient);
+        transform: translateY(-2px);
+    }
+
+    .sidebar-comunidad {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        border: 1px solid rgba(108, 92, 231, 0.2);
+    }
+
+    .sidebar-link {
+        display: block;
+        padding: 1rem;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        border-radius: 8px;
+        margin-bottom: 0.8rem;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+    }
+
+    .sidebar-link:hover,
+    .sidebar-link.active {
+        background: rgba(108, 92, 231, 0.2);
+        color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .stats-card {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(108, 92, 231, 0.3);
+        color: white; /* Asegura que todo el texto sea blanco */
+    }
+
+    .grupo-navigation {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .nav-btn {
+        background: transparent;
+        border: 2px solid rgba(108, 92, 231, 0.3);
+        color: rgba(255, 255, 255, 0.8);
+        padding: 0.8rem 1.5rem;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        transition: all 0.3s ease;
+        flex: 1;
+    }
+
+    .nav-btn:hover,
+    .nav-btn.active {
+        background: var(--primary-gradient);
+        color: white;
+        border-color: var(--primary);
+        transform: translateY(-2px);
+    }
+
+    .miembro-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: var(--border-radius);
+        border: 1px solid rgba(108, 92, 231, 0.2);
+        transition: all 0.3s ease;
+        color: white; /* Asegura que el texto sea blanco */
+    }
+
+    .miembro-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--primary);
+    }
+
+    .publicacion-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        border: 1px solid rgba(108, 92, 231, 0.2);
+        color: white; /* Asegura que el texto sea blanco */
+    }
+
+    .seccion-contenido {
+        transition: all 0.3s ease;
+    }
+
+    /* Asegurar que todo el texto dentro de las tarjetas sea blanco */
+    .stats-card h1,
+    .stats-card h2,
+    .stats-card h3,
+    .stats-card h4,
+    .stats-card h5,
+    .stats-card h6,
+    .stats-card p,
+    .stats-card small,
+    .stats-card span:not(.badge) {
+        color: white !important;
+    }
+
+    .miembro-card h6,
+    .miembro-card small,
+    .miembro-card p {
+        color: white !important;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Mostrar/ocultar secciones
+        function mostrarSeccion(seccion) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.seccion-contenido').forEach(sec => {
+                sec.classList.add('d-none');
+                sec.classList.remove('d-block');
+            });
+            
+            // Mostrar la sección seleccionada
+            document.getElementById('seccion-' + seccion).classList.remove('d-none');
+            document.getElementById('seccion-' + seccion).classList.add('d-block');
+            
+            // Actualizar botones activos
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Actualizar URL sin recargar
+            const url = new URL(window.location);
+            url.searchParams.set('seccion', seccion);
+            window.history.replaceState({}, '', url);
+        }
+
+        // Cargar sección desde URL
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const seccion = urlParams.get('seccion');
+            if (seccion) {
+                mostrarSeccion(seccion);
+            }
+        });
+
+        async function publicarEnGrupo() {
+            const contenido = document.getElementById('nuevaPublicacion').value;
+            if (!contenido.trim()) {
+                alert('Por favor escribe algo para publicar');
+                return;
+            }
+
+            try {
+                const response = await fetch('/Grupos/Publicar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        grupoId: @Model.Grupo.Id,
+                        contenido: contenido
+                    })
+                });
+                
+                const result = await response.json();
+                alert(result.message);
+                if (result.success) {
+                    location.reload();
+                }
+            } catch (error) {
+                alert('Error al publicar');
+            }
+        }
+
+        async function unirseGrupo(grupoId) {
+            try {
+                const response = await fetch('/Grupos/Unirse', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ grupoId: grupoId })
+                });
+                
+                const result = await response.json();
+                alert(result.message);
+                if (result.success) {
+                    location.reload();
+                }
+            } catch (error) {
+                alert('Error al unirse al grupo: ' + error.message);
+            }
+        }
+
+        async function agregarAmigo(usuarioId) {
+            try {
+                const response = await fetch('/Amigos/EnviarSolicitud', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ amigoId: usuarioId })
+                });
+                
+                const result = await response.json();
+                alert(result.message);
+            } catch (error) {
+                alert('Error al enviar solicitud: ' + error.message);
+            }
+        }
+
+        // Agregar esta función en el section Scripts de Detalle.cshtml
+        async function salirDelGrupo(grupoId, nombreGrupo) {
+            if (confirm(`¿Estás seguro de que quieres salir del grupo "${nombreGrupo}"?`)) {
+                try {
+                    const response = await fetch('/Grupos/SalirDelGrupo', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ grupoId: grupoId })
+                    });
+                    
+                    const result = await response.json();
+                    alert(result.message);
+                    if (result.success) {
+                        window.location.href = '/Grupos';
+                    }
+                } catch (error) {
+                    alert('Error al salir del grupo: ' + error.message);
+                }
+            }
+        }
+
+        // Subir multimedia
+        document.getElementById('formMultimedia').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('/Grupos/SubirMultimedia', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    alert('Multimedia subida correctamente');
+                    this.reset();
+                    location.reload();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error al subir multimedia: ' + error.message);
+            }
+        });
+
+        // Reacciones
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('reaccion-btn')) {
+                const multimediaId = e.target.getAttribute('data-multimedia-id');
+                const reaccion = e.target.getAttribute('data-reaccion');
+                reaccionarMultimedia(multimediaId, reaccion);
+            }
+        });
+
+        async function reaccionarMultimedia(multimediaId, tipoReaccion) {
+            try {
+                const response = await fetch('/Grupos/ReaccionarMultimedia', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        multimediaId: parseInt(multimediaId),
+                        tipoReaccion: tipoReaccion
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    // Actualizar contadores visualmente
+                    const contenedor = document.querySelector(`#multimedia-${multimediaId} .reacciones-contadores`);
+                    if (contenedor) {
+                        // En una implementación real, actualizarías los contadores específicos
+                        // Por simplicidad, recargamos la sección
+                        location.reload();
+                    }
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert('Error al reaccionar: ' + error.message);
+            }
+        }
+
+        // Mostrar/ocultar comentarios
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('comentario-btn')) {
+                const multimediaId = e.target.getAttribute('data-multimedia-id');
+                const seccionComentarios = document.getElementById(`comentarios-${multimediaId}`);
+                seccionComentarios.classList.toggle('d-none');
+            }
+        });
+
+        // Agregar comentario
+        async function agregarComentario(multimediaId) {
+            const input = document.getElementById(`input-comentario-${multimediaId}`);
+            const contenido = input.value.trim();
+            
+            if (!contenido) {
+                alert('Por favor escribe un comentario');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/Grupos/AgregarComentarioMultimedia', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        multimediaId: multimediaId,
+                        contenido: contenido
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    input.value = '';
+                    // En una implementación real, agregarías el comentario a la lista
+                    // Por simplicidad, recargamos
+                    location.reload();
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert('Error al agregar comentario: ' + error.message);
+            }
+        }
+    </script>
+}
