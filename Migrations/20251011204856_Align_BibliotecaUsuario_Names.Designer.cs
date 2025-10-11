@@ -12,8 +12,8 @@ using Proyecto_Gaming.Data;
 namespace Proyecto_Gaming.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251009004746_AddReaccionesMultimedia")]
-    partial class AddReaccionesMultimedia
+    [Migration("20251011204856_Align_BibliotecaUsuario_Names")]
+    partial class Align_BibliotecaUsuario_Names
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -197,26 +197,20 @@ namespace Proyecto_Gaming.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("game_name");
 
+                    b.Property<int>("RawgGameId")
+                        .HasColumnType("integer")
+                        .HasColumnName("rawg_game_id");
+
+                    b.Property<string>("Resena")
+                        .HasColumnType("text");
+
                     b.Property<string>("UsuarioId")
                         .IsRequired()
                         .HasMaxLength(450)
                         .HasColumnType("character varying(450)")
                         .HasColumnName("id_usuario");
 
-                    b.Property<int>("RawgGameId")
-                        .HasColumnType("integer")
-                        .HasColumnName("rawg_game_id");
-
-                    b.Property<string>("Resena")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioId")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UsuarioId");
 
                     b.HasIndex("UsuarioId", "RawgGameId")
                         .IsUnique();
@@ -790,7 +784,9 @@ namespace Proyecto_Gaming.Migrations
                 {
                     b.HasOne("Proyecto_Gaming.Models.Usuario", null)
                         .WithMany("BibliotecaUsuarios")
-                        .HasForeignKey("UsuarioId");
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Proyecto_Gaming.Models.Comunidad.Amigo", b =>

@@ -12,7 +12,7 @@ namespace Proyecto_Gaming.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_BibliotecaUsuario_AspNetUsers_id_usuario",
+                name: "FK_BibliotecaUsuario_AspNetUsers_UsuarioId",
                 table: "BibliotecaUsuario");
 
             migrationBuilder.DropForeignKey(
@@ -136,7 +136,7 @@ namespace Proyecto_Gaming.Migrations
                 column: "id_usuario");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_BibliotecaUsuario_AspNetUsers_id_usuario",
+                name: "FK_BibliotecaUsuario_AspNetUsers_usuarioId",
                 table: "BibliotecaUsuario",
                 column: "id_usuario",
                 principalTable: "AspNetUsers",

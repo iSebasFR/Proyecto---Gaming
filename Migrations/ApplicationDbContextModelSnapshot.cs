@@ -194,28 +194,22 @@ namespace Proyecto_Gaming.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("game_name");
 
-                    b.Property<string>("IdUsuario")
-                        .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("character varying(450)")
-                        .HasColumnName("id_usuario");
-
                     b.Property<int>("RawgGameId")
                         .HasColumnType("integer")
                         .HasColumnName("rawg_game_id");
 
                     b.Property<string>("Resena")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("UsuarioId")
-                        .HasColumnType("text");
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)")
+                        .HasColumnName("id_usuario");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UsuarioId");
-
-                    b.HasIndex("IdUsuario", "RawgGameId")
+                    b.HasIndex("UsuarioId", "RawgGameId")
                         .IsUnique();
 
                     b.ToTable("BibliotecaUsuario", (string)null);
@@ -787,7 +781,9 @@ namespace Proyecto_Gaming.Migrations
                 {
                     b.HasOne("Proyecto_Gaming.Models.Usuario", null)
                         .WithMany("BibliotecaUsuarios")
-                        .HasForeignKey("UsuarioId");
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Proyecto_Gaming.Models.Comunidad.Amigo", b =>

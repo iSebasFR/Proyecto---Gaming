@@ -120,10 +120,10 @@ namespace Proyecto_Gaming.Controllers
                 {
                     command.CommandText = @"
                         INSERT INTO ""BibliotecaUsuario"" 
-                        (""IdUsuario"", ""RawgGameId"", ""Estado"", ""GameName"", ""GameImage"", ""Resena"", ""Calificacion"")
-                        VALUES (@idUsuario, @rawgId, 'Pendiente', @gameName, @gameImage, '', 0)";
+                        (""UsuarioId"", ""RawgGameId"", ""Estado"", ""GameName"", ""GameImage"", ""Resena"", ""Calificacion"")
+                        VALUES (@UsuarioId, @rawgId, 'Pendiente', @gameName, @gameImage, '', 0)";
                     
-                    command.Parameters.Add(new Npgsql.NpgsqlParameter("idUsuario", usuario.Id));
+                    command.Parameters.Add(new Npgsql.NpgsqlParameter("UsuarioId", usuario.Id));
                     command.Parameters.Add(new Npgsql.NpgsqlParameter("rawgId", id));
                     command.Parameters.Add(new Npgsql.NpgsqlParameter("gameName", gameDetails.Name));
                     command.Parameters.Add(new Npgsql.NpgsqlParameter("gameImage", gameDetails.BackgroundImage ?? "https://via.placeholder.com/400x200?text=Imagen+No+Disponible"));
@@ -166,7 +166,7 @@ namespace Proyecto_Gaming.Controllers
             
             using (var command = connection.CreateCommand())
             {
-                command.CommandText = @"SELECT * FROM ""BibliotecaUsuario"" WHERE ""IdUsuario"" = @userId AND ""Estado"" = 'Pendiente'";
+                command.CommandText = @"SELECT * FROM ""BibliotecaUsuario"" WHERE ""UsuarioId"" = @userId AND ""Estado"" = 'Pendiente'";
                 
                 var parameter = command.CreateParameter();
                 parameter.ParameterName = "userId";
@@ -179,16 +179,16 @@ namespace Proyecto_Gaming.Controllers
                     {
                         juegosPendientes.Add(new BibliotecaUsuario
                         {
-                            Id = reader.GetInt32(0),
-                            IdUsuario = reader.GetString(1),
-                            RawgGameId = reader.GetInt32(2),
-                            Estado = reader.GetString(3),
-                            GameName = reader.GetString(4),
-                            GameImage = reader.GetString(5),
-                            Resena = reader.GetString(6),
-                            Calificacion = reader.GetInt32(7),
-                            FechaCompletado = reader.IsDBNull(8) ? null : reader.GetDateTime(8),
-                            FechaResena = reader.IsDBNull(9) ? null : reader.GetDateTime(9)
+                            Id = reader.GetInt32(1),
+                            UsuarioId = reader.GetString(3),
+                            RawgGameId = reader.GetInt32(0),
+                            Estado = reader.GetString(2),
+                            GameName = reader.GetString(5),
+                            GameImage = reader.GetString(4),
+                            Resena = reader.GetString(9),
+                            Calificacion = reader.GetInt32(6),
+                            FechaCompletado = reader.IsDBNull(7) ? null : reader.GetDateTime(8),
+                            FechaResena = reader.IsDBNull(8) ? null : reader.GetDateTime(9)
                         });
                     }
                 }
@@ -238,7 +238,7 @@ namespace Proyecto_Gaming.Controllers
             
             using (var command = connection.CreateCommand())
             {
-                command.CommandText = @"UPDATE ""BibliotecaUsuario"" SET ""Estado"" = 'Jugando' WHERE ""IdUsuario"" = @userId AND ""RawgGameId"" = @gameId AND ""Estado"" = 'Pendiente'";
+                command.CommandText = @"UPDATE ""BibliotecaUsuario"" SET ""Estado"" = 'Jugando' WHERE ""UsuarioId"" = @userId AND ""RawgGameId"" = @gameId AND ""Estado"" = 'Pendiente'";
                 
                 command.Parameters.Add(new Npgsql.NpgsqlParameter("userId", usuario.Id));
                 command.Parameters.Add(new Npgsql.NpgsqlParameter("gameId", id));
@@ -283,7 +283,7 @@ namespace Proyecto_Gaming.Controllers
             
             using (var command = connection.CreateCommand())
             {
-                command.CommandText = @"SELECT * FROM ""BibliotecaUsuario"" WHERE ""IdUsuario"" = @userId AND ""Estado"" = 'Jugando'";
+                command.CommandText = @"SELECT * FROM ""BibliotecaUsuario"" WHERE ""UsuarioId"" = @userId AND ""Estado"" = 'Jugando'";
                 
                 var parameter = command.CreateParameter();
                 parameter.ParameterName = "userId";
@@ -297,7 +297,7 @@ namespace Proyecto_Gaming.Controllers
                         juegosJugando.Add(new BibliotecaUsuario
                         {
                             Id = reader.GetInt32(0),
-                            IdUsuario = reader.GetString(1),
+                            UsuarioId = reader.GetString(1),
                             RawgGameId = reader.GetInt32(2),
                             Estado = reader.GetString(3),
                             GameName = reader.GetString(4),
@@ -339,7 +339,7 @@ namespace Proyecto_Gaming.Controllers
             
             using (var command = connection.CreateCommand())
             {
-                command.CommandText = @"SELECT * FROM ""BibliotecaUsuario"" WHERE ""IdUsuario"" = @userId AND ""Estado"" = 'Completado'";
+                command.CommandText = @"SELECT * FROM ""BibliotecaUsuario"" WHERE ""UsuarioId"" = @userId AND ""Estado"" = 'Completado'";
                 
                 var parameter = command.CreateParameter();
                 parameter.ParameterName = "userId";
@@ -353,7 +353,7 @@ namespace Proyecto_Gaming.Controllers
                         juegosCompletados.Add(new BibliotecaUsuario
                         {
                             Id = reader.GetInt32(0),
-                            IdUsuario = reader.GetString(1),
+                            UsuarioId = reader.GetString(1),
                             RawgGameId = reader.GetInt32(2),
                             Estado = reader.GetString(3),
                             GameName = reader.GetString(4),
@@ -393,7 +393,7 @@ namespace Proyecto_Gaming.Controllers
             
             using (var command = connection.CreateCommand())
             {
-                command.CommandText = @"UPDATE ""BibliotecaUsuario"" SET ""Estado"" = 'Completado', ""FechaCompletado"" = @fecha WHERE ""IdUsuario"" = @userId AND ""RawgGameId"" = @gameId AND ""Estado"" = 'Jugando'";
+                command.CommandText = @"UPDATE ""BibliotecaUsuario"" SET ""Estado"" = 'Completado', ""FechaCompletado"" = @fecha WHERE ""UsuarioId"" = @userId AND ""RawgGameId"" = @gameId AND ""Estado"" = 'Jugando'";
                 
                 command.Parameters.Add(new Npgsql.NpgsqlParameter("userId", usuario.Id));
                 command.Parameters.Add(new Npgsql.NpgsqlParameter("gameId", id));
@@ -440,7 +440,7 @@ namespace Proyecto_Gaming.Controllers
                 
                 using (var command = connection.CreateCommand())
                 {
-                    command.CommandText = @"UPDATE ""BibliotecaUsuario"" SET ""Resena"" = @resena, ""Calificacion"" = @calificacion, ""FechaResena"" = @fecha WHERE ""IdUsuario"" = @userId AND ""RawgGameId"" = @gameId AND ""Estado"" = 'Completado'";
+                    command.CommandText = @"UPDATE ""BibliotecaUsuario"" SET ""Resena"" = @resena, ""Calificacion"" = @calificacion, ""FechaResena"" = @fecha WHERE ""UsuarioId"" = @userId AND ""RawgGameId"" = @gameId AND ""Estado"" = 'Completado'";
                     
                     command.Parameters.Add(new Npgsql.NpgsqlParameter("userId", usuario.Id));
                     command.Parameters.Add(new Npgsql.NpgsqlParameter("gameId", id));
@@ -489,7 +489,7 @@ namespace Proyecto_Gaming.Controllers
             
             using (var command = connection.CreateCommand())
             {
-                command.CommandText = @"SELECT * FROM ""BibliotecaUsuario"" WHERE ""IdUsuario"" = @userId";
+                command.CommandText = @"SELECT * FROM ""BibliotecaUsuario"" WHERE ""UsuarioId"" = @userId";
                 
                 var parameter = command.CreateParameter();
                 parameter.ParameterName = "userId";
@@ -503,7 +503,7 @@ namespace Proyecto_Gaming.Controllers
                         miBiblioteca.Add(new BibliotecaUsuario
                         {
                             Id = reader.GetInt32(0),
-                            IdUsuario = reader.GetString(1),
+                            UsuarioId = reader.GetString(1),
                             RawgGameId = reader.GetInt32(2),
                             Estado = reader.GetString(3),
                             GameName = reader.GetString(4),

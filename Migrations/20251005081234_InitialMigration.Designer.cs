@@ -180,7 +180,7 @@ namespace Proyecto_Gaming.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("id_juego");
 
-                    b.Property<string>("IdUsuario")
+                    b.Property<string>("UsuarioId")
                         .IsRequired()
                         .HasMaxLength(450)
                         .HasColumnType("character varying(450)")
@@ -190,7 +190,7 @@ namespace Proyecto_Gaming.Migrations
 
                     b.HasIndex("IdJuego");
 
-                    b.HasIndex("IdUsuario");
+                    b.HasIndex("UsuarioId");
 
                     b.ToTable("BibliotecaUsuario", (string)null);
                 });
@@ -394,7 +394,7 @@ namespace Proyecto_Gaming.Migrations
 
                     b.HasOne("Proyecto_Gaming.Models.Usuario", "Usuario")
                         .WithMany("BibliotecaUsuarios")
-                        .HasForeignKey("IdUsuario")
+                        .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

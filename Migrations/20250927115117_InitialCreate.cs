@@ -56,14 +56,14 @@ namespace Proyecto_Gaming.Migrations
                 name: "BibliotecaUsuario",
                 columns: table => new
                 {
-                    IdUsuario = table.Column<int>(type: "integer", nullable: false),
+                    UsuarioId = table.Column<int>(type: "integer", nullable: false),
                     IdJuego = table.Column<int>(type: "integer", nullable: false),
                     Id = table.Column<int>(type: "integer", nullable: false),
                     estado = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BibliotecaUsuario", x => new { x.IdUsuario, x.IdJuego });
+                    table.PrimaryKey("PK_BibliotecaUsuario", x => new { x.UsuarioId, x.IdJuego });
                     table.ForeignKey(
                         name: "FK_BibliotecaUsuario_Juegos_IdJuego",
                         column: x => x.IdJuego,
@@ -71,8 +71,8 @@ namespace Proyecto_Gaming.Migrations
                         principalColumn: "id_juego",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_BibliotecaUsuario_Usuarios_IdUsuario",
-                        column: x => x.IdUsuario,
+                        name: "FK_BibliotecaUsuario_Usuarios_UsuarioId",
+                        column: x => x.UsuarioId,
                         principalTable: "Usuarios",
                         principalColumn: "id_usuario",
                         onDelete: ReferentialAction.Cascade);

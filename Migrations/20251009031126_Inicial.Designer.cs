@@ -12,8 +12,8 @@ using Proyecto_Gaming.Data;
 namespace Proyecto_Gaming.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251009004746_AddReaccionesMultimedia")]
-    partial class AddReaccionesMultimedia
+    [Migration("20251009031126_Inicial")]
+    partial class Inicial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

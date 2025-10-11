@@ -197,7 +197,7 @@ namespace Proyecto_Gaming.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("game_name");
 
-                    b.Property<string>("IdUsuario")
+                    b.Property<string>("UsuarioId")
                         .IsRequired()
                         .HasMaxLength(450)
                         .HasColumnType("character varying(450)")
@@ -217,7 +217,7 @@ namespace Proyecto_Gaming.Migrations
 
                     b.HasIndex("UsuarioId");
 
-                    b.HasIndex("IdUsuario", "RawgGameId")
+                    b.HasIndex("UsuarioId", "RawgGameId")
                         .IsUnique();
 
                     b.ToTable("BibliotecaUsuario", (string)null);
