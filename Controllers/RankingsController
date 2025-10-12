@@ -1,0 +1,16 @@
+using Microsoft.AspNetCore.Mvc;
+
+namespace TuProyecto.Controllers
+{
+    public class RankingsController : Controller
+    {
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        // Si prefieres cargar en acciones separadas
+        public IActionResult Juegos() => View();
+        public IActionResult JugadoresGrupos() => View();
+    }
+}

@@ -231,7 +231,7 @@ namespace Proyecto_Gaming.Controllers
                 
                 using (var command = connection.CreateCommand())
                 {
-                    command.CommandText = @"DELETE FROM ""BibliotecaUsuario"" WHERE ""IdUsuario"" = @userId";
+                    command.CommandText = @"DELETE FROM ""BibliotecaUsuario"" WHERE ""UsuarioId"" = @userId";
                     command.Parameters.Add(new NpgsqlParameter("userId", usuario.Id));
                     await command.ExecuteNonQueryAsync();
                 }

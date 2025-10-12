@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Comunidad – Mis Grupos</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <style>
+    :root{--grad1:#6a00ff;--grad2:#ff3aa3;--bg1:#0a0f1f;--bg2:#081a2b;--text:#e9e9ef;--muted:#cfd2dc;--card:#ffffff14;--card2:#ffffff22;--radius:18px;--shadow:0 10px 30px rgba(0,0,0,.35)}
+    body{color:var(--text);background:radial-gradient(1200px 600px at 80% 10%,#43136b55 0,transparent 55%),radial-gradient(1200px 600px at 20% 30%,#0b57d455 0,transparent 60%),linear-gradient(160deg,var(--bg1),var(--bg2));min-height:100vh}
+    .navbar-gaming{background:#00000055!important;backdrop-filter:blur(6px);border-bottom:1px solid #ffffff22}
+    .navbar-gaming .nav-link{color:#ddd!important}.navbar-gaming .nav-link.active,.navbar-gaming .nav-link:hover{color:#fff!important}
+    .glass{background:var(--card);border:1px solid var(--card2);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .pill{height:10px;border-radius:999px;background:linear-gradient(90deg,var(--grad1),var(--grad2));box-shadow:var(--shadow);opacity:.9}
+    .chip{padding:8px 14px;border-radius:999px;background:#ffffff20;font-weight:700}
+    .group-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#6a00ff,#ff3aa3);box-shadow:0 0 0 3px #ffffff22}
+    .tag{background:#40d67a33;border:1px solid #40d67a55;border-radius:999px;padding:.2rem .6rem;font-weight:700;font-size:.8rem}
+    .subtab .nav-link{color:#e9e9ef;border:0;border-radius:10px}
+    .subtab .nav-link.active{background:linear-gradient(90deg,var(--grad1),var(--grad2))}
+    .side-card{background:#ffffff14;border:1px solid #ffffff22;border-radius:16px}
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-gaming">
+    <div class="container-fluid">
+      <a class="navbar-brand" asp-controller="Home" asp-action="Index"><i class="fas fa-gamepad me-2"></i>GAMING</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"><span class="navbar-toggler-icon"></span></button>
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index"><i class="fas fa-home me-2"></i>Inicio</a></li>
+          <li class="nav-item"><a class="nav-link active" asp-controller="Comunidad" asp-action="Index"><i class="fas fa-users me-2"></i>Comunidad</a></li>
+          <li class="nav-item"><a class="nav-link" asp-controller="Rankings" asp-action="Index"><i class="fas fa-trophy me-2"></i>Rankings</a></li>
+          <li class="nav-item"><a class="nav-link" asp-controller="Estadisticas" asp-action="Index"><i class="fas fa-chart-line me-2"></i>Estadísticas</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container py-3">
+    <!-- barra superior -->
+    <div class="d-flex align-items-center gap-2 flex-wrap mb-3">
+      <div class="pill flex-grow-1"></div>
+      <span class="chip">Feed</span><span class="chip">Amigos</span><span class="chip">Grupos</span>
+      <form class="d-flex ms-auto glass px-3 py-1 rounded-pill" role="search" style="gap:8px;">
+        <i class="fas fa-search align-self-center"></i>
+        <input class="form-control form-control-sm bg-transparent border-0 text-light" type="search" placeholder="Buscar..." />
+      </form>
+    </div>
+
+    <div class="row g-3">
+      <!-- sidebar izquierda -->
+      <div class="col-lg-3">
+        <div class="glass p-3">
+          <h5 class="mb-3"><i class="fas fa-users me-2"></i>Grupos</h5>
+          <input class="form-control form-control-sm bg-dark text-white border-0 mb-2" placeholder="Buscar..." />
+          <a class="btn btn-sm btn-outline-light w-100 mb-2">Todos los grupos</a>
+          <a class="btn btn-sm btn-outline-light w-100 mb-2">Mis grupos</a>
+          <a class="btn btn-sm btn-light text-dark w-100" asp-controller="Comunidad" asp-action="CrearGrupo">+ Crear grupo</a>
+        </div>
+
+        <div class="glass p-3 mt-3">
+          <h6 class="mb-2">Mis Grupos</h6>
+          <div class="d-flex align-items-center gap-2 mb-2"><div class="group-avatar" style="width:36px;height:36px"></div><span>GameSphere España</span></div>
+          <div class="d-flex align-items-center gap-2 mb-2"><div class="group-avatar" style="width:36px;height:36px"></div><span>RPG Masters</span></div>
+          <div class="d-flex align-items-center gap-2"><div class="group-avatar" style="width:36px;height:36px"></div><span>Estrategia Total</span></div>
+        </div>
+      </div>
+
+      <!-- centro -->
+      <div class="col-lg-6">
+        <div class="glass p-3">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <div class="group-avatar"></div>
+            <div class="flex-grow-1">
+              <h5 class="m-0">Los Spartanos</h5>
+              <small class="text-muted">32.2k miembros</small> · <span class="tag">46 en línea</span>
+            </div>
+            <a class="btn btn-sm btn-light text-dark">+ Invitar</a>
+            <a class="btn btn-sm btn-outline-light" asp-controller="Comunidad" asp-action="ConfigGrupo"><i class="fas fa-cog me-1"></i>Configuración</a>
+          </div>
+
+          <ul class="nav subtab nav-pills mt-3">
+            <li class="nav-item"><a class="nav-link" asp-controller="Comunidad" asp-action="MisGruposChat">Chat</a></li>
+            <li class="nav-item"><a class="nav-link" asp-controller="Comunidad" asp-action="MisGruposRanking">Ranking</a></li>
+            <li class="nav-item"><a class="nav-link" asp-controller="Comunidad" asp-action="MisGruposMiembros">Miembros</a></li>
+            <li class="nav-item"><a class="nav-link" asp-controller="Comunidad" asp-action="MisGruposMultimedia">Multimedia</a></li>
+          </ul>
+
+          <div class="mt-3 text-muted">Selecciona una subpestaña para comenzar.</div>
+        </div>
+      </div>
+
+      <!-- sidebar derecha -->
+      <div class="col-lg-3">
+        <div class="side-card p-3 mb-3">
+          <div class="d-flex justify-content-between mb-2"><h6 class="m-0">Miembros en línea</h6><a href="#" class="btn btn-sm btn-light text-dark">Ver todos</a></div>
+          <div class="d-flex align-items-center gap-2 mb-2"><div class="group-avatar" style="width:32px;height:32px"></div><div><strong>LaraCroft</strong><br><small class="text-muted">Chat</small></div></div>
+          <div class="d-flex align-items-center gap-2"><div class="group-avatar" style="width:32px;height:32px"></div><div><strong>GameMaster</strong><br><small class="text-muted">Chat</small></div></div>
+        </div>
+
+        <div class="side-card p-3">
+          <div class="d-flex justify-content-between mb-2"><h6 class="m-0">Ranking de actividad</h6><a href="#" class="btn btn-sm btn-light text-dark">Ver todos</a></div>
+          <table class="table table-dark table-sm table-borderless m-0">
+            <thead><tr><th>Top jugadores</th><th>Tiempo</th></tr></thead>
+            <tbody>
+              <tr><td>El Pepe</td><td>1.2k h</td></tr>
+              <tr><td>Xamp</td><td>900k h</td></tr>
+              <tr><td>Jekkly</td><td>670k h</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
