@@ -17,7 +17,7 @@ namespace Proyecto_Gaming.Migrations
                 table: "BibliotecaUsuario");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_BibliotecaUsuario_Usuarios_IdUsuario",
+                name: "FK_BibliotecaUsuario_Usuarios_UsuarioId",
                 table: "BibliotecaUsuario");
 
             migrationBuilder.DropPrimaryKey(
@@ -71,7 +71,7 @@ namespace Proyecto_Gaming.Migrations
                 newName: "id_juego");
 
             migrationBuilder.RenameColumn(
-                name: "IdUsuario",
+                name: "UsuarioId",
                 table: "BibliotecaUsuario",
                 newName: "id_usuario");
 
@@ -593,7 +593,7 @@ namespace Proyecto_Gaming.Migrations
             migrationBuilder.RenameColumn(
                 name: "id_usuario",
                 table: "BibliotecaUsuario",
-                newName: "IdUsuario");
+                newName: "UsuarioId");
 
             migrationBuilder.RenameColumn(
                 name: "id_juego",
@@ -665,7 +665,7 @@ namespace Proyecto_Gaming.Migrations
                 .OldAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             migrationBuilder.AlterColumn<int>(
-                name: "IdUsuario",
+                name: "UsuarioId",
                 table: "BibliotecaUsuario",
                 type: "integer",
                 nullable: false,
@@ -737,7 +737,7 @@ namespace Proyecto_Gaming.Migrations
             migrationBuilder.AddPrimaryKey(
                 name: "PK_BibliotecaUsuario",
                 table: "BibliotecaUsuario",
-                columns: new[] { "IdUsuario", "IdJuego" });
+                columns: new[] { "UsuarioId", "IdJuego" });
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_Usuarios",
@@ -753,9 +753,9 @@ namespace Proyecto_Gaming.Migrations
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_BibliotecaUsuario_Usuarios_IdUsuario",
+                name: "FK_BibliotecaUsuario_Usuarios_UsuarioId",
                 table: "BibliotecaUsuario",
-                column: "IdUsuario",
+                column: "UsuarioId",
                 principalTable: "Usuarios",
                 principalColumn: "id_usuario",
                 onDelete: ReferentialAction.Cascade);

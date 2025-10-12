@@ -23,6 +23,18 @@ builder.Services.AddHttpClient<IRawgService, RawgService>(client =>
 });
 builder.Services.AddScoped<IRawgService, RawgService>();
 
+// ✅ Email service (FileMode o SMTP según configuración)
+var emailMode = builder.Configuration["Email:Mode"] ?? "File"; // "File" o "Smtp"
+if (emailMode.Equals("Smtp", StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+}
+else
+{
+    builder.Services.AddScoped<IEmailService, FileEmailService>();
+}
+
+
 // ✅ CONFIGURAR IDENTITY CORRECTAMENTE
 builder.Services.AddDefaultIdentity<Usuario>(options => 
 {

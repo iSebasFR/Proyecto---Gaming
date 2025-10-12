@@ -1,0 +1,14 @@
+@{
+    ViewData["Title"] = "Contáctanos";
+}
+
+<section class="contacto">
+    <h2>Contáctanos</h2>
+    <p>Si tienes dudas o sugerencias, escríbenos:</p>
+    <form method="post" asp-action="EnviarMensaje">
+        <input type="text" name="Nombre" placeholder="Tu nombre" required />
+        <input type="email" name="Email" placeholder="Tu correo" required />
+        <textarea name="Mensaje" placeholder="Tu mensaje..." required></textarea>
+        <button type="submit" class="btn btn-primary">Enviar</button>
+    </form>
+</section>
