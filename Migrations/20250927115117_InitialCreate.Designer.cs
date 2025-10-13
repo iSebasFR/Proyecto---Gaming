@@ -27,7 +27,7 @@ namespace Proyecto_Gaming.Migrations
 
             modelBuilder.Entity("Proyecto_Gaming.Models.BibliotecaUsuario", b =>
                 {
-                    b.Property<int>("IdUsuario")
+                    b.Property<int>("UsuarioId")
                         .HasColumnType("integer");
 
                     b.Property<int>("IdJuego")
@@ -42,7 +42,7 @@ namespace Proyecto_Gaming.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("integer");
 
-                    b.HasKey("IdUsuario", "IdJuego");
+                    b.HasKey("UsuarioId", "IdJuego");
 
                     b.HasIndex("IdJuego");
 
@@ -179,7 +179,7 @@ namespace Proyecto_Gaming.Migrations
 
                     b.HasOne("Proyecto_Gaming.Models.Usuario", "Usuario")
                         .WithMany("BibliotecaUsuarios")
-                        .HasForeignKey("IdUsuario")
+                        .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

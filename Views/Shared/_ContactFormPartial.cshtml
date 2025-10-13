@@ -1,0 +1,45 @@
+@model Proyecto_Gaming.ViewModels.ContactFormViewModel
+
+<div class="card bg-dark text-white shadow mt-4">
+  <div class="card-body">
+    <h5 class="card-title mb-3">
+      <i class="fa-solid fa-envelope me-2"></i>Contáctanos
+    </h5>
+
+    <form asp-controller="Contact" asp-action="Send" method="post" novalidate>
+      @Html.AntiForgeryToken()
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label asp-for="Nombre" class="form-label"></label>
+          <input asp-for="Nombre" class="form-control" />
+          <span asp-validation-for="Nombre" class="text-warning"></span>
+        </div>
+        <div class="col-md-6">
+          <label asp-for="Email" class="form-label"></label>
+          <input asp-for="Email" class="form-control" />
+          <span asp-validation-for="Email" class="text-warning"></span>
+        </div>
+        <div class="col-12">
+          <label asp-for="Asunto" class="form-label"></label>
+          <input asp-for="Asunto" class="form-control" />
+          <span asp-validation-for="Asunto" class="text-warning"></span>
+        </div>
+        <div class="col-12">
+          <label asp-for="Mensaje" class="form-label"></label>
+          <textarea asp-for="Mensaje" class="form-control" rows="4"></textarea>
+          <span asp-validation-for="Mensaje" class="text-warning"></span>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-paper-plane me-2"></i>Enviar
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -40,7 +40,7 @@ namespace Proyecto_Gaming.Data
                     .HasColumnName("id")
                     .ValueGeneratedOnAdd();
                     
-                entity.Property(bu => bu.IdUsuario)
+                entity.Property(bu => bu.UsuarioId)
                     .HasColumnName("id_usuario")
                     .IsRequired()
                     .HasMaxLength(450);
@@ -64,7 +64,7 @@ namespace Proyecto_Gaming.Data
                     .HasMaxLength(500);
 
                 // Índice único para evitar duplicados
-                entity.HasIndex(bu => new { bu.IdUsuario, bu.RawgGameId })
+                entity.HasIndex(bu => new { bu.UsuarioId, bu.RawgGameId })
                     .IsUnique();
             });
 

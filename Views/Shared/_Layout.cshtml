@@ -335,6 +335,8 @@
         </main>
     </div>
 
+
+
     <footer class="footer-gaming">
         <div class="container">
             <div class="row align-items-center">
@@ -352,6 +354,7 @@
                 </div>
             </div>
         </div>
+        @await Html.PartialAsync("_ContactFormPartial", new Proyecto_Gaming.ViewModels.ContactFormViewModel())
     </footer>
 
     <!-- Librerías JavaScript necesarias -->
@@ -369,5 +372,11 @@
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
+    <footer class="footer text-center py-3 bg-dark text-white">
+    <p>&copy; 2025 Proyecto Gaming</p>
+    <a asp-controller="Contact" asp-action="Index" class="text-white">Contáctanos</a>
+</footer>
+
 </body>
+
 </html>
