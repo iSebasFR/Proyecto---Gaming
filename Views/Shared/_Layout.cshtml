@@ -236,6 +236,16 @@
                             </a>
                         </li>
 
+                        @if (User.IsInRole("Admin"))
+                        {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                <i class="fas fa-tools me-2"></i>Administración
+                            </a>
+                        </li>
+                        }
+
+
                         <!-- Estas opciones se mostrarán solo si el usuario está logueado -->
                         @if (User.Identity.IsAuthenticated)
                         {

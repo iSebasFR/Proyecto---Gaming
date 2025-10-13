@@ -65,7 +65,7 @@ namespace Proyecto_Gaming.Controllers
                 command.CommandText = @"
                     SELECT COUNT(*) as TotalJuegos
                     FROM ""BibliotecaUsuario"" 
-                    WHERE ""IdUsuario"" = @userId";
+                    WHERE ""UsuarioId"" = @userId";
 
                 var parameter = command.CreateParameter();
                 parameter.ParameterName = "userId";
@@ -87,7 +87,7 @@ namespace Proyecto_Gaming.Controllers
             {
                 command.CommandText = @"
                     SELECT * FROM ""BibliotecaUsuario"" 
-                    WHERE ""IdUsuario"" = @userId 
+                    WHERE ""UsuarioId"" = @userId 
                     ORDER BY ""Id"" DESC 
                     LIMIT 3";
 
@@ -103,7 +103,7 @@ namespace Proyecto_Gaming.Controllers
                         bibliotecaReciente.Add(new BibliotecaUsuario
                         {
                             Id = reader.GetInt32(0),
-                            IdUsuario = reader.GetString(1),
+                            UsuarioId = reader.GetString(1),
                             RawgGameId = reader.GetInt32(2),
                             Estado = reader.GetString(3),
                             GameName = reader.GetString(4),

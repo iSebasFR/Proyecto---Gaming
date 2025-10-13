@@ -1,0 +1,64 @@
+@model IEnumerable<Proyecto_Gaming.Areas.Admin.Controllers.UserRowVm>
+@{
+    ViewData["Title"] = "Gestión de Usuarios";
+}
+
+<h2 class="mb-4">Gestión de Usuarios</h2>
+
+<div class="table-responsive">
+    <table class="table table-dark table-striped table-hover align-middle rounded">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Nombre</th>
+                <th>Estado</th>
+                <th>Rol</th>
+                <th style="width: 320px;">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var u in Model)
+        {
+            var bloqueado = u.LockoutEnd.HasValue && u.LockoutEnd > DateTimeOffset.UtcNow;
+            <tr>
+                <td>@u.Email</td>
+                <td>@u.DisplayName</td>
+                <td>@(bloqueado ? "Bloqueado" : "Activo")</td>
+                <td>@(u.IsAdmin ? "Administrador" : "Usuario")</td>
+                <td>
+                    <form asp-action="ToggleLock" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@u.Id" />
+                        <button type="submit" class="btn btn-sm @(bloqueado ? "btn-success" : "btn-warning")">
+                            @(bloqueado ? "Desbloquear" : "Bloquear")
+                        </button>
+                    </form>
+
+                    @if (!u.IsAdmin)
+                    {
+                        <form asp-action="MakeAdmin" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@u.Id" />
+                            <button type="submit" class="btn btn-sm btn-primary">Hacer Admin</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="RemoveAdmin" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@u.Id" />
+                            <button type="submit" class="btn btn-sm btn-danger">Quitar Admin</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+@if (TempData["ok"] != null)
+{
+    <div class="alert alert-success mt-3">@TempData["ok"]</div>
+}
+@if (TempData["error"] != null)
+{
+    <div class="alert alert-danger mt-3">@TempData["error"]</div>
+}

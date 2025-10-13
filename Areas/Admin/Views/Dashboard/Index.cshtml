@@ -1,0 +1,53 @@
+@model Proyecto_Gaming.Areas.Admin.Controllers.AdminDashboardVm
+@{
+    ViewData["Title"] = "Panel de Administración";
+}
+
+<h2 class="mb-4">Panel de Administración</h2>
+
+<div class="row g-3">
+    <div class="col-md-3">
+        <div class="card bg-dark text-light border-secondary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="h5 mb-0">@Model.TotalUsers</div>
+                        <small class="text-secondary">Usuarios totales</small>
+                    </div>
+                    <i class="fas fa-users fa-2x text-secondary"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-dark text-light border-secondary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="h5 mb-0">@Model.AdminUsers</div>
+                        <small class="text-secondary">Administradores</small>
+                    </div>
+                    <i class="fas fa-user-shield fa-2x text-secondary"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-dark text-light border-secondary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="h5 mb-0">@Model.LockedUsers</div>
+                        <small class="text-secondary">Bloqueados</small>
+                    </div>
+                    <i class="fas fa-user-lock fa-2x text-secondary"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <a class="btn btn-primary w-100" asp-area="Admin" asp-controller="Users" asp-action="Index">
+            Gestionar Usuarios
+        </a>
+    </div>
+</div>
