@@ -354,7 +354,12 @@
                 </div>
             </div>
         </div>
-        @await Html.PartialAsync("_ContactFormPartial", new Proyecto_Gaming.ViewModels.ContactFormViewModel())
+       @if (ViewContext.RouteData.Values["controller"]?.ToString() == "Home"
+    && ViewContext.RouteData.Values["action"]?.ToString() == "Index")
+{
+    @await Html.PartialAsync("_ContactFormPartial", new Proyecto_Gaming.ViewModels.ContactFormViewModel())
+}
+
     </footer>
 
     <!-- Librerías JavaScript necesarias -->
