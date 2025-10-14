@@ -229,42 +229,82 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarContent">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <!-- Opciones visibles siempre -->
-                        <li class="nav-item">
-                            <a class="nav-link active" asp-area="" asp-controller="Home" asp-action="Index">
-                                <i class="fas fa-home me-2"></i>Inicio
-                            </a>
-                        </li>
+                     @{
+    var area = ViewContext.RouteData.Values["area"]?.ToString();
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
 
-                        @if (User.IsInRole("Admin"))
-                        {
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
-                                <i class="fas fa-tools me-2"></i>Administración
-                            </a>
-                        </li>
-                        }
+    var isAdminArea = string.Equals(area, "Admin", StringComparison.OrdinalIgnoreCase);
+    var isHome = string.IsNullOrEmpty(area) && controller == "Home" && action == "Index";
+}
 
+<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    @if (isAdminArea)
+    {
+        <!-- EN ÁREA ADMIN: Inicio + Administración -->
+        <li class="nav-item">
+            <a class="nav-link @(controller=="Home" && string.IsNullOrEmpty(area) ? "active" : "")"
+               asp-area="" asp-controller="Home" asp-action="Index">
+               <i class="fas fa-home me-2"></i>Inicio
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(controller=="Dashboard" ? "active" : "")"
+               asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+               <i class="fas fa-tools me-2"></i>Administración
+            </a>
+        </li>
+    }
+    else if (isHome)
+    {
+        <!-- EN HOME: SOLO Administración -->
+        @if (User.IsInRole("Admin"))
+        {
+            <li class="nav-item">
+                <a class="nav-link"
+                   asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                   <i class="fas fa-tools me-2"></i>Administración
+                </a>
+            </li>
+        }
+    }
+    else
+    {
+        <!-- RESTO DEL SITIO: menú normal -->
+        @if (User.IsInRole("Admin"))
+        {
+            <li class="nav-item">
+                <a class="nav-link @(controller=="Dashboard" && area=="Admin" ? "active" : "")"
+                   asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                   <i class="fas fa-tools me-2"></i>Administración
+                </a>
+            </li>
+        }
 
-                        <!-- Estas opciones se mostrarán solo si el usuario está logueado -->
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Biblioteca" asp-action="Index">
-                                    <i class="fas fa-book me-2"></i>Biblioteca
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Comunidad" asp-action="Index">
-                                    <i class="fas fa-users me-2"></i>Comunidad
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Estadisticas" asp-action="Index">
-                                    <i class="fas fa-chart-line me-2"></i>Estadísticas
-                                </a>
-                            </li>
-                        }
+        @if (User.Identity.IsAuthenticated)
+        {
+            <li class="nav-item">
+                <a class="nav-link @(controller=="Biblioteca" ? "active" : "")"
+                   asp-area="" asp-controller="Biblioteca" asp-action="Index">
+                   <i class="fas fa-book me-2"></i>Biblioteca
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(controller=="Comunidad" ? "active" : "")"
+                   asp-area="" asp-controller="Comunidad" asp-action="Index">
+                   <i class="fas fa-users me-2"></i>Comunidad
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(controller=="Estadisticas" ? "active" : "")"
+                   asp-area="" asp-controller="Estadisticas" asp-action="Index">
+                   <i class="fas fa-chart-line me-2"></i>Estadísticas
+                </a>
+            </li>
+        }
+    }
+</ul>
+
                     </ul>
 
                     <!-- Verificación de autenticación con Identity -->
