@@ -7,6 +7,7 @@ using Proyecto_Gaming.Models;
 using Proyecto_Gaming.Services;
 using Proyecto_Gaming.ViewModels;
 using Proyecto_Gaming.Models.Rawg;
+using Proyecto_Gaming.Helpers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,64 +30,185 @@ namespace Proyecto_Gaming.Controllers
             _rawgService = rawgService;
         }
 
-        // GET: Biblioteca - ACTUALIZADO CON FILTROS DINÁMICOS
-        public async Task<IActionResult> Index(string search, string genre, string platform, int page = 1)
+        // GET: Biblioteca - CON SESIONES Y TRACKING ML
+public async Task<IActionResult> Index(string search, string genre, string platform, int page = 1)
+{
+    if (!User.Identity.IsAuthenticated)
+    {
+        TempData["Error"] = "Debes iniciar sesión para acceder al catálogo.";
+        return RedirectToAction("Login", "Account");
+    }
+
+    var usuario = await _userManager.GetUserAsync(User);
+
+    // ✅ TRACKING PARA ML - Guardar búsqueda actual
+    if (!string.IsNullOrEmpty(search) || !string.IsNullOrEmpty(genre) || !string.IsNullOrEmpty(platform))
+    {
+        var userSearch = new UserSearch
         {
-            if (!User.Identity.IsAuthenticated)
-            {
-                TempData["Error"] = "Debes iniciar sesión para acceder al catálogo.";
-                return RedirectToAction("Login", "Account");
-            }
+            SearchTerm = search,
+            Genre = genre,
+            Platform = platform,
+            Timestamp = DateTime.UtcNow
+        };
 
-            try
-            {
-                var availableFilters = await _rawgService.GetAvailableFiltersAsync();
-                var gamesResponse = await _rawgService.GetGamesAsync(search, genre, platform, page);
+        // Guardar en sesión para ML
+        HttpContext.Session.AddSearchToHistory(userSearch);
 
-                var viewModel = new GameCatalogViewModel
-                {
-                    Games = gamesResponse.Results,
-                    Genres = availableFilters.AvailableGenres,
-                    Platforms = availableFilters.AvailablePlatforms,
-                    Search = search,
-                    SelectedGenre = genre,
-                    SelectedPlatform = platform,
-                    CurrentPage = page,
-                    TotalPages = Math.Min((int)Math.Ceiling(gamesResponse.Count / 20.0), 5),
-                    HasNextPage = !string.IsNullOrEmpty(gamesResponse.Next) && page < 5,
-                    HasPreviousPage = !string.IsNullOrEmpty(gamesResponse.Previous) && page > 1,
-                    AvailableGenres = availableFilters.AvailableGenres
-                        .Select(g => new SelectListItem 
-                        { 
-                            Value = g.Slug, 
-                            Text = g.Name,
-                            Selected = g.Slug == genre
-                        })
-                        .ToList(),
-                    AvailablePlatforms = availableFilters.AvailablePlatforms
-                        .Select(p => new SelectListItem 
-                        { 
-                            Value = p.Id.ToString(), 
-                            Text = p.Name,
-                            Selected = p.Id.ToString() == platform
-                        })
-                        .ToList()
-                };
-
-                return View(viewModel);
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = $"Error al cargar los juegos: {ex.Message}";
-                return View(new GameCatalogViewModel { 
-                    Games = new List<Game>(),
-                    AvailableGenres = new List<SelectListItem>(),
-                    AvailablePlatforms = new List<SelectListItem>()
-                });
-            }
+        // Guardar término de búsqueda reciente
+        if (!string.IsNullOrEmpty(search))
+        {
+            HttpContext.Session.AddRecentSearch(search);
         }
 
-        // AddToLibrary - CON SQL DIRECTO
+        // Guardar en Redis para análisis ML
+        await _rawgService.TrackUserSearchAsync(usuario.Id, search, genre, platform);
+    }
+
+    // ✅ GUARDAR FILTROS EN SESIÓN para persistencia
+    if (!string.IsNullOrEmpty(search) || !string.IsNullOrEmpty(genre) || !string.IsNullOrEmpty(platform))
+    {
+        HttpContext.Session.SetString("LastSearch", search ?? "");
+        HttpContext.Session.SetString("LastGenre", genre ?? "");
+        HttpContext.Session.SetString("LastPlatform", platform ?? "");
+        HttpContext.Session.SetInt32("LastPage", page);
+    }
+
+    // ✅ CARGAR PREFERENCIAS DE USUARIO DESDE SESIÓN
+    var userPreferences = HttpContext.Session.GetUserPreferences();
+
+    try
+    {
+        var availableFilters = await _rawgService.GetAvailableFiltersAsync();
+        var gamesResponse = await _rawgService.GetGamesAsync(search, genre, platform, page);
+
+        var viewModel = new GameCatalogViewModel
+        {
+            Games = gamesResponse.Results,
+            Genres = availableFilters.AvailableGenres,
+            Platforms = availableFilters.AvailablePlatforms,
+            Search = search,
+            SelectedGenre = genre,
+            SelectedPlatform = platform,
+            CurrentPage = page,
+            TotalPages = Math.Min((int)Math.Ceiling(gamesResponse.Count / 20.0), 5),
+            HasNextPage = !string.IsNullOrEmpty(gamesResponse.Next) && page < 5,
+            HasPreviousPage = !string.IsNullOrEmpty(gamesResponse.Previous) && page > 1,
+            AvailableGenres = availableFilters.AvailableGenres
+                .Select(g => new SelectListItem 
+                { 
+                    Value = g.Slug, 
+                    Text = g.Name,
+                    Selected = g.Slug == genre
+                })
+                .ToList(),
+            AvailablePlatforms = availableFilters.AvailablePlatforms
+                .Select(p => new SelectListItem 
+                { 
+                    Value = p.Id.ToString(), 
+                    Text = p.Name,
+                    Selected = p.Id.ToString() == platform
+                })
+                .ToList(),
+            // ✅ NUEVO: Datos de sesión para la vista
+            UserPreferences = userPreferences,
+            RecentSearches = HttpContext.Session.GetSearchHistory().Take(5).ToList(),
+            RecentSearchTerms = HttpContext.Session.GetRecentSearches().Take(5).ToList()
+        };
+
+        return View(viewModel);
+    }
+    catch (Exception ex)
+    {
+        TempData["Error"] = $"Error al cargar los juegos: {ex.Message}";
+        return View(new GameCatalogViewModel { 
+            Games = new List<Game>(),
+            AvailableGenres = new List<SelectListItem>(),
+            AvailablePlatforms = new List<SelectListItem>(),
+            UserPreferences = userPreferences
+        });
+    }
+}
+
+        // ✅ NUEVO: Restaurar última búsqueda desde sesión
+        public async Task<IActionResult> LastSearch()
+    {
+        if (!User.Identity.IsAuthenticated)
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+            var search = HttpContext.Session.GetString("LastSearch") ?? "";
+            var genre = HttpContext.Session.GetString("LastGenre") ?? "";
+            var platform = HttpContext.Session.GetString("LastPlatform") ?? "";
+            var page = HttpContext.Session.GetInt32("LastPage") ?? 1;
+    
+        // ✅ REDIRIGIR al Index con los parámetros, no retornar una vista
+        TempData["Info"] = "Última búsqueda restaurada desde sesión";
+        return RedirectToAction(nameof(Index), new {
+            search,
+            genre = genre, 
+            platform = platform, 
+            page = page 
+        });
+    }
+
+        // ✅ NUEVO: Guardar preferencias de usuario
+       [HttpPost]
+        public IActionResult SavePreferences(UserPreferences preferences)
+        {
+        if (User.Identity.IsAuthenticated)
+        {
+            HttpContext.Session.SetUserPreferences(preferences);
+            TempData["Ok"] = "Preferencias guardadas correctamente.";
+         }
+    
+        // ✅ REDIRIGIR al Index
+        return RedirectToAction(nameof(Index));
+        }
+
+        // ✅ NUEVO: Obtener recomendaciones basadas en historial de sesión
+       // ✅ CORREGIDO: Recomendaciones también debe redirigir al Index
+public async Task<IActionResult> Recomendaciones()
+{
+    if (!User.Identity.IsAuthenticated)
+    {
+        TempData["Error"] = "Debes iniciar sesión para ver recomendaciones.";
+        return RedirectToAction("Login", "Account");
+    }
+
+    var searchHistory = HttpContext.Session.GetSearchHistory();
+    
+    if (!searchHistory.Any())
+    {
+        TempData["Info"] = "Realiza algunas búsquedas para obtener recomendaciones personalizadas.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    // ✅ LÓGICA DE RECOMENDACIÓN BASADA EN SESIONES
+    var mostSearchedGenre = searchHistory
+        .Where(s => !string.IsNullOrEmpty(s.Genre))
+        .GroupBy(s => s.Genre)
+        .OrderByDescending(g => g.Count())
+        .Select(g => g.Key)
+        .FirstOrDefault();
+
+    var mostSearchedPlatform = searchHistory
+        .Where(s => !string.IsNullOrEmpty(s.Platform))
+        .GroupBy(s => s.Platform)
+        .OrderByDescending(g => g.Count())
+        .Select(g => g.Key)
+        .FirstOrDefault();
+
+    // ✅ REDIRIGIR al Index con los parámetros de recomendación
+    TempData["Ok"] = "Recomendaciones basadas en tu historial de búsquedas";
+    return RedirectToAction(nameof(Index), new { 
+        genre = mostSearchedGenre, 
+        platform = mostSearchedPlatform 
+    });
+}
+
+        // AddToLibrary - CON SQL DIRECTO (MANTENIDO)
         public async Task<IActionResult> AddToLibrary(int id)
         {
             if (!User.Identity.IsAuthenticated)
@@ -142,7 +264,7 @@ namespace Proyecto_Gaming.Controllers
             }
         }
 
-        // GET: Biblioteca/Pendientes - CON SQL DIRECTO
+        // GET: Biblioteca/Pendientes - CON SQL DIRECTO (MANTENIDO)
         public async Task<IActionResult> Pendientes()
         {
             if (!User.Identity.IsAuthenticated)
@@ -216,48 +338,9 @@ namespace Proyecto_Gaming.Controllers
             }
         }
 
-        // MarkAsPlaying - CON SQL DIRECTO
-        public async Task<IActionResult> MarkAsPlaying(int id)
-        {
-            if (!User.Identity.IsAuthenticated)
-            {
-                TempData["Error"] = "Debes iniciar sesión.";
-                return RedirectToAction(nameof(Pendientes));
-            }
-
-            var usuario = await _userManager.GetUserAsync(User);
-            if (usuario == null)
-            {
-                TempData["Error"] = "No se pudo identificar al usuario.";
-                return RedirectToAction(nameof(Pendientes));
-            }
-
-            // SQL DIRECTO
-            var connection = _context.Database.GetDbConnection();
-            await connection.OpenAsync();
-            
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = @"UPDATE ""BibliotecaUsuario"" SET ""Estado"" = 'Jugando' WHERE ""UsuarioId"" = @userId AND ""RawgGameId"" = @gameId AND ""Estado"" = 'Pendiente'";
-                
-                command.Parameters.Add(new Npgsql.NpgsqlParameter("userId", usuario.Id));
-                command.Parameters.Add(new Npgsql.NpgsqlParameter("gameId", id));
-                
-                var rowsAffected = await command.ExecuteNonQueryAsync();
-                
-                if (rowsAffected == 0)
-                {
-                    TempData["Error"] = "No se encontró el juego en Pendientes.";
-                }
-                else
-                {
-                    TempData["Ok"] = "¡Disfruta! Marcado como 'Jugando'.";
-                }
-            }
-            
-            await connection.CloseAsync();
-            return RedirectToAction(nameof(Pendientes));
-        }
+        // Los demás métodos se mantienen igual...
+        // MarkAsPlaying, Jugando, Completados, MarkAsCompleted, AddReview, MiBiblioteca
+        // ... (mantener el código existente para estos métodos)
 
         // GET: Biblioteca/Jugando - CON SQL DIRECTO
         public async Task<IActionResult> Jugando()
@@ -369,6 +452,49 @@ namespace Proyecto_Gaming.Controllers
             
             await connection.CloseAsync();
             return View(juegosCompletados);
+        }
+
+        // MarkAsPlaying - CON SQL DIRECTO
+        public async Task<IActionResult> MarkAsPlaying(int id)
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                TempData["Error"] = "Debes iniciar sesión.";
+                return RedirectToAction(nameof(Pendientes));
+            }
+
+            var usuario = await _userManager.GetUserAsync(User);
+            if (usuario == null)
+            {
+                TempData["Error"] = "No se pudo identificar al usuario.";
+                return RedirectToAction(nameof(Pendientes));
+            }
+
+            // SQL DIRECTO
+            var connection = _context.Database.GetDbConnection();
+            await connection.OpenAsync();
+            
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"UPDATE ""BibliotecaUsuario"" SET ""Estado"" = 'Jugando' WHERE ""UsuarioId"" = @userId AND ""RawgGameId"" = @gameId AND ""Estado"" = 'Pendiente'";
+                
+                command.Parameters.Add(new Npgsql.NpgsqlParameter("userId", usuario.Id));
+                command.Parameters.Add(new Npgsql.NpgsqlParameter("gameId", id));
+                
+                var rowsAffected = await command.ExecuteNonQueryAsync();
+                
+                if (rowsAffected == 0)
+                {
+                    TempData["Error"] = "No se encontró el juego en Pendientes.";
+                }
+                else
+                {
+                    TempData["Ok"] = "¡Disfruta! Marcado como 'Jugando'.";
+                }
+            }
+            
+            await connection.CloseAsync();
+            return RedirectToAction(nameof(Pendientes));
         }
 
         // MarkAsCompleted - CON SQL DIRECTO

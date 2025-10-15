@@ -9,7 +9,23 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// ✅ AGREGAR CACHÉ EN MEMORIA
+// ✅ CONFIGURAR REDIS (DISTRIBUTED CACHE)
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "Gaming_";
+});
+
+// ✅ CONFIGURAR SESIONES DISTRIBUIDAS
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.Name = "Gaming.Session";
+});
+
+// ✅ MANTENER CACHÉ EN MEMORIA PARA DATOS LOCALES
 builder.Services.AddMemoryCache();
 
 // Configurar PostgreSQL
@@ -24,7 +40,7 @@ builder.Services.AddHttpClient<IRawgService, RawgService>(client =>
 builder.Services.AddScoped<IRawgService, RawgService>();
 
 // ✅ Email service (FileMode o SMTP según configuración)
-var emailMode = builder.Configuration["Email:Mode"] ?? "File"; // "File" o "Smtp"
+var emailMode = builder.Configuration["Email:Mode"] ?? "File";
 if (emailMode.Equals("Smtp", StringComparison.OrdinalIgnoreCase))
 {
     builder.Services.AddScoped<IEmailService, SmtpEmailService>();
@@ -33,7 +49,6 @@ else
 {
     builder.Services.AddScoped<IEmailService, FileEmailService>();
 }
-
 
 // ✅ CONFIGURAR IDENTITY CORRECTAMENTE
 builder.Services.AddDefaultIdentity<Usuario>(options => 
@@ -48,10 +63,6 @@ builder.Services.AddDefaultIdentity<Usuario>(options =>
 })
 .AddRoles<IdentityRole>()   
 .AddEntityFrameworkStores<ApplicationDbContext>();
-
-// ✅ SESSIONS (opcional pero recomendado)
-builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession();
 
 var app = builder.Build();
 
@@ -82,18 +93,16 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-    // ✅ SEMILLA: rol Admin + usuario admin (seguro, idempotente)
+// ✅ SEMILLA: rol Admin + usuario admin
 try
 {
     using var scope = app.Services.CreateScope();
     var roleMgr = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<Usuario>>();
 
-    // 1) Crear rol "Admin" si no existe
     if (!await roleMgr.RoleExistsAsync("Admin"))
         await roleMgr.CreateAsync(new IdentityRole("Admin"));
 
-    // 2) Crear usuario admin inicial (ajusta correo/clave si quieres)
     var adminEmail = "admin@gaming.com";
     var admin = await userMgr.FindByEmailAsync(adminEmail);
     if (admin is null)
@@ -106,7 +115,6 @@ try
             DisplayName = "Administrador"
         };
 
-        // Nota: la contraseña cumple tus reglas actuales
         var createResult = await userMgr.CreateAsync(admin, "Admin#2025!");
         if (createResult.Succeeded)
         {
@@ -121,7 +129,6 @@ try
     }
     else
     {
-        // Asegurar que tiene el rol
         if (!await userMgr.IsInRoleAsync(admin, "Admin"))
             await userMgr.AddToRoleAsync(admin, "Admin");
     }
@@ -130,7 +137,6 @@ catch (Exception ex)
 {
     Console.WriteLine($"[Seed Admin] Error: {ex.Message}");
 }
-
 
 // Configure pipeline
 if (!app.Environment.IsDevelopment())
@@ -143,25 +149,22 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-// ✅ ESTOS MIDDLEWARES EN ORDEN CORRECTO
+// ✅ ORDEN CORRECTO DE MIDDLEWARES (SESSION ANTES DE AUTH)
+app.UseSession(); // ← NUEVO: Sesiones antes de autenticación
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseSession();
 
 // ✅ MAPEOS NECESARIOS PARA IDENTITY
 app.MapControllers();
-app.MapRazorPages();  // ← ESTO ES CRÍTICO PARA LOGIN/REGISTER
+app.MapRazorPages();
 
-// ✅ Ruta para las ÁREAS (como Admin)
+// ✅ Ruta para las ÁREAS
 app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
-
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
-
-

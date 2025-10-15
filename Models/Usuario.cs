@@ -21,6 +21,6 @@ namespace Proyecto_Gaming.Models
         public string? Estado { get; set; } = "Activo";
 
         // Relación con BibliotecaUsuario
-        public ICollection<BibliotecaUsuario> BibliotecaUsuarios { get; set; }
+        public ICollection<BibliotecaUsuario>? BibliotecaUsuarios { get; set; }
     }
 }
