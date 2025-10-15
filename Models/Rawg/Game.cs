@@ -8,13 +8,13 @@ namespace Proyecto_Gaming.Models.Rawg
         public int Id { get; set; }
 
         [JsonPropertyName("name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [JsonPropertyName("released")]
-        public string Released { get; set; }
+        public string? Released { get; set; }
 
         [JsonPropertyName("background_image")]
-        public string BackgroundImage { get; set; }
+        public string? BackgroundImage { get; set; }
 
         [JsonPropertyName("rating")]
         public double Rating { get; set; }
@@ -47,16 +47,16 @@ namespace Proyecto_Gaming.Models.Rawg
         public int Id { get; set; }
 
         [JsonPropertyName("name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [JsonPropertyName("slug")]
-        public string Slug { get; set; }  // ← NUEVA PROPIEDAD
+        public string? Slug { get; set; }  // ← NUEVA PROPIEDAD
     }
 
     public class PlatformInfo
     {
         [JsonPropertyName("platform")]
-        public Platform Platform { get; set; }
+        public Platform? Platform { get; set; }
     }
 
     public class Platform
@@ -65,10 +65,10 @@ namespace Proyecto_Gaming.Models.Rawg
         public int Id { get; set; }
 
         [JsonPropertyName("name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [JsonPropertyName("slug")]
-        public string Slug { get; set; }  // ← NUEVA PROPIEDAD
+        public string? Slug { get; set; }  // ← NUEVA PROPIEDAD
     }
 
     public class Screenshot
@@ -77,6 +77,6 @@ namespace Proyecto_Gaming.Models.Rawg
         public int Id { get; set; }
 
         [JsonPropertyName("image")]
-        public string Image { get; set; }
+        public string? Image { get; set; }
     }
 }

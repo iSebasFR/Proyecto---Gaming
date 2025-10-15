@@ -8,10 +8,10 @@ namespace Proyecto_Gaming.Models.Rawg
         public int Count { get; set; }
 
         [JsonPropertyName("next")]
-        public string Next { get; set; }
+        public string? Next { get; set; }
 
         [JsonPropertyName("previous")]
-        public string Previous { get; set; }
+        public string? Previous { get; set; }
 
         [JsonPropertyName("results")]
         public List<Game> Results { get; set; } = new List<Game>();

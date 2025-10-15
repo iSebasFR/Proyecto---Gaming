@@ -10,7 +10,7 @@ namespace Proyecto_Gaming.Models
         public int Id { get; set; }
 
         // IMPORTANTE: el nombre correcto que usamos ahora es UsuarioId
-        public string UsuarioId { get; set; } = default!;
+        public string? UsuarioId { get; set; } = default!;
 
         public int RawgGameId { get; set; }
 

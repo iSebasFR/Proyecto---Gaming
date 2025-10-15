@@ -12,10 +12,10 @@
                 <a class="nav-link text-white fw-bold" asp-action="Pendientes">Pendiente</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-white fw-bold" href="#">Jugando</a>
+                <a class="nav-link text-white fw-bold" asp-action="Jugando">Jugando</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-white fw-bold" href="#">Completados</a>
+                <a class="nav-link text-white fw-bold" asp-action="Completados">Completados</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link text-white fw-bold active" asp-action="Index">Catálogo</a>
@@ -24,45 +24,129 @@
     </div>
 </nav>
 
-<!-- Filtros - ACTUALIZADOS CON OPCIONES DINÁMICAS -->
-<div class="filter-section bg-dark rounded p-4 mb-4">
-    <form asp-action="Index" method="get" class="row g-3 align-items-end">
-        <div class="col-md-5">
-            <label class="form-label text-white">Filtrar por género:</label>
-            <select name="genre" class="form-select">
-                <option value="">Todos los géneros</option>
-                @foreach (var genre in Model.AvailableGenres)
+<!-- ✅ BÚSQUEDA POR NOMBRE Y BOTONES DE SESIÓN MEJORADOS -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-dark">
+            <div class="card-body">
+                <!-- Formulario de Búsqueda -->
+                <form asp-action="Index" method="get" class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label text-white">🔍 Buscar por nombre:</label>
+                        <input type="text" name="search" class="form-control" 
+                               value="@Model.Search" placeholder="Ej: The Witcher, Mario...">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-white">🎮 Género:</label>
+                        <select name="genre" class="form-select">
+                            <option value="">Todos los géneros</option>
+                            @foreach (var genre in Model.AvailableGenres)
+                            {
+                                <option value="@genre.Value" selected="@genre.Selected">@genre.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-white">🖥️ Plataforma:</label>
+                        <select name="platform" class="form-select">
+                            <option value="">Todas las plataformas</option>
+                            @foreach (var platform in Model.AvailablePlatforms)
+                            {
+                                <option value="@platform.Value" selected="@platform.Selected">@platform.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100 h-100">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                    </div>
+                </form>
+
+                <!-- ✅ BOTONES MEJORADOS -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="d-flex gap-2 flex-wrap">
+                            <!-- ✅ BÚSQUEDA ANTERIOR (SOLO cuando hay disponible) -->
+                            @if (Model.HasPreviousSearch)
+                            {
+                                <a href="@Url.Action("LastSearch")" class="btn btn-outline-info btn-sm">
+                                    🔄 Búsqueda Anterior
+                                </a>
+                            }
+
+                            <!-- Recomendaciones -->
+                            <a href="@Url.Action("Recomendaciones")" class="btn btn-outline-warning btn-sm">
+                                💡 Recomendaciones ML
+                            </a>
+                            
+                            <!-- Limpiar Filtros -->
+                            @if (!string.IsNullOrEmpty(Model.Search) || !string.IsNullOrEmpty(Model.SelectedGenre) || !string.IsNullOrEmpty(Model.SelectedPlatform))
+                            {
+                                <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                                    🗑️ Limpiar Filtros
+                                </a>
+                            }
+
+                            <!-- Búsquedas Recientes Dropdown -->
+                            @if (Model.RecentSearchTerms.Any())
+                            {
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        📚 Historial (@Model.RecentSearchTerms.Count)
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><h6 class="dropdown-header">Tus búsquedas recientes:</h6></li>
+                                        @foreach (var recentSearch in Model.RecentSearchTerms)
+                                        {
+                                            <li>
+                                                <a class="dropdown-item" href="@Url.Action("Index", new { search = recentSearch })">
+                                                    <i class="fas fa-search me-2"></i>@recentSearch
+                                                </a>
+                                            </li>
+                                        }
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item text-danger" href="@Url.Action("ClearSearchHistory")">
+                                                <i class="fas fa-trash me-2"></i>Limpiar historial
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ✅ INFO DE SESIÓN ACTUAL -->
+                @if (!string.IsNullOrEmpty(Model.Search) || !string.IsNullOrEmpty(Model.SelectedGenre) || !string.IsNullOrEmpty(Model.SelectedPlatform))
                 {
-                    <option value="@genre.Value" selected="@genre.Selected">@genre.Text</option>
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="alert alert-info py-2 mb-0">
+                                <small>
+                                    <strong>Filtros activos:</strong>
+                                    @if (!string.IsNullOrEmpty(Model.Search))
+                                    {
+                                        <span class="badge bg-primary me-1">Busqueda: "@Model.Search"</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.SelectedGenre))
+                                    {
+                                        <span class="badge bg-success me-1">Género: @Model.AvailableGenres.FirstOrDefault(g => g.Value == Model.SelectedGenre)?.Text</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.SelectedPlatform))
+                                    {
+                                        <span class="badge bg-warning me-1">Plataforma: @Model.AvailablePlatforms.FirstOrDefault(p => p.Value == Model.SelectedPlatform)?.Text</span>
+                                    }
+                                    <small class="text-muted ms-2">(Guardado en sesión)</small>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
                 }
-            </select>
-        </div>
-        <div class="col-md-5">
-            <label class="form-label text-white">Filtrar por plataforma:</label>
-            <select name="platform" class="form-select">
-                <option value="">Todas las plataformas</option>
-                @foreach (var platform in Model.AvailablePlatforms)
-                {
-                    <option value="@platform.Value" selected="@platform.Selected">@platform.Text</option>
-                }
-            </select>
-        </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-primary w-100 h-100">
-                <i class="fas fa-search"></i> Buscar
-            </button>
-        </div>
-        
-        <!-- Botón para limpiar filtros -->
-        @if (!string.IsNullOrEmpty(Model.SelectedGenre) || !string.IsNullOrEmpty(Model.SelectedPlatform))
-        {
-            <div class="col-12 text-center mt-3">
-                <a asp-action="Index" class="btn btn-outline-warning btn-sm">
-                    <i class="fas fa-times"></i> Limpiar filtros
-                </a>
             </div>
-        }
-    </form>
+        </div>
+    </div>
 </div>
 
 <!-- Juegos desde RAWG API -->
@@ -134,6 +218,7 @@
                 {
                     <li class="page-item">
                         <a class="page-link" href="@Url.Action("Index", new { 
+                            search = Model.Search,
                             genre = Model.SelectedGenre, 
                             platform = Model.SelectedPlatform, 
                             page = Model.CurrentPage - 1 
@@ -146,6 +231,7 @@
                 {
                     <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
                         <a class="page-link" href="@Url.Action("Index", new { 
+                            search = Model.Search,
                             genre = Model.SelectedGenre, 
                             platform = Model.SelectedPlatform, 
                             page = i 
@@ -158,6 +244,7 @@
                 {
                     <li class="page-item">
                         <a class="page-link" href="@Url.Action("Index", new { 
+                            search = Model.Search,
                             genre = Model.SelectedGenre, 
                             platform = Model.SelectedPlatform, 
                             page = Model.CurrentPage + 1 
@@ -173,6 +260,10 @@ else
     <div class="alert alert-info text-center">
         <h4>No se encontraron juegos</h4>
         <p>Intenta con otros criterios de búsqueda</p>
+        @if (!string.IsNullOrEmpty(Model.Search))
+        {
+            <p>Buscaste: <strong>"@Model.Search"</strong></p>
+        }
         <a asp-action="Index" class="btn btn-primary">Ver todos los juegos</a>
     </div>
 }
@@ -197,22 +288,20 @@ else
         .game-rating {
             font-size: 1.1rem;
         }
-        
-        .filter-section {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-        }
 
         .w-48 {
             width: 48% !important;
         }
 
-        /* Estilo para el botón de buscar más grande */
         .btn-primary {
             height: 42px;
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+
+        .badge {
+            font-size: 0.7em;
         }
     </style>
 }

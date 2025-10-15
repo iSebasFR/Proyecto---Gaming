@@ -26,13 +26,13 @@ namespace Proyecto_Gaming.ViewModels
         public List<Grupo> GruposRecomendados { get; set; } = new List<Grupo>();
         public List<Grupo> MisGrupos { get; set; } = new List<Grupo>();
         public List<Grupo> TodosLosGrupos { get; set; } = new List<Grupo>();
-        public Grupo GrupoSeleccionado { get; set; }
+        public Grupo? GrupoSeleccionado { get; set; }
         public string VistaActiva { get; set; } = "Recomendados";
     }
 
     public class DetalleGrupoViewModel
     {
-        public Grupo Grupo { get; set; }
+        public Grupo? Grupo { get; set; }
         public List<Grupo> MisGrupos { get; set; } = new List<Grupo>(); // NUEVO: Para el sidebar
         public List<MiembroGrupo> Miembros { get; set; } = new List<MiembroGrupo>();
         public List<PublicacionGrupo> Publicaciones { get; set; } = new List<PublicacionGrupo>();
@@ -45,16 +45,16 @@ namespace Proyecto_Gaming.ViewModels
     {
         [Required]
         [StringLength(100)]
-        public string Nombre { get; set; }
+        public string? Nombre { get; set; }
 
         [StringLength(500)]
-        public string Descripcion { get; set; }
+        public string? Descripcion { get; set; }
 
-        public IFormFile FotoGrupo { get; set; }
-        public IFormFile BannerGrupo { get; set; }
+        public IFormFile? FotoGrupo { get; set; }
+        public IFormFile? BannerGrupo { get; set; }
 
         [Required]
-        public string Categoria { get; set; }
+        public string? Categoria { get; set; }
 
         public bool EsPublico { get; set; } = true;
     }
@@ -89,26 +89,26 @@ namespace Proyecto_Gaming.ViewModels
     public class GestionMiembroRequest
     {
         public int GrupoId { get; set; }
-        public string UsuarioId { get; set; }
+        public string? UsuarioId { get; set; }
     }
 
     public class MultimediaViewModel
     {
         public int GrupoId { get; set; }
-        public IFormFile Archivo { get; set; }
-        public string Descripcion { get; set; }
-        public string TipoArchivo { get; set; }
+        public IFormFile? Archivo { get; set; }
+        public string? Descripcion { get; set; }
+        public string? TipoArchivo { get; set; }
     }
 
     public class ComentarioMultimediaViewModel
     {
         public int MultimediaId { get; set; }
-        public string Contenido { get; set; }
+        public string? Contenido { get; set; }
     }
 
     public class ReaccionViewModel
     {
         public int MultimediaId { get; set; }
-        public string TipoReaccion { get; set; } // "like", "love", "wow", "sad", "angry"
+        public string? TipoReaccion { get; set; } // "like", "love", "wow", "sad", "angry"
     }
 }
