@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Proyecto_Gaming.Models;
 using Proyecto_Gaming.ViewModels;
 using Proyecto_Gaming.Data;
+using Proyecto_Gaming.Services;
 using System.Diagnostics;
 
 namespace Proyecto_Gaming.Controllers
@@ -13,20 +14,23 @@ namespace Proyecto_Gaming.Controllers
         private readonly UserManager<Usuario> _userManager;
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
+        private readonly IStatsService _statsService;
 
-        public PerfilController(UserManager<Usuario> userManager, 
+        public PerfilController(UserManager<Usuario> userManager,
                               ApplicationDbContext context,
-                              IWebHostEnvironment environment)
+                              IWebHostEnvironment environment,
+                              IStatsService statsService)
         {
             _userManager = userManager;
             _context = context;
             _environment = environment;
+            _statsService = statsService;
         }
 
         // GET: Perfil/Index
-        public async Task<IActionResult> Index(string userId = null)
+        public async Task<IActionResult> Index(string? userId = null)
         {
-            Usuario usuario;
+            Usuario? usuario;
 
             if (string.IsNullOrEmpty(userId))
             {
@@ -54,70 +58,12 @@ namespace Proyecto_Gaming.Controllers
 
         private async Task<PerfilViewModel> ConstruirPerfilViewModel(Usuario usuario)
         {
-            // Obtener estadísticas de la biblioteca usando SQL directo
-            var connection = _context.Database.GetDbConnection();
-            await connection.OpenAsync();
-
-            var totalJuegos = 0;
-
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = @"
-                    SELECT COUNT(*) as TotalJuegos
-                    FROM ""BibliotecaUsuario"" 
-                    WHERE ""UsuarioId"" = @userId";
-
-                var parameter = command.CreateParameter();
-                parameter.ParameterName = "userId";
-                parameter.Value = usuario.Id;
-                command.Parameters.Add(parameter);
-
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    if (await reader.ReadAsync())
-                    {
-                        totalJuegos = reader.GetInt32(0);
-                    }
-                }
-            }
-
-            // Obtener biblioteca reciente (últimos 3 juegos)
-            var bibliotecaReciente = new List<BibliotecaUsuario>();
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = @"
-                    SELECT * FROM ""BibliotecaUsuario"" 
-                    WHERE ""UsuarioId"" = @userId 
-                    ORDER BY ""Id"" DESC 
-                    LIMIT 3";
-
-                var parameter = command.CreateParameter();
-                parameter.ParameterName = "userId";
-                parameter.Value = usuario.Id;
-                command.Parameters.Add(parameter);
-
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        bibliotecaReciente.Add(new BibliotecaUsuario
-                        {
-                            Id = reader.GetInt32(0),
-                            UsuarioId = reader.GetString(1),
-                            RawgGameId = reader.GetInt32(2),
-                            Estado = reader.GetString(3),
-                            GameName = reader.GetString(4),
-                            GameImage = reader.GetString(5),
-                            Resena = reader.GetString(6),
-                            Calificacion = reader.GetInt32(7),
-                            FechaCompletado = reader.IsDBNull(8) ? null : reader.GetDateTime(8),
-                            FechaResena = reader.IsDBNull(9) ? null : reader.GetDateTime(9)
-                        });
-                    }
-                }
-            }
-
-            await connection.CloseAsync();
+            // Obtener biblioteca reciente (últimos 3 juegos) usando EF Core
+            var bibliotecaReciente = await _context.BibliotecaUsuario
+                .Where(b => b.UsuarioId == usuario.Id)
+                .OrderByDescending(b => b.Id)
+                .Take(3)
+                .ToListAsync();
 
             // Datos visuales para amigos (no funcional aún)
             var amigosVisual = new List<UsuarioAmigoViewModel>
@@ -127,10 +73,23 @@ namespace Proyecto_Gaming.Controllers
                 new UsuarioAmigoViewModel { Nombre = "GameLover", Estado = "Jugando", Avatar = "GL" }
             };
 
+            // Obtener estadísticas generales del usuario
+            var stats = await _statsService.GetUserStatsAsync(usuario.Id);
+            var totalJuegos = stats.TotalGames;
+
+            // Contar grupos del usuario
+            var groupsCount = await _context.MiembrosGrupo.CountAsync(m => m.UsuarioId == usuario.Id);
+
             return new PerfilViewModel
             {
                 Usuario = usuario,
-                TotalJuegos = totalJuegos,
+                AmigosCount = stats.FriendsCount,
+                TotalJuegos = stats.TotalGames,
+                TotalHoras = stats.TotalHours,
+                JuegosPendientes = stats.TotalGames - stats.CompletedGames,
+                JuegosJugando = 0, // pendiente de campo real
+                JuegosCompletados = stats.CompletedGames,
+                GruposCount = groupsCount,
                 BibliotecaReciente = bibliotecaReciente,
                 AmigosVisual = amigosVisual,
                 JuegosDestacados = bibliotecaReciente.Take(2).ToList()

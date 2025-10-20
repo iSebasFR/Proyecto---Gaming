@@ -1,0 +1,13 @@
+@model Proyecto_Gaming.ViewModels.PerfilViewModel
+
+@{
+    ViewData["Title"] = "Estadísticas";
+}
+
+<h2 class="text-white mb-2">Estadísticas</h2>
+
+@await Html.PartialAsync("~/Views/Perfil/_Estadisticas.cshtml", Model)
+
+<div class="mt-5">
+    <a asp-controller="Perfil" asp-action="Index" class="btn btn-primary">Volver al Perfil</a>
+</div>

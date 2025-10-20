@@ -1,0 +1,407 @@
+@model Proyecto_Gaming.ViewModels.PerfilViewModel
+
+@{
+    int safe(int? v) => v ?? 0;
+    var counts = new[] { safe(Model.JuegosPendientes), safe(Model.TotalJuegos), safe(Model.JuegosJugando), safe(Model.JuegosCompletados) };
+    var labels = new[] { "Juegos pendientes", "Juegos en biblioteca", "Jugando", "Juegos completados" };
+    var colors = new[] { "#4dc9f6", "#f67019", "#f53794", "#537bc4" };
+    var total = counts.Sum();
+
+    var legend = new System.Text.StringBuilder();
+    for (int i = 0; i < counts.Length; i++) {
+        legend.Append("<li class=\"mb-3 d-flex align-items-center\">\n");
+        legend.Append($"<span style=\"width:14px;height:14px;background:{colors[i]};display:inline-block;border-radius:4px;margin-right:12px;\"></span>");
+        legend.Append($"<div><div style=\"font-weight:700;\">{labels[i]}</div><div style=\"opacity:.9;font-size:13px;\">{counts[i]}</div></div>\n");
+        legend.Append("</li>\n");
+    }
+
+    var legendHtml = "<ul id=\"perfilStatsLegend\" class=\"list-unstyled mb-0\">" + legend.ToString() + "</ul>";
+
+    // Serialize data for client-side Chart.js
+    var jsonCounts = System.Text.Json.JsonSerializer.Serialize(counts);
+    var jsonLabels = System.Text.Json.JsonSerializer.Serialize(labels);
+    var jsonColors = System.Text.Json.JsonSerializer.Serialize(colors);
+    // Serialize Top Juegos Finalizados for horizontal bar chart
+    var topLabels = Model.TopJuegosFinalizados?.Keys.ToArray() ?? Array.Empty<string>();
+    var topData = Model.TopJuegosFinalizados?.Values.ToArray() ?? Array.Empty<int>();
+    var jsonTopLabels = System.Text.Json.JsonSerializer.Serialize(topLabels);
+    var jsonTopData = System.Text.Json.JsonSerializer.Serialize(topData);
+    
+    // Serialize monthly reviews trend for the last N months
+    var monthlyReviews = Model.MonthlyReviews?.ToArray() ?? Array.Empty<int>();
+    // Generate month labels relative to today
+    var monthLabels = monthlyReviews.Select((_, idx) => DateTime.Now.AddMonths(idx - monthlyReviews.Length + 1).ToString("MMM")).ToArray();
+    var jsonMonthLabels = System.Text.Json.JsonSerializer.Serialize(monthLabels);
+    var jsonMonthData = System.Text.Json.JsonSerializer.Serialize(monthlyReviews);
+    // Serialize monthly friends trend for the last N months
+    var monthlyFriends = Model.MonthlyFriends?.ToArray() ?? Array.Empty<int>();
+    var monthFriendsLabels = monthlyFriends.Select((_, idx) => DateTime.Now.AddMonths(idx - monthlyFriends.Length + 1).ToString("MMM")).ToArray();
+    var jsonMonthFriendsLabels = System.Text.Json.JsonSerializer.Serialize(monthFriendsLabels);
+    var jsonMonthFriendsData = System.Text.Json.JsonSerializer.Serialize(monthlyFriends);
+    // Serialize monthly groups trend for the last N months
+    var monthlyGroups = Model.MonthlyGroups?.ToArray() ?? Array.Empty<int>();
+    var monthGroupsLabels = monthlyGroups.Select((_, idx) => DateTime.Now.AddMonths(idx - monthlyGroups.Length + 1).ToString("MMM")).ToArray();
+    var jsonMonthGroupsLabels = System.Text.Json.JsonSerializer.Serialize(monthGroupsLabels);
+    var jsonMonthGroupsData = System.Text.Json.JsonSerializer.Serialize(monthlyGroups);
+}
+
+<!-- Encabezado principal de estadísticas -->
+<div class="card stats-card mb-4">
+    <div class="card-header bg-transparent border-0">
+        <h5 class="mb-0 fw-bold">Estadísticas de @Model.Usuario!.UserName</h5>
+    </div>
+    <div class="card-body">
+        <div class="row row-cols-3 g-3">
+            <div class="col">
+                <div class="stat-box p-3 text-center rounded" style="background:#d0e7ff;">
+                    <h3 class="fw-bold mb-0">@Model.AmigosCount</h3>
+                    <small class="opacity-75">Amigos</small>
+                </div>
+            </div>
+            <div class="col">
+                <div class="stat-box p-3 text-center rounded" style="background:#d0ffd8;">
+                    <h3 class="fw-bold mb-0">@Model.GruposCount</h3>
+                    <small class="opacity-75">Grupos</small>
+                </div>
+            </div>
+            <div class="col">
+                <div class="stat-box p-3 text-center rounded" style="background:#ffe4b8;">
+                    <h3 class="fw-bold mb-0">@Model.TotalReviews</h3>
+                    <small class="opacity-75">Reseñas</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts section under personalized stats -->
+<div class="card stats-card mb-4">
+    <div class="card-header bg-transparent border-0">
+        <h5 class="mb-0 fw-bold">Estadísticas de Juegos</h5>
+    </div>
+    <div class="card-body">
+        <div class="row row-cols-2 g-3 mb-4">
+            <div class="col">
+                <div class="stat-box p-3 text-center rounded" style="background:#4dc9f6;">
+                    <h3 class="fw-bold mb-0">@Model.JuegosPendientes</h3>
+                    <small class="opacity-75">Juegos pendientes</small>
+                </div>
+            </div>
+            <div class="col">
+                <div class="stat-box p-3 text-center rounded" style="background:#f67019;">
+                    <h3 class="fw-bold mb-0">@Model.TotalJuegos</h3>
+                    <small class="opacity-75">Juegos en biblioteca</small>
+                </div>
+            </div>
+            <div class="col">
+                <div class="stat-box p-3 text-center rounded" style="background:#f53794;">
+                    <h3 class="fw-bold mb-0">@Model.JuegosJugando</h3>
+                    <small class="opacity-75">Jugando</small>
+                </div>
+            </div>
+            <div class="col">
+                <div class="stat-box p-3 text-center rounded" style="background:#537bc4;">
+                    <h3 class="fw-bold mb-0">@Model.JuegosCompletados</h3>
+                    <small class="opacity-75">Juegos completados</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                @Html.Raw(legendHtml)
+            </div>
+            <div class="col-md-8 d-flex justify-content-center">
+                <div style="width:420px;max-width:100%;height:320px;position:relative;">
+                    <canvas id="perfilStatsChart" role="img" aria-label="Gráfica de pastel" style="max-width:100%;max-height:100%;"></canvas>
+                    @if (total == 0) {
+                        <div class="text-center" style="position:absolute;left:0;top:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
+                            <div style="color:#666;">No hay datos para mostrar</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Custom legend styles to match previous UI -->
+    <style>
+      #perfilStatsLegend { list-style: none; padding-left: 0; margin-bottom: 0; }
+      #perfilStatsLegend li { margin-bottom: 12px; display: flex; align-items: center; }
+      #perfilStatsLegend li span { width: 14px; height: 14px; border-radius: 4px; margin-right: 12px; display: inline-block; }
+      #perfilStatsLegend li div > div:first-child { font-weight: 700; }
+      #perfilStatsLegend li div > div:last-child { opacity: .9; font-size: 13px; }
+    </style>
+<!-- Chart.js CDN - pinned minor version for stability -->
+<!-- Load Chart.js and DataLabels plugin from CDN as fallback -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script>
+    (function(){
+        var counts = @Html.Raw(jsonCounts);
+        var labels = @Html.Raw(jsonLabels);
+        var colors = @Html.Raw(jsonColors);
+
+        function sum(arr){ return arr.reduce(function(a,b){ return a + b; }, 0); }
+
+        document.addEventListener('DOMContentLoaded', function(){
+            var ctxEl = document.getElementById('perfilStatsChart');
+            if (!ctxEl || typeof Chart === 'undefined') return;
+
+            // Register the DataLabels plugin
+            if (Chart.register) {
+                Chart.register(ChartDataLabels);
+            }
+
+            var ctx = ctxEl.getContext('2d');
+            var total = sum(counts);
+            var dataValues = total === 0 ? counts.map(() => 0) : counts;
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: colors,
+                        borderColor: '#ffffff',
+                        borderWidth: 2,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx){
+                                    var v = ctx.parsed || 0;
+                                    var pct = total > 0 ? Math.round((v / total) * 100) : 0;
+                                    return ctx.label + ': ' + v + ' (' + pct + '%)';
+                                }
+                            }
+                        },
+                        datalabels: {
+                            color: '#ffffff',
+                            font: { weight: 'bold', size: 14 },
+                            formatter: function(value, ctx) {
+                                var dataArr = ctx.chart.data.datasets[0].data;
+                                var sumVal = dataArr.reduce((a,b) => a + b, 0);
+                                return sumVal > 0 ? Math.round((value / sumVal) * 100) + '%' : '';
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    })();
+</script>
+
+<!-- Gráfica de barras horizontales: Mis Top Juegos Finalizados -->
+<div class="card stats-card mb-4">
+    <div class="card-header bg-transparent border-0">
+        <h5 class="mb-0 fw-bold">Top Juegos Finalizados</h5>
+    </div>
+    <div class="card-body" style="height: 300px; position: relative;">
+        <canvas id="perfilTopGamesChart" style="max-width:100%; max-height:100%;"></canvas>
+        @if ((Model.TopJuegosFinalizados?.Count ?? 0) == 0) {
+            <div class="text-center" style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
+                <span style="color:#666;">No hay juegos finalizados</span>
+            </div>
+        }
+    </div>
+</div>
+<script>
+    (function(){
+        var topLabels = @Html.Raw(jsonTopLabels);
+        var topData = @Html.Raw(jsonTopData);
+        document.addEventListener('DOMContentLoaded', function(){
+            var canvas = document.getElementById('perfilTopGamesChart');
+            if (!canvas || typeof Chart === 'undefined') return;
+            // Register DataLabels plugin for this chart
+            if (Chart.register) {
+                Chart.register(ChartDataLabels);
+            }
+            var ctx = canvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: topLabels,
+                    datasets: [{
+                        label: 'Veces completado',
+                        data: topData,
+                        backgroundColor: '#537bc4'
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            ticks: {
+                                autoSkip: false,
+                                color: '#000'
+                            }
+                        },
+                        x: {
+                            beginAtZero: true,
+                            ticks: { color: '#000' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Top Juegos Finalizados' },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'end',
+                            color: '#ffffff',
+                            font: { weight: 'bold' },
+                            formatter: function(value){ return value; }
+                        }
+                    }
+                }
+            });
+        });
+    })();
+</script>
+
+<!-- Gráfica de línea: Tendencia de horas jugadas en últimos meses -->
+<!-- Gráfica de línea: Tendencia de Reseñas Realizadas -->
+<div class="card stats-card mb-4">
+    <div class="card-header bg-transparent border-0">
+        <h5 class="mb-0 fw-bold">Tendencia de Reseñas Realizadas</h5>
+    </div>
+    <div class="card-body" style="height: 300px; position: relative;">
+        <canvas id="perfilTrendChart" style="max-width:100%; max-height:100%;"></canvas>
+    @if (!(Model.MonthlyReviews?.Any(r => r > 0) ?? false)) {
+            <div class="text-center" style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
+                <span style="color:#666;">No hay datos de tendencia</span>
+            </div>
+        }
+    </div>
+</div>
+<script>
+    (function(){
+        var labels = @Html.Raw(jsonMonthLabels);
+        var data = @Html.Raw(jsonMonthData);
+        document.addEventListener('DOMContentLoaded', function(){
+            var ctx = document.getElementById('perfilTrendChart');
+            if (!ctx || typeof Chart === 'undefined') return;
+            new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Reseñas realizadas',
+                        data: data,
+                        fill: false,
+                        borderColor: '#4dc9f6',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { x: { ticks: { color: '#000' } }, y: { beginAtZero: true, ticks: { color: '#000', stepSize: 1 } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        });
+    })();
+</script>
+
+<!-- Gráfica de barras: Nuevos amigos por mes -->
+<div class="row row-cols-1 row-cols-md-2 g-3 mb-4">
+    <div class="card stats-card mb-4">
+        <div class="card stats-card h-100">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="mb-0 fw-bold">Estadística de Amigos</h5>
+            </div>
+            <div class="card-body" style="height: 300px; position: relative;">
+                <canvas id="perfilFriendsChart" style="max-width:100%; max-height:100%;"></canvas>
+                @if (!(Model.MonthlyFriends?.Any(f => f > 0) ?? false)) {
+                    <div class="text-center" style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
+                        <span style="color:#666;">No hay datos de amigos nuevos</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="card stats-card mb-4">
+        <div class="card stats-card h-100">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="mb-0 fw-bold">Estadística de Grupos</h5>
+            </div>
+            <div class="card-body" style="height: 300px; position: relative;">
+                <canvas id="perfilGroupsChart" style="max-width:100%; max-height:100%;"></canvas>
+                @if (!(Model.MonthlyGroups?.Any(g => g > 0) ?? false)) {
+                    <div class="text-center" style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
+                        <span style="color:#666;">No hay datos de grupos nuevos</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    (function(){
+        var friendLabels = @Html.Raw(jsonMonthFriendsLabels);
+        var friendData = @Html.Raw(jsonMonthFriendsData);
+        document.addEventListener('DOMContentLoaded', function(){
+            var canvas = document.getElementById('perfilFriendsChart');
+            if (!canvas || typeof Chart === 'undefined') return;
+            var ctx = canvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: friendLabels,
+                    datasets: [{
+                        label: 'Nuevos amigos',
+                        data: friendData,
+                        backgroundColor: '#4dc9f6'
+                    }]
+                },
+                options: {
+                    indexAxis: 'x',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { x: { ticks: { color: '#000' } }, y: { beginAtZero: true, ticks: { color: '#000', stepSize: 1 } } },
+                    plugins: { legend: { display: false }, title: { display: true, text: 'Estadística de Amigos' } }
+                }
+            });
+        });
+    })();
+</script>
+<script>
+    (function(){
+        var groupLabels = @Html.Raw(jsonMonthGroupsLabels);
+        var groupData = @Html.Raw(jsonMonthGroupsData);
+        document.addEventListener('DOMContentLoaded', function(){
+            var canvas = document.getElementById('perfilGroupsChart');
+            if (!canvas || typeof Chart === 'undefined') return;
+            var ctx = canvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: groupLabels,
+                    datasets: [{
+                        label: 'Nuevos grupos',
+                        data: groupData,
+                        backgroundColor: '#f67019'
+                    }]
+                },
+                options: {
+                    indexAxis: 'x',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { x: { ticks: { color: '#000' } }, y: { beginAtZero: true, ticks: { color: '#000', stepSize: 1 } } },
+                    plugins: { legend: { display: false }, title: { display: true, text: 'Estadística de Grupos' } }
+                }
+            });
+        });
+    })();
+</script>

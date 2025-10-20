@@ -15,7 +15,7 @@
                     <div class="row align-items-center">
                         <div class="col-md-3 text-center">
                             <div class="avatar-container mb-3">
-                                @if (!string.IsNullOrEmpty(Model.Usuario.FotoPerfil))
+                                @if (!string.IsNullOrEmpty(Model.Usuario!.FotoPerfil))
                                 {
                                     <img src="@Model.Usuario.FotoPerfil" class="avatar-img" alt="Avatar">
                                 }
@@ -49,11 +49,19 @@
                                     <small class="text-white opacity-75">Juegos</small>
                                 </div>
                                 <div class="stat-item">
-                                    <h4 class="text-white mb-1 fw-bold">-</h4>
+                                    <h4 class="text-white mb-1 fw-bold">@Model.AmigosCount</h4>
                                     <small class="text-white opacity-75">Amigos</small>
                                 </div>
                                 <div class="stat-item">
-                                    <h4 class="text-white mb-1 fw-bold">-</h4>
+                                    <h4 class="text-white mb-1 fw-bold">@Model.TotalHoras</h4>
+                                    <small class="text-white opacity-75">Horas</small>
+                                </div>
+                                <div class="stat-item">
+                                    <h4 class="text-white mb-1 fw-bold">@Model.JuegosCompletados</h4>
+                                    <small class="text-white opacity-75">Completados</small>
+                                </div>
+                                <div class="stat-item">
+                                    <h4 class="text-white mb-1 fw-bold">@Model.GruposCount</h4>
                                     <small class="text-white opacity-75">Grupos</small>
                                 </div>
                             </div>
@@ -72,9 +80,9 @@
                             <h5 class="text-white mb-0 fw-bold"><i class="fas fa-history me-2"></i>Actividad Reciente</h5>
                         </div>
                         <div class="card-body">
-                            @if (Model.BibliotecaReciente.Any())
+                            @if (Model.BibliotecaReciente!.Any())
                             {
-                                foreach (var juego in Model.BibliotecaReciente)
+                                foreach (var juego in Model.BibliotecaReciente!)
                                 {
                                     <div class="activity-item mb-3 p-3 rounded-3">
                                         <div class="d-flex align-items-center">
@@ -150,9 +158,9 @@
                             <h5 class="text-white mb-0 fw-bold"><i class="fas fa-gamepad me-2"></i>Biblioteca de Juegos</h5>
                         </div>
                         <div class="card-body">
-                            @if (Model.JuegosDestacados.Any())
+                            @if (Model.JuegosDestacados!.Any())
                             {
-                                foreach (var juego in Model.JuegosDestacados)
+                                foreach (var juego in Model.JuegosDestacados!)
                                 {
                                     <div class="game-item mb-3 p-3 rounded-3">
                                         <div class="d-flex align-items-center">
@@ -197,7 +205,7 @@
                     <h5 class="text-white mb-0 fw-bold"><i class="fas fa-users me-2"></i>Amigos en Común</h5>
                 </div>
                 <div class="card-body">
-                    @foreach (var amigo in Model.AmigosVisual)
+                    @foreach (var amigo in Model.AmigosVisual!)
                     {
                         <div class="friend-item mb-3 p-3 rounded-3">
                             <div class="d-flex align-items-center">
@@ -259,6 +267,7 @@
         </div>
     </div>
 </div>
+
 
 @section Styles {
     <style>
