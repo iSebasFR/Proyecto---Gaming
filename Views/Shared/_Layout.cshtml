@@ -215,6 +215,53 @@
             background: var(--primary-gradient);
             transform: translateY(-3px);
         }
+
+        /* Estilos para el formulario de contacto en el footer */
+        .footer-contact {
+            background: rgba(35, 40, 48, 0.9);
+            border-top: 1px solid rgba(108, 92, 231, 0.3);
+            padding: 2rem 0;
+            margin-top: 2rem;
+        }
+
+        .footer-contact .card {
+            border: none;
+            background: transparent;
+        }
+
+        .footer-contact .card-title {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .footer-contact .form-label {
+            color: var(--light);
+            font-weight: 500;
+        }
+
+        .footer-contact .form-control {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .footer-contact .form-control:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 0 0 0.25rem rgba(108, 92, 231, 0.25);
+        }
+
+        .footer-contact .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+            font-weight: 600;
+        }
+
+        .footer-contact .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -229,42 +276,47 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarContent">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <!-- Opciones visibles siempre -->
+                        <!-- Opción Inicio - Siempre visible para todos -->
                         <li class="nav-item">
-                            <a class="nav-link active" asp-area="" asp-controller="Home" asp-action="Index">
+                            <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")" 
+                               asp-area="" asp-controller="Home" asp-action="Index">
                                 <i class="fas fa-home me-2"></i>Inicio
                             </a>
                         </li>
 
                         @if (User.IsInRole("Admin"))
                         {
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
-                                <i class="fas fa-tools me-2"></i>Administración
-                            </a>
-                        </li>
-                        }
-
-
-                        <!-- Estas opciones se mostrarán solo si el usuario está logueado -->
-                        @if (User.Identity.IsAuthenticated)
-                        {
+                            <!-- SI ES ADMIN: Solo muestra Inicio y Administración -->
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Biblioteca" asp-action="Index">
+                                <a class="nav-link @(ViewContext.RouteData.Values["area"]?.ToString() == "Admin" ? "active" : "")" 
+                                   asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                    <i class="fas fa-tools me-2"></i>Administración
+                                </a>
+                            </li>
+                        }
+                        else if (User.Identity.IsAuthenticated)
+                        {
+                            <!-- SI ES USUARIO NORMAL (logueado pero NO admin): Muestra todas las opciones -->
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Biblioteca" ? "active" : "")" 
+                                   asp-area="" asp-controller="Biblioteca" asp-action="Index">
                                     <i class="fas fa-book me-2"></i>Biblioteca
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Comunidad" asp-action="Index">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Comunidad" ? "active" : "")" 
+                                   asp-area="" asp-controller="Comunidad" asp-action="Index">
                                     <i class="fas fa-users me-2"></i>Comunidad
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Estadisticas" asp-action="Index">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Estadisticas" ? "active" : "")" 
+                                   asp-area="" asp-controller="Estadisticas" asp-action="Index">
                                     <i class="fas fa-chart-line me-2"></i>Estadísticas
                                 </a>
                             </li>
                         }
+                        <!-- Si no está logueado, no muestra ninguna opción adicional -->
                     </ul>
 
                     <!-- Verificación de autenticación con Identity -->
@@ -274,14 +326,16 @@
                         <div class="user-profile">
                             <span class="user-welcome d-none d-md-block">¡Hola, @User.Identity.Name!</span>
                             <div class="dropdown">
+                                <!-- CORREGIDO: Cambié el botón a un tipo button normal -->
                                 <button class="btn user-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <div class="profile-pic">
                                         <i class="fas fa-user text-white"></i>
                                     </div>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" asp-controller="Perfil" asp-action="Index"><i class="fas fa-user me-2"></i>Mi Perfil</a></li>
-                                    <li><a class="dropdown-item" asp-controller="Configuracion" asp-action="Index"><i class="fas fa-cog me-2"></i>Configuración</a></li>
+                                    <!-- CORREGIDO: Links funcionales -->
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Perfil" asp-action="Index"><i class="fas fa-user me-2"></i>Mi Perfil</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Configuracion" asp-action="Index"><i class="fas fa-cog me-2"></i>Configuración</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
@@ -335,27 +389,89 @@
         </main>
     </div>
 
+    @{
+        // Verificar si estamos en la página Home/Index Y NO es Admin
+        var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+        var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
+        var isHomeIndex = currentController == "Home" && currentAction == "Index";
+        var isAdmin = User.IsInRole("Admin");
+    }
 
-
-    <footer class="footer-gaming">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <p class="mb-0">&copy; 2025 - GAMING - <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-white-50">Política de Privacidad</a></p>
-                </div>
-                <div class="col-md-6">
-                    <div class="social-links">
-                        <a href="#" class="social-icon"><i class="fab fa-discord"></i></a>
-                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
-                        <a href="#" class="social-icon"><i class="fab fa-steam"></i></a>
+    @if (isHomeIndex && !isAdmin)
+    {
+        <!-- ==================== -->
+        <!-- FOOTER CON FORMULARIO (SOLO PARA HOME/INDEX Y NO ADMIN) -->
+        <!-- ==================== -->
+        <footer class="footer-gaming">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p class="mb-0">&copy; 2025 - GAMING - <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-white-50">Política de Privacidad</a></p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="social-links">
+                            <a href="#" class="social-icon"><i class="fab fa-discord"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-steam"></i></a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        @await Html.PartialAsync("_ContactFormPartial", new Proyecto_Gaming.ViewModels.ContactFormViewModel())
-    </footer>
+            
+            <!-- SECCIÓN DEL FORMULARIO DE CONTACTO -->
+            <div class="footer-contact">
+                <div class="container">
+                    @await Html.PartialAsync("_ContactFormPartial", new Proyecto_Gaming.ViewModels.ContactFormViewModel())
+                </div>
+            </div>
+            
+            <!-- INFORMACIÓN ADICIONAL -->
+            <div class="container mt-3">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <p class="mb-0 text-white-50">Proyecto Gaming - Todos los derechos reservados</p>
+                        <a asp-controller="Contact" asp-action="Index" class="text-white-50">Más información de contacto</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    }
+    else
+    {
+        <!-- ==================== -->
+        <!-- FOOTER NORMAL (PARA ADMIN Y OTRAS PÁGINAS) -->
+        <!-- ==================== -->
+        <footer class="footer-gaming">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p class="mb-0">&copy; 2025 - GAMING - <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-white-50">Política de Privacidad</a></p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="social-links">
+                            <a href="#" class="social-icon"><i class="fab fa-discord"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-steam"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- INFORMACIÓN ADICIONAL SIN FORMULARIO -->
+            <div class="container mt-3">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <p class="mb-0 text-white-50">Proyecto Gaming - Todos los derechos reservados</p>
+                        <a asp-controller="Contact" asp-action="Index" class="text-white-50">Contáctanos</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    }
 
     <!-- Librerías JavaScript necesarias -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -372,11 +488,5 @@
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
-    <footer class="footer text-center py-3 bg-dark text-white">
-    <p>&copy; 2025 Proyecto Gaming</p>
-    <a asp-controller="Contact" asp-action="Index" class="text-white">Contáctanos</a>
-</footer>
-
 </body>
-
 </html>
