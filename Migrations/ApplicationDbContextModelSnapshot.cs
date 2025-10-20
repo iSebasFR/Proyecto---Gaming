@@ -162,8 +162,7 @@ namespace Proyecto_Gaming.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
+                        .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
@@ -194,12 +193,6 @@ namespace Proyecto_Gaming.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("game_name");
 
-                    b.Property<string>("UsuarioId")
-                        .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("character varying(450)")
-                        .HasColumnName("id_usuario");
-
                     b.Property<int>("RawgGameId")
                         .HasColumnType("integer")
                         .HasColumnName("rawg_game_id");
@@ -209,11 +202,17 @@ namespace Proyecto_Gaming.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)")
+                        .HasColumnName("id_usuario");
+
+                    b.Property<string>("UsuarioId1")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UsuarioId");
+                    b.HasIndex("UsuarioId1");
 
                     b.HasIndex("UsuarioId", "RawgGameId")
                         .IsUnique();
@@ -356,7 +355,6 @@ namespace Proyecto_Gaming.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BannerGrupo")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("banner_grupo");
@@ -374,7 +372,6 @@ namespace Proyecto_Gaming.Migrations
                         .HasColumnName("creador_id");
 
                     b.Property<string>("Descripcion")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("descripcion");
@@ -392,7 +389,6 @@ namespace Proyecto_Gaming.Migrations
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<string>("FotoGrupo")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("foto_grupo");
@@ -467,7 +463,6 @@ namespace Proyecto_Gaming.Migrations
                         .HasColumnName("angry");
 
                     b.Property<string>("Descripcion")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
                         .HasColumnName("descripcion");
@@ -501,7 +496,6 @@ namespace Proyecto_Gaming.Migrations
                         .HasColumnName("sad");
 
                     b.Property<string>("TipoArchivo")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)")
                         .HasColumnName("tipo_archivo");
@@ -785,9 +779,17 @@ namespace Proyecto_Gaming.Migrations
 
             modelBuilder.Entity("Proyecto_Gaming.Models.BibliotecaUsuario", b =>
                 {
+                    b.HasOne("Proyecto_Gaming.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Proyecto_Gaming.Models.Usuario", null)
                         .WithMany("BibliotecaUsuarios")
-                        .HasForeignKey("UsuarioId");
+                        .HasForeignKey("UsuarioId1");
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("Proyecto_Gaming.Models.Comunidad.Amigo", b =>

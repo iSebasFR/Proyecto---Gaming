@@ -36,9 +36,10 @@ namespace Proyecto_Gaming.Data
                 entity.ToTable("BibliotecaUsuario");
                 entity.HasKey(bu => bu.Id);
                 
-                entity.Property(bu => bu.Id)
-                    .HasColumnName("id")
-                    .ValueGeneratedOnAdd();
+                // ELIMINA esta línea - deja que EF maneje el nombre automáticamente
+                // entity.Property(bu => bu.Id)
+                //     .HasColumnName("id")
+                //     .ValueGeneratedOnAdd();
                     
                 entity.Property(bu => bu.UsuarioId)
                     .HasColumnName("id_usuario")
@@ -66,6 +67,12 @@ namespace Proyecto_Gaming.Data
                 // Índice único para evitar duplicados
                 entity.HasIndex(bu => new { bu.UsuarioId, bu.RawgGameId })
                     .IsUnique();
+
+                // RELACIÓN IMPORTANTE - Agrega esto
+                entity.HasOne(bu => bu.Usuario)
+                    .WithMany()
+                    .HasForeignKey(bu => bu.UsuarioId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             // Configuración existente para Usuario
