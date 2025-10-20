@@ -39,6 +39,9 @@ builder.Services.AddHttpClient<IRawgService, RawgService>(client =>
 });
 builder.Services.AddScoped<IRawgService, RawgService>();
 
+// ✅ STATISTICS SERVICE
+builder.Services.AddScoped<IStatsService, StatsService>();
+
 // ✅ Email service (FileMode o SMTP según configuración)
 var emailMode = builder.Configuration["Email:Mode"] ?? "File";
 if (emailMode.Equals("Smtp", StringComparison.OrdinalIgnoreCase))

@@ -234,26 +234,18 @@ public async Task<IActionResult> Recomendaciones()
                     return RedirectToAction(nameof(Index));
                 }
 
-                // SQL DIRECTO
-                var connection = _context.Database.GetDbConnection();
-                await connection.OpenAsync();
-                
-                using (var command = connection.CreateCommand())
+                // Usar EF Core para añadir la entrada en la biblioteca
+                var entry = new BibliotecaUsuario
                 {
-                    command.CommandText = @"
-                        INSERT INTO ""BibliotecaUsuario"" 
-                        (""UsuarioId"", ""RawgGameId"", ""Estado"", ""GameName"", ""GameImage"", ""Resena"", ""Calificacion"")
-                        VALUES (@UsuarioId, @rawgId, 'Pendiente', @gameName, @gameImage, '', 0)";
-                    
-                    command.Parameters.Add(new Npgsql.NpgsqlParameter("UsuarioId", usuario.Id));
-                    command.Parameters.Add(new Npgsql.NpgsqlParameter("rawgId", id));
-                    command.Parameters.Add(new Npgsql.NpgsqlParameter("gameName", gameDetails.Name));
-                    command.Parameters.Add(new Npgsql.NpgsqlParameter("gameImage", gameDetails.BackgroundImage ?? "https://via.placeholder.com/400x200?text=Imagen+No+Disponible"));
-                    
-                    await command.ExecuteNonQueryAsync();
-                }
-                
-                await connection.CloseAsync();
+                    UsuarioId = usuario.Id,
+                    RawgGameId = id,
+                    Estado = "Pendiente",
+                    GameName = gameDetails.Name,
+                    GameImage = gameDetails.BackgroundImage ?? "https://via.placeholder.com/400x200?text=Imagen+No+Disponible",
+                };
+
+                _context.BibliotecaUsuario.Add(entry);
+                await _context.SaveChangesAsync();
                 TempData["Ok"] = $"{gameDetails.Name} añadido a Pendientes.";
                 return RedirectToAction(nameof(Pendientes));
             }
@@ -280,43 +272,11 @@ public async Task<IActionResult> Recomendaciones()
                 return RedirectToAction("Login", "Account");
             }
 
-            // SQL DIRECTO
-            var connection = _context.Database.GetDbConnection();
-            await connection.OpenAsync();
-            
-            var juegosPendientes = new List<BibliotecaUsuario>();
-            
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = @"SELECT * FROM ""BibliotecaUsuario"" WHERE ""UsuarioId"" = @userId AND ""Estado"" = 'Pendiente'";
-                
-                var parameter = command.CreateParameter();
-                parameter.ParameterName = "userId";
-                parameter.Value = usuario.Id;
-                command.Parameters.Add(parameter);
-                
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        juegosPendientes.Add(new BibliotecaUsuario
-                        {
-                            Id = reader.GetInt32(0),
-                            UsuarioId = reader.GetString(1),
-                            RawgGameId = reader.GetInt32(2),
-                            Estado = reader.GetString(3),
-                            GameName = reader.GetString(4),
-                            GameImage = reader.GetString(5),
-                            Resena = reader.GetString(6),
-                            Calificacion = reader.GetInt32(7),
-                            FechaCompletado = reader.IsDBNull(8) ? null : reader.GetDateTime(8),
-                            FechaResena = reader.IsDBNull(9) ? null : reader.GetDateTime(9)
-                        });
-                    }
-                }
-            }
-            
-            await connection.CloseAsync();
+            // Usar EF Core para obtener los juegos pendientes (más seguro y menos propenso a errores de mapeo)
+            var juegosPendientes = await _context.BibliotecaUsuario
+                .Where(b => b.UsuarioId == usuario.Id && b.Estado.ToLower() == "pendiente")
+                .ToListAsync();
+
             return View(juegosPendientes);
         }
 
@@ -358,43 +318,11 @@ public async Task<IActionResult> Recomendaciones()
                 return RedirectToAction("Login", "Account");
             }
 
-            // SQL DIRECTO
-            var connection = _context.Database.GetDbConnection();
-            await connection.OpenAsync();
-            
-            var juegosJugando = new List<BibliotecaUsuario>();
-            
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = @"SELECT * FROM ""BibliotecaUsuario"" WHERE ""UsuarioId"" = @userId AND ""Estado"" = 'Jugando'";
-                
-                var parameter = command.CreateParameter();
-                parameter.ParameterName = "userId";
-                parameter.Value = usuario.Id;
-                command.Parameters.Add(parameter);
-                
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        juegosJugando.Add(new BibliotecaUsuario
-                        {
-                            Id = reader.GetInt32(0),
-                            UsuarioId = reader.GetString(1),
-                            RawgGameId = reader.GetInt32(2),
-                            Estado = reader.GetString(3),
-                            GameName = reader.GetString(4),
-                            GameImage = reader.GetString(5),
-                            Resena = reader.GetString(6),
-                            Calificacion = reader.GetInt32(7),
-                            FechaCompletado = reader.IsDBNull(8) ? null : reader.GetDateTime(8),
-                            FechaResena = reader.IsDBNull(9) ? null : reader.GetDateTime(9)
-                        });
-                    }
-                }
-            }
-            
-            await connection.CloseAsync();
+            // Usar EF Core para obtener los juegos en progreso
+            var juegosJugando = await _context.BibliotecaUsuario
+                .Where(b => b.UsuarioId == usuario.Id && b.Estado.ToLower() == "jugando")
+                .ToListAsync();
+
             return View(juegosJugando);
         }
 
@@ -414,43 +342,11 @@ public async Task<IActionResult> Recomendaciones()
                 return RedirectToAction("Login", "Account");
             }
 
-            // SQL DIRECTO
-            var connection = _context.Database.GetDbConnection();
-            await connection.OpenAsync();
-            
-            var juegosCompletados = new List<BibliotecaUsuario>();
-            
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = @"SELECT * FROM ""BibliotecaUsuario"" WHERE ""UsuarioId"" = @userId AND ""Estado"" = 'Completado'";
-                
-                var parameter = command.CreateParameter();
-                parameter.ParameterName = "userId";
-                parameter.Value = usuario.Id;
-                command.Parameters.Add(parameter);
-                
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        juegosCompletados.Add(new BibliotecaUsuario
-                        {
-                            Id = reader.GetInt32(0),
-                            UsuarioId = reader.GetString(1),
-                            RawgGameId = reader.GetInt32(2),
-                            Estado = reader.GetString(3),
-                            GameName = reader.GetString(4),
-                            GameImage = reader.GetString(5),
-                            Resena = reader.GetString(6),
-                            Calificacion = reader.GetInt32(7),
-                            FechaCompletado = reader.IsDBNull(8) ? null : reader.GetDateTime(8),
-                            FechaResena = reader.IsDBNull(9) ? null : reader.GetDateTime(9)
-                        });
-                    }
-                }
-            }
-            
-            await connection.CloseAsync();
+            // Usar EF Core para obtener los juegos completados (más seguro)
+            var juegosCompletados = await _context.BibliotecaUsuario
+                .Where(b => b.UsuarioId == usuario.Id && b.Estado.ToLower() == "completado")
+                .ToListAsync();
+
             return View(juegosCompletados);
         }
 
@@ -470,30 +366,21 @@ public async Task<IActionResult> Recomendaciones()
                 return RedirectToAction(nameof(Pendientes));
             }
 
-            // SQL DIRECTO
-            var connection = _context.Database.GetDbConnection();
-            await connection.OpenAsync();
-            
-            using (var command = connection.CreateCommand())
+            // Usar EF Core para actualizar el estado a 'Jugando'
+            var itemToPlay = await _context.BibliotecaUsuario
+                .FirstOrDefaultAsync(b => b.UsuarioId == usuario.Id && b.RawgGameId == id && b.Estado.ToLower() == "pendiente");
+
+            if (itemToPlay == null)
             {
-                command.CommandText = @"UPDATE ""BibliotecaUsuario"" SET ""Estado"" = 'Jugando' WHERE ""UsuarioId"" = @userId AND ""RawgGameId"" = @gameId AND ""Estado"" = 'Pendiente'";
-                
-                command.Parameters.Add(new Npgsql.NpgsqlParameter("userId", usuario.Id));
-                command.Parameters.Add(new Npgsql.NpgsqlParameter("gameId", id));
-                
-                var rowsAffected = await command.ExecuteNonQueryAsync();
-                
-                if (rowsAffected == 0)
-                {
-                    TempData["Error"] = "No se encontró el juego en Pendientes.";
-                }
-                else
-                {
-                    TempData["Ok"] = "¡Disfruta! Marcado como 'Jugando'.";
-                }
+                TempData["Error"] = "No se encontró el juego en Pendientes.";
             }
-            
-            await connection.CloseAsync();
+            else
+            {
+                itemToPlay.Estado = "Jugando";
+                _context.BibliotecaUsuario.Update(itemToPlay);
+                await _context.SaveChangesAsync();
+                TempData["Ok"] = "¡Disfruta! Marcado como 'Jugando'.";
+            }
             return RedirectToAction(nameof(Pendientes));
         }
 
@@ -513,33 +400,25 @@ public async Task<IActionResult> Recomendaciones()
                 return RedirectToAction(nameof(Jugando));
             }
 
-            // SQL DIRECTO
-            var connection = _context.Database.GetDbConnection();
-            await connection.OpenAsync();
-            
-            using (var command = connection.CreateCommand())
+            // Usar EF Core para actualizar a 'Completado'
+            var itemToComplete = await _context.BibliotecaUsuario
+                .FirstOrDefaultAsync(b => b.UsuarioId == usuario.Id && b.RawgGameId == id && b.Estado.ToLower() == "jugando");
+
+            if (itemToComplete == null)
             {
-                command.CommandText = @"UPDATE ""BibliotecaUsuario"" SET ""Estado"" = 'Completado', ""FechaCompletado"" = @fecha WHERE ""UsuarioId"" = @userId AND ""RawgGameId"" = @gameId AND ""Estado"" = 'Jugando'";
-                
-                command.Parameters.Add(new Npgsql.NpgsqlParameter("userId", usuario.Id));
-                command.Parameters.Add(new Npgsql.NpgsqlParameter("gameId", id));
-                command.Parameters.Add(new Npgsql.NpgsqlParameter("fecha", DateTime.UtcNow));
-                
-                var rowsAffected = await command.ExecuteNonQueryAsync();
-                
-                if (rowsAffected == 0)
-                {
-                    TempData["Error"] = "No se encontró el juego en Jugando.";
-                }
-                else
-                {
-                    var game = await _rawgService.GetGameDetailsAsync(id);
-                    var gameName = game?.Name ?? "el juego";
-                    TempData["Ok"] = $"¡Felicidades! {gameName} marcado como 'Completado'.";
-                }
+                TempData["Error"] = "No se encontró el juego en Jugando.";
             }
-            
-            await connection.CloseAsync();
+            else
+            {
+                itemToComplete.Estado = "Completado";
+                itemToComplete.FechaCompletado = DateTime.UtcNow;
+                _context.BibliotecaUsuario.Update(itemToComplete);
+                await _context.SaveChangesAsync();
+
+                var game = await _rawgService.GetGameDetailsAsync(id);
+                var gameName = game?.Name ?? "el juego";
+                TempData["Ok"] = $"¡Felicidades! {gameName} marcado como 'Completado'.";
+            }
             return RedirectToAction(nameof(Completados));
         }
 
@@ -560,30 +439,29 @@ public async Task<IActionResult> Recomendaciones()
 
             try
             {
-                // SQL DIRECTO
-                var connection = _context.Database.GetDbConnection();
-                await connection.OpenAsync();
-                
-                using (var command = connection.CreateCommand())
+                // Usar EF Core para actualizar reseña/calificación (si existen columnas)
+                var reviewItem = await _context.BibliotecaUsuario
+                    .FirstOrDefaultAsync(b => b.UsuarioId == usuario.Id && b.RawgGameId == id && b.Estado.ToLower() == "completado");
+
+                if (reviewItem == null)
                 {
-                    command.CommandText = @"UPDATE ""BibliotecaUsuario"" SET ""Resena"" = @resena, ""Calificacion"" = @calificacion, ""FechaResena"" = @fecha WHERE ""UsuarioId"" = @userId AND ""RawgGameId"" = @gameId AND ""Estado"" = 'Completado'";
-                    
-                    command.Parameters.Add(new Npgsql.NpgsqlParameter("userId", usuario.Id));
-                    command.Parameters.Add(new Npgsql.NpgsqlParameter("gameId", id));
-                    command.Parameters.Add(new Npgsql.NpgsqlParameter("resena", resena ?? ""));
-                    command.Parameters.Add(new Npgsql.NpgsqlParameter("calificacion", calificacion));
-                    command.Parameters.Add(new Npgsql.NpgsqlParameter("fecha", DateTime.UtcNow));
-                    
-                    var rowsAffected = await command.ExecuteNonQueryAsync();
-                    
-                    if (rowsAffected == 0)
-                    {
-                        return Json(new { success = false, message = "Juego no encontrado." });
-                    }
+                    return Json(new { success = false, message = "Juego no encontrado." });
                 }
-                
-                await connection.CloseAsync();
-                return Json(new { success = true, message = "Reseña publicada correctamente." });
+
+                // Algunas migraciones podrían no tener columnas resena/calificacion; actualizar condicionalmente
+                try
+                {
+                    reviewItem.Resena = resena ?? "";
+                    reviewItem.Calificacion = calificacion;
+                    reviewItem.FechaResena = DateTime.UtcNow;
+                    _context.BibliotecaUsuario.Update(reviewItem);
+                    await _context.SaveChangesAsync();
+                    return Json(new { success = true, message = "Reseña publicada correctamente." });
+                }
+                catch
+                {
+                    return Json(new { success = false, message = "Error al guardar la reseña." });
+                }
             }
             catch (Exception ex)
             {
@@ -607,43 +485,11 @@ public async Task<IActionResult> Recomendaciones()
                 return RedirectToAction("Login", "Account");
             }
 
-            // SQL DIRECTO
-            var connection = _context.Database.GetDbConnection();
-            await connection.OpenAsync();
-            
-            var miBiblioteca = new List<BibliotecaUsuario>();
-            
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = @"SELECT * FROM ""BibliotecaUsuario"" WHERE ""UsuarioId"" = @userId";
-                
-                var parameter = command.CreateParameter();
-                parameter.ParameterName = "userId";
-                parameter.Value = usuario.Id;
-                command.Parameters.Add(parameter);
-                
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        miBiblioteca.Add(new BibliotecaUsuario
-                        {
-                            Id = reader.GetInt32(0),
-                            UsuarioId = reader.GetString(1),
-                            RawgGameId = reader.GetInt32(2),
-                            Estado = reader.GetString(3),
-                            GameName = reader.GetString(4),
-                            GameImage = reader.GetString(5),
-                            Resena = reader.GetString(6),
-                            Calificacion = reader.GetInt32(7),
-                            FechaCompletado = reader.IsDBNull(8) ? null : reader.GetDateTime(8),
-                            FechaResena = reader.IsDBNull(9) ? null : reader.GetDateTime(9)
-                        });
-                    }
-                }
-            }
-            
-            await connection.CloseAsync();
+            // Usar EF Core para obtener la biblioteca completa
+            var miBiblioteca = await _context.BibliotecaUsuario
+                .Where(b => b.UsuarioId == usuario.Id)
+                .ToListAsync();
+
             return View(miBiblioteca);
         }
     }

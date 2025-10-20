@@ -1,0 +1,14 @@
+{
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "library": "chart.js@4.3.0",
+      "destination": "wwwroot/js/"
+    },
+    {
+      "library": "chartjs-plugin-datalabels@2.2.0",
+      "destination": "wwwroot/js/"
+    }
+  ]
+}

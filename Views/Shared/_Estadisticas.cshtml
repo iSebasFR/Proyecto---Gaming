@@ -1,0 +1,116 @@
+@model Proyecto_Gaming.ViewModels.PerfilViewModel
+
+<div class="card stats-card mb-4" style="background: linear-gradient(180deg, rgba(79,63,156,0.12), rgba(108,92,231,0.06)); border-radius:18px; padding:18px;">
+    <div class="card-header bg-transparent text-dark border-0">
+        <h5 class="mb-0 fw-bold">Estadísticas de juegos <i class="fas fa-gamepad ms-2"></i></h5>
+    </div>
+    <div class="card-body">
+        <div class="row row-cols-2 row-cols-md-2 g-3 mb-4">
+            <div class="col">
+                <div class="stat-box p-3 text-center rounded" style="background: #e9dfff;">
+                    <h3 class="fw-bold mb-0">@Model.JuegosPendientes</h3>
+                    <small class="opacity-75">Juegos pendientes</small>
+                </div>
+            </div>
+            <div class="col">
+                <div class="stat-box p-3 text-center rounded" style="background: #f4e3ff;">
+                    <h3 class="fw-bold mb-0">@Model.TotalJuegos</h3>
+                    <small class="opacity-75">Juegos en biblioteca</small>
+                </div>
+            </div>
+            <div class="col">
+                <div class="stat-box p-3 text-center rounded" style="background: #f7e6ff;">
+                    <h3 class="fw-bold mb-0">@Model.JuegosJugando</h3>
+                    <small class="opacity-75">Jugando</small>
+                </div>
+            </div>
+            <div class="col">
+                <div class="stat-box p-3 text-center rounded" style="background: #f4d7ff;">
+                    <h3 class="fw-bold mb-0">@Model.JuegosCompletados</h3>
+                    <small class="opacity-75">Juegos completados</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-7">
+                <canvas id="pieChartStats"></canvas>
+            </div>
+            <div class="col-md-5 d-flex align-items-center">
+                <div>
+                    <ul class="list-unstyled mb-0">
+                        <li class="d-flex align-items-center mb-2"><span style="width:14px;height:14px;background:#4dc9f6;display:inline-block;border-radius:3px;margin-right:8px;"></span> <strong>Juegos pendientes</strong> <span class="text-muted ms-2">@Model.JuegosPendientes</span></li>
+                        <li class="d-flex align-items-center mb-2"><span style="width:14px;height:14px;background:#f67019;display:inline-block;border-radius:3px;margin-right:8px;"></span> <strong>Juegos en biblioteca</strong> <span class="text-muted ms-2">@Model.TotalJuegos</span></li>
+                        <li class="d-flex align-items-center mb-2"><span style="width:14px;height:14px;background:#f53794;display:inline-block;border-radius:3px;margin-right:8px;"></span> <strong>Jugando</strong> <span class="text-muted ms-2">@Model.JuegosJugando</span></li>
+                        <li class="d-flex align-items-center mb-2"><span style="width:14px;height:14px;background:#537bc4;display:inline-block;border-radius:3px;margin-right:8px;"></span> <strong>Juegos completados</strong> <span class="text-muted ms-2">@Model.JuegosCompletados</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4" />
+        <h6 class="text-muted">Tendencia (juegos pendientes últimos 6 meses)</h6>
+        <div>
+            <canvas id="barChartHours" style="height:240px; max-height:320px;"></canvas>
+        </div>
+
+        <h6 class="text-muted mt-4">Distribución actual</h6>
+        <div>
+            <canvas id="barChartCounts" class="mt-2" style="height:180px; max-height:240px;"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<script>
+    (function() {
+        const loadChart = () => typeof Chart !== 'undefined';
+        const ready = (cb) => {
+            if (document.readyState === 'complete' || document.readyState === 'interactive') cb();
+            else document.addEventListener('DOMContentLoaded', cb);
+        };
+
+        ready(() => {
+            if (!loadChart()) { console.error('Chart.js not loaded.'); return; }
+            if (window.Chart && window.Chart.register && typeof ChartDataLabels !== 'undefined') { try { Chart.register(ChartDataLabels); } catch {} }
+
+            try {
+                const counts = [@Model.JuegosPendientes, @Model.TotalJuegos, @Model.JuegosJugando, @Model.JuegosCompletados];
+                const labels = ['Pendientes', 'Biblioteca', 'Jugando', 'Completados'];
+                const colors = ['#4dc9f6', '#f67019', '#f53794', '#537bc4'];
+
+                const pieEl = document.getElementById('pieChartStats');
+                if (pieEl && pieEl.getContext) {
+                    const ctx = pieEl.getContext('2d');
+                    const total = counts.reduce((a,b) => a + b, 0) || 1;
+                    new Chart(ctx, { type: 'pie', data: { labels, datasets: [{ data: counts, backgroundColor: colors, borderColor: 'rgba(255,255,255,0.06)', borderWidth: 2 }] }, options: { responsive: true, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (context) => { const v = context.raw || 0; const pct = ((v/total)*100).toFixed(1); return context.label + ': ' + v + ' (' + pct + '%)'; } } } } } );
+                }
+
+                const countsEl = document.getElementById('barChartCounts');
+                if (countsEl && countsEl.getContext) {
+                    const ctxCounts = countsEl.getContext('2d');
+                    new Chart(ctxCounts, { type: 'bar', data: { labels, datasets: [{ label: 'Cantidad', data: counts, backgroundColor: colors }] }, options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'start', formatter: v => v } } }, plugins: (typeof ChartDataLabels !== 'undefined') ? [ChartDataLabels] : [] });
+                }
+
+                try {
+                    const raw = [@((Model.MonthlyHours != null) ? string.Join(",", Model.MonthlyHours) : "0,0,0,0,0,0")];
+                    const values = raw.map(v => parseInt(v));
+                    const months = [];
+                    const now = new Date();
+                    for (let i = 5; i >= 0; i--) { const d = new Date(now.getFullYear(), now.getMonth() - i, 1); months.push(d.toLocaleString(undefined, { month: 'short' })); }
+                    const trendEl = document.getElementById('barChartHours');
+                    if (trendEl && trendEl.getContext) { const ctxBar = trendEl.getContext('2d'); new Chart(ctxBar, { type: 'bar', data: { labels: months, datasets: [{ label: 'Horas', data: values, backgroundColor: 'rgba(108,92,231,0.8)' }] }, options: { responsive: true, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } }); }
+                } catch (e2) { console.warn('Monthly trend chart init failed:', e2); }
+
+            } catch (e) { console.error('Error initializing charts:', e); }
+        });
+    })();
+</script>
+
+<!-- Debug info (visible) to help verify Razor-injected arrays while troubleshooting -->
+<div id="stats-debug" style="color:#fff; font-size:0.9rem; margin-top:12px;">
+    <strong>DEBUG — valores inyectados:</strong>
+    <div>counts: [@Model.JuegosPendientes, @Model.TotalJuegos, @Model.JuegosJugando, @Model.JuegosCompletados]</div>
+    <div>monthly: [@((Model.MonthlyHours != null) ? string.Join(", ", Model.MonthlyHours) : "0, 0, 0, 0, 0, 0")]</div>
+</div>

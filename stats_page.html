@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Iniciar Sesi&#xF3;n - GAMING</title>
+    
+    <!-- Librerías CSS necesarias -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Renderizar la sección Styles -->
+    
+
+    <style>
+        /* (Mantén todos tus estilos CSS existentes igual) */
+        :root {
+            --primary: #6c5ce7;
+            --primary-dark: #5649c7;
+            --primary-gradient: linear-gradient(135deg, #6c5ce7 0%, #8a7dff 100%);
+            --secondary: #a29bfe;
+            --dark: #2d3436;
+            --light: #f5f6fa;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --card-bg: rgba(35, 40, 48, 0.9);
+            --border-radius: 12px;
+            --box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            --transition: all 0.3s ease;
+            --text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)), 
+                        url('https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* (Mantén todos los demás estilos igual) */
+        .navbar-gaming {
+            background: rgba(18, 20, 24, 0.98) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(108, 92, 231, 0.4) !important;
+            padding: 0.8rem 1rem;
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 2.2rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1.5px;
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+
+        .navbar-nav .nav-link {
+            color: white !important;
+            font-weight: 600 !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: var(--border-radius);
+            margin: 0 0.2rem;
+            transition: var(--transition);
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary) !important;
+            background: rgba(108, 92, 231, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .user-btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            margin-left: 0.5rem;
+        }
+
+        .btn-login {
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-login:hover {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.1);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .user-btn:not(.btn-login) {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+        }
+
+        .user-btn:not(.btn-login):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+        }
+
+        .profile-pic {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .profile-pic:hover {
+            transform: scale(1.1);
+            border-color: var(--primary);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-welcome {
+            color: white;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        .dropdown-menu {
+            background: rgba(18, 20, 24, 0.98);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(108, 92, 231, 0.3);
+            border-radius: var(--border-radius);
+            padding: 0.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .dropdown-item {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.7rem 1rem;
+            transition: var(--transition);
+            border-radius: 6px;
+            font-weight: 500;
+            margin: 0.2rem 0;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(108, 92, 231, 0.2);
+            color: var(--primary);
+        }
+
+        .alert-container {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            z-index: 1050;
+            min-width: 300px;
+        }
+
+        .footer-gaming {
+            background: rgba(18, 20, 24, 0.98);
+            border-top: 1px solid rgba(108, 92, 231, 0.3);
+            padding: 2rem 0;
+            margin-top: auto;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .social-icon:hover {
+            background: var(--primary-gradient);
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body>
+    <header b-4rn3j81c32>
+        <nav b-4rn3j81c32 class="navbar navbar-expand-lg navbar-gaming">
+            <div b-4rn3j81c32 class="container-fluid">
+                <a class="navbar-brand" href="/">
+                    <i b-4rn3j81c32 class="fas fa-gamepad me-2"></i>GAMING
+                </a>
+                <button b-4rn3j81c32 class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span b-4rn3j81c32 class="navbar-toggler-icon text-white"><i b-4rn3j81c32 class="fas fa-bars"></i></span>
+                </button>
+                <div b-4rn3j81c32 class="collapse navbar-collapse" id="navbarContent">
+                    <ul b-4rn3j81c32 class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <!-- Opciones visibles siempre -->
+                        <li b-4rn3j81c32 class="nav-item">
+                            <a class="nav-link active" href="/">
+                                <i b-4rn3j81c32 class="fas fa-home me-2"></i>Inicio
+                            </a>
+                        </li>
+
+
+
+                        <!-- Estas opciones se mostrarán solo si el usuario está logueado -->
+                    </ul>
+
+                    <!-- Verificación de autenticación con Identity -->
+                        <!-- Usuario NO logueado - Mostrar botones de login/registro -->
+                        <div b-4rn3j81c32 class="user-actions">
+                            <a class="user-btn btn-login" href="/Identity/Account/Login">
+                                <i b-4rn3j81c32 class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                            </a>
+                            <a class="user-btn" href="/Identity/Account/Register">
+                                <i b-4rn3j81c32 class="fas fa-user-plus me-2"></i>Registrarse
+                            </a>
+                        </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Container para mensajes temporales -->
+    <div b-4rn3j81c32 class="alert-container">
+    </div>
+    
+    <div b-4rn3j81c32 class="container">
+        <main b-4rn3j81c32 role="main" class="pb-3">
+            
+
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-xl-10 col-lg-12 col-md-9">
+            <div class="p-4 p-sm-5" style="background-color: rgba(23, 26, 33, 0.8); border-radius: 1rem;">
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <section>
+                            <form id="account" method="post">
+                                <h1 class="fw-bold">¡Bienvenido de vuelta!</h1>
+                                <p class="text-white-50 mb-4">Ingresa tus credenciales para continuar la misión.</p>
+                                
+                                
+                                
+                                <div class="form-floating mb-3">
+                                    <input class="form-control" autocomplete="username" aria-required="true" placeholder="tu-email@ejemplo.com" type="email" data-val="true" data-val-email="The Email field is not a valid e-mail address." data-val-required="The Email field is required." id="Input_Email" name="Input.Email" value="" />
+                                    <label class="form-label" for="Input_Email">Correo Electrónico</label>
+                                    <span class="text-danger field-validation-valid" data-valmsg-for="Input.Email" data-valmsg-replace="true"></span>
+                                </div>
+                                
+                                <div class="form-floating mb-3">
+                                    <input class="form-control" autocomplete="current-password" aria-required="true" placeholder="contraseña" type="password" data-val="true" data-val-required="The Password field is required." id="Input_Password" name="Input.Password" />
+                                    <label class="form-label" for="Input_Password">Contraseña</label>
+                                    <span class="text-danger field-validation-valid" data-valmsg-for="Input.Password" data-valmsg-replace="true"></span>
+                                </div>
+                                
+                                <div class="checkbox mb-3">
+                                    <label class="form-label" for="Input_RememberMe">
+                                        <input class="form-check-input" type="checkbox" data-val="true" data-val-required="The Remember me? field is required." id="Input_RememberMe" name="Input.RememberMe" value="true" />
+                                        Mantener la sesión iniciada
+                                    </label>
+                                </div>
+                                
+                                <div class="d-grid gap-2">
+                                    <button id="login-submit" type="submit" class="btn btn-primary btn-lg">INICIAR SESIÓN</button>
+                                </div>
+                                
+                                <div class="text-center mt-4">
+                                    <p class="mb-1"><a id="forgot-password" href="/Identity/Account/ForgotPassword">¿Problemas para entrar?</a></p>
+                                    <p class="mb-1"><a href="/Identity/Account/Register?returnUrl=%2FEstadisticas">¿Aún no tienes cuenta? ¡Regístrate!</a></p>
+                                    <p class="mb-0"><a id="resend-confirmation" href="/Identity/Account/ResendEmailConfirmation">Reenviar correo de confirmación</a></p>
+                                </div>
+                            <input name="__RequestVerificationToken" type="hidden" value="CfDJ8P3WdH3001JPsZLfILM0glGBXbQOCNlznzH7tgcePZ_jXBtJQGIi034P4jh9i5XwZfb8AloR6AtdFzJIFRU3naWWrbFpbq6YHEinOIjMmm-kwkNVJdfdiGcSmgwDY5JifKTDM6Z-yXVPH24Gqt9DurQ" /><input name="Input.RememberMe" type="hidden" value="false" /></form>
+                        </section>
+                    </div>
+
+                    <div class="col-md-6 ps-md-5 mt-5 mt-md-0 d-flex flex-column justify-content-center">
+                        <section>
+                            <h2 class="h5 text-white-50 mb-4">O conéctate a través de:</h2>
+                                    <div>
+                                        <p>
+                                            No hay otros servicios de inicio de sesión configurados. Para más información, consulta <a href="https://go.microsoft.com/fwlink/?LinkID=532715">este artículo</a>.
+                                        </p>
+                                    </div>
+                        </section>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        </main>
+    </div>
+
+
+
+    <footer b-4rn3j81c32 class="footer-gaming">
+        <div b-4rn3j81c32 class="container">
+            <div b-4rn3j81c32 class="row align-items-center">
+                <div b-4rn3j81c32 class="col-md-6">
+                    <p b-4rn3j81c32 class="mb-0">&copy; 2025 - GAMING - <a class="text-white-50" href="/Home/Privacy">Política de Privacidad</a></p>
+                </div>
+                <div b-4rn3j81c32 class="col-md-6">
+                    <div b-4rn3j81c32 class="social-links">
+                        <a b-4rn3j81c32 href="#" class="social-icon"><i b-4rn3j81c32 class="fab fa-discord"></i></a>
+                        <a b-4rn3j81c32 href="#" class="social-icon"><i b-4rn3j81c32 class="fab fa-twitter"></i></a>
+                        <a b-4rn3j81c32 href="#" class="social-icon"><i b-4rn3j81c32 class="fab fa-instagram"></i></a>
+                        <a b-4rn3j81c32 href="#" class="social-icon"><i b-4rn3j81c32 class="fab fa-youtube"></i></a>
+                        <a b-4rn3j81c32 href="#" class="social-icon"><i b-4rn3j81c32 class="fab fa-steam"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+<div class="card bg-dark text-white shadow mt-4">
+  <div class="card-body">
+    <h5 class="card-title mb-3">
+      <i class="fa-solid fa-envelope me-2"></i>Contáctanos
+    </h5>
+
+    <form method="post" novalidate action="/Identity/Contact/Send">
+      
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="Nombre">Nombre</label>
+          <input class="form-control" type="text" data-val="true" data-val-length="The field Nombre must be a string with a maximum length of 100." data-val-length-max="100" data-val-required="Tu nombre es obligatorio" id="Nombre" maxlength="100" name="Nombre" value="" />
+          <span class="text-warning field-validation-valid" data-valmsg-for="Nombre" data-valmsg-replace="true"></span>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="Email">Email</label>
+          <input class="form-control" type="email" data-val="true" data-val-email="Email inv&#xE1;lido" data-val-required="Tu email es obligatorio" id="Email" name="Email" value="" />
+          <span class="text-warning field-validation-valid" data-valmsg-for="Email" data-valmsg-replace="true"></span>
+        </div>
+        <div class="col-12">
+          <label class="form-label" for="Asunto">Asunto</label>
+          <input class="form-control" type="text" data-val="true" data-val-length="The field Asunto must be a string with a maximum length of 150." data-val-length-max="150" id="Asunto" maxlength="150" name="Asunto" value="" />
+          <span class="text-warning field-validation-valid" data-valmsg-for="Asunto" data-valmsg-replace="true"></span>
+        </div>
+        <div class="col-12">
+          <label class="form-label" for="Mensaje">Mensaje</label>
+          <textarea class="form-control" rows="4" data-val="true" data-val-length="M&#xE1;ximo 2000 caracteres" data-val-length-max="2000" data-val-required="Por favor, escribe tu mensaje" id="Mensaje" maxlength="2000" name="Mensaje">
+</textarea>
+          <span class="text-warning field-validation-valid" data-valmsg-for="Mensaje" data-valmsg-replace="true"></span>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-paper-plane me-2"></i>Enviar
+          </button>
+        </div>
+      </div>
+    <input name="__RequestVerificationToken" type="hidden" value="CfDJ8P3WdH3001JPsZLfILM0glGBXbQOCNlznzH7tgcePZ_jXBtJQGIi034P4jh9i5XwZfb8AloR6AtdFzJIFRU3naWWrbFpbq6YHEinOIjMmm-kwkNVJdfdiGcSmgwDY5JifKTDM6Z-yXVPH24Gqt9DurQ" /></form>
+  </div>
+</div>
+
+
+    </footer>
+
+    <!-- Librerías JavaScript necesarias -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/site.js?v=hRQyftXiu1lLX2P9Ly9xa4gHJgLeR1uGN5qegUobtGo"></script>
+
+    <!-- Script para auto-ocultar alerts -->
+    <script>
+        $(document).ready(function() {
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 5000);
+        });
+    </script>
+
+    
+    <script src="/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+
+
+    <footer b-4rn3j81c32 class="footer text-center py-3 bg-dark text-white">
+    <p b-4rn3j81c32>&copy; 2025 Proyecto Gaming</p>
+    <a class="text-white" href="/Identity/Contact">Contáctanos</a>
+</footer>
+
+</body>
+
+</html>
