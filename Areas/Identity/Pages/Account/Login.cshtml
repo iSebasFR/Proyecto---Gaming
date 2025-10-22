@@ -3,85 +3,411 @@
 
 @{
     ViewData["Title"] = "Iniciar Sesión";
+    Layout = "_AuthLayout"; // ← AÑADE ESTA LÍNEA
 }
 
-<div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-xl-10 col-lg-12 col-md-9">
-            <div class="p-4 p-sm-5" style="background-color: rgba(23, 26, 33, 0.8); border-radius: 1rem;">
-                
-                <div class="row">
-                    <div class="col-md-6">
-                        <section>
-                            <form id="account" method="post">
-                                <h1 class="fw-bold">¡Bienvenido de vuelta!</h1>
-                                <p class="text-white-50 mb-4">Ingresa tus credenciales para continuar la misión.</p>
-                                
-                                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-                                
-                                <div class="form-floating mb-3">
-                                    <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="tu-email@ejemplo.com" />
-                                    <label asp-for="Input.Email" class="form-label">Correo Electrónico</label>
-                                    <span asp-validation-for="Input.Email" class="text-danger"></span>
-                                </div>
-                                
-                                <div class="form-floating mb-3">
-                                    <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="contraseña" />
-                                    <label asp-for="Input.Password" class="form-label">Contraseña</label>
-                                    <span asp-validation-for="Input.Password" class="text-danger"></span>
-                                </div>
-                                
-                                <div class="checkbox mb-3">
-                                    <label asp-for="Input.RememberMe" class="form-label">
-                                        <input class="form-check-input" asp-for="Input.RememberMe" />
-                                        Mantener la sesión iniciada
-                                    </label>
-                                </div>
-                                
-                                <div class="d-grid gap-2">
-                                    <button id="login-submit" type="submit" class="btn btn-primary btn-lg">INICIAR SESIÓN</button>
-                                </div>
-                                
-                                <div class="text-center mt-4">
-                                    <p class="mb-1"><a id="forgot-password" asp-page="./ForgotPassword">¿Problemas para entrar?</a></p>
-                                    <p class="mb-1"><a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">¿Aún no tienes cuenta? ¡Regístrate!</a></p>
-                                    <p class="mb-0"><a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Reenviar correo de confirmación</a></p>
-                                </div>
-                            </form>
-                        </section>
-                    </div>
 
-                    <div class="col-md-6 ps-md-5 mt-5 mt-md-0 d-flex flex-column justify-content-center">
-                        <section>
-                            <h2 class="h5 text-white-50 mb-4">O conéctate a través de:</h2>
-                            @{
-                                if ((Model.ExternalLogins?.Count ?? 0) == 0)
-                                {
-                                    <div>
-                                        <p>
-                                            No hay otros servicios de inicio de sesión configurados. Para más información, consulta <a href="https://go.microsoft.com/fwlink/?LinkID=532715">este artículo</a>.
-                                        </p>
-                                    </div>
-                                }
-                                else
-                                {
-                                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+<style>
+    /* PALETA DE COLORES GAMING */
+    :root {
+        --bg-dark: #070714;
+        --bg-primary: #0f0f1f;
+        --card-bg: #151530;
+        --accent-purple: #8b2ce6;
+        --accent-blue: #2c5be6;
+        --neon-purple: #b042ff;
+        --neon-blue: #428bff;
+        --text-primary: #ffffff;
+        --text-secondary: #b8b8d0;
+        --navbar-bg: rgba(15, 15, 31, 0.95);
+    }
+
+    .login-container {
+        min-height: 100vh;
+        background: var(--bg-dark);
+        background-image: 
+            radial-gradient(circle at 20% 30%, rgba(139, 44, 230, 0.15) 0%, transparent 40%),
+            radial-gradient(circle at 80% 70%, rgba(44, 91, 230, 0.15) 0%, transparent 40%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .login-card {
+        background: var(--card-bg);
+        border: 1px solid rgba(139, 44, 230, 0.3);
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .login-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+    }
+
+    .login-header {
+        text-align: center;
+        padding: 2rem 2rem 1rem;
+    }
+
+    .login-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(to right, var(--neon-purple), var(--neon-blue));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .login-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 0;
+    }
+
+    .form-floating {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-control {
+        background: rgba(255, 255, 255, 0.08);
+        border: 2px solid rgba(139, 44, 230, 0.3);
+        border-radius: 12px;
+        color: var(--text-primary);
+        padding: 1rem 1.2rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(5px);
+    }
+
+    .form-control:focus {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: var(--neon-purple);
+        box-shadow: 0 0 0 0.3rem rgba(139, 44, 230, 0.25), 
+                    0 0 20px rgba(139, 44, 230, 0.2);
+        color: var(--text-primary);
+        outline: none;
+    }
+
+    .form-control::placeholder {
+        color: var(--text-secondary);
+        opacity: 0.6;
+    }
+
+    .form-label {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.8rem;
+    }
+
+    .floating-label {
+        position: absolute;
+        top: 1rem;
+        left: 1.2rem;
+        color: var(--text-secondary);
+        transition: all 0.3s ease;
+        pointer-events: none;
+        background: transparent;
+        padding: 0 0.5rem;
+    }
+
+    .form-control:focus + .floating-label,
+    .form-control:not(:placeholder-shown) + .floating-label {
+        top: -0.5rem;
+        left: 0.8rem;
+        font-size: 0.8rem;
+        color: var(--neon-blue);
+        background: var(--card-bg);
+    }
+
+    .checkbox {
+        margin: 1.5rem 0;
+    }
+
+    .form-check-input {
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(139, 44, 230, 0.3);
+        border-radius: 4px;
+        margin-right: 0.5rem;
+    }
+
+    .form-check-input:checked {
+        background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+        border-color: var(--accent-purple);
+    }
+
+    .form-check-label {
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+        border: none;
+        color: white;
+        font-weight: 700;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-primary:hover {
+        box-shadow: 0 10px 25px rgba(139, 44, 230, 0.4);
+        transform: none;
+    }
+
+    .btn-outline-light {
+        border: 2px solid rgba(139, 44, 230, 0.3);
+        color: var(--text-secondary);
+        font-weight: 600;
+        padding: 0.8rem 1.5rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        background: transparent;
+    }
+
+    .btn-outline-light:hover {
+        border-color: var(--accent-purple);
+        background: rgba(139, 44, 230, 0.1);
+        color: var(--text-primary);
+        transform: none;
+    }
+
+    .login-links {
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    .login-links a {
+        color: var(--neon-blue);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .login-links a:hover {
+        color: var(--neon-purple);
+        text-decoration: underline;
+    }
+
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 2rem 0;
+        color: var(--text-secondary);
+    }
+
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid rgba(139, 44, 230, 0.3);
+    }
+
+    .divider span {
+        padding: 0 1rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .external-logins {
+        text-align: center;
+    }
+
+    .external-logins h3 {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .text-danger {
+        color: #ff6b6b !important;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        display: block;
+        font-weight: 600;
+    }
+
+    .validation-summary-errors {
+        background: rgba(255, 107, 107, 0.1);
+        border: 1px solid #ff6b6b;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        color: #ff6b6b;
+    }
+
+    .validation-summary-errors ul {
+        margin: 0;
+        padding-left: 1rem;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .login-card {
+            margin: 1rem;
+        }
+        
+        .login-title {
+            font-size: 2rem;
+        }
+        
+        .btn-primary, .btn-outline-light {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="login-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-8 col-lg-10">
+                <div class="login-card">
+                    <div class="login-header">
+                        <h1 class="login-title">INICIAR SESIÓN</h1>
+                        <p class="login-subtitle">Ingresa tus credenciales para continuar la misión</p>
+                    </div>
+                    
+                    <div class="p-4 p-sm-5">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <section>
+                                    <form id="account" method="post">
+                                        <div asp-validation-summary="ModelOnly" class="validation-summary-errors" role="alert"></div>
+                                        
+                                        <div class="form-floating">
+                                            <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder=" " />
+                                            <label class="floating-label">Correo Electrónico</label>
+                                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                                        </div>
+                                        
+                                        <div class="form-floating">
+                                            <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder=" " />
+                                            <label class="floating-label">Contraseña</label>
+                                            <span asp-validation-for="Input.Password" class="text-danger"></span>
+                                        </div>
+                                        
+                                        <div class="checkbox">
+                                            <label asp-for="Input.RememberMe" class="form-check-label">
+                                                <input class="form-check-input" asp-for="Input.RememberMe" />
+                                                Mantener la sesión iniciada
+                                            </label>
+                                        </div>
+                                        
                                         <div class="d-grid gap-2">
-                                            @foreach (var provider in Model.ExternalLogins!)
-                                            {
-                                                // Aquí podrías agregar íconos para cada proveedor (Steam, Discord, etc.)
-                                                <button type="submit" class="btn btn-outline-light" name="provider" value="@provider.Name" title="Ingresar usando tu cuenta de @provider.DisplayName">
-                                                    <i class="fab fa-@provider.Name.ToLower() me-2"></i> Conectar con @provider.DisplayName
-                                                </button>
-                                            }
+                                            <button id="login-submit" type="submit" class="btn btn-primary">
+                                                <i class="fas fa-sign-in-alt me-2"></i>ACCEDER AL SISTEMA
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="login-links">
+                                            <a id="forgot-password" asp-page="./ForgotPassword">
+                                                <i class="fas fa-key me-2"></i>¿Problemas para entrar?
+                                            </a>
+                                            <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">
+                                                <i class="fas fa-user-plus me-2"></i>¿Aún no tienes cuenta? ¡Regístrate!
+                                            </a>
+                                            <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">
+                                                <i class="fas fa-envelope me-2"></i>Reenviar correo de confirmación
+                                            </a>
                                         </div>
                                     </form>
-                                }
-                            }
-                        </section>
+                                </section>
+                            </div>
+
+                            <div class="col-lg-6 mt-5 mt-lg-0">
+                                <div class="divider">
+                                    <span>O conéctate con</span>
+                                </div>
+                                
+                                <section class="external-logins">
+                                    @{
+                                        if ((Model.ExternalLogins?.Count ?? 0) == 0)
+                                        {
+                                            <div class="text-center">
+                                                <p class="text-white-50">
+                                                    No hay otros servicios de inicio de sesión configurados.
+                                                </p>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                                                <div class="d-grid gap-2">
+                                                    @foreach (var provider in Model.ExternalLogins!)
+                                                    {
+                                                        <button type="submit" class="btn btn-outline-light" name="provider" value="@provider.Name" title="Ingresar usando tu cuenta de @provider.DisplayName">
+                                                            @if (provider.Name.ToLower() == "steam")
+                                                            {
+                                                                <i class="fab fa-steam me-2"></i>
+                                                            }
+                                                            else if (provider.Name.ToLower() == "discord")
+                                                            {
+                                                                <i class="fab fa-discord me-2"></i>
+                                                            }
+                                                            else if (provider.Name.ToLower() == "google")
+                                                            {
+                                                                <i class="fab fa-google me-2"></i>
+                                                            }
+                                                            else if (provider.Name.ToLower() == "microsoft")
+                                                            {
+                                                                <i class="fab fa-microsoft me-2"></i>
+                                                            }
+                                                            else
+                                                            {
+                                                                <i class="fas fa-gamepad me-2"></i>
+                                                            }
+                                                            Conectar con @provider.DisplayName
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </form>
+                                        }
+                                    }
+                                </section>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>

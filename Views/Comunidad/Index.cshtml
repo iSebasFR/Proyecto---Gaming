@@ -3,80 +3,275 @@
     ViewData["Title"] = "Comunidad Gaming";
 }
 
-<!-- Navbar Secundaria para Comunidad -->
-<nav class="navbar navbar-expand-lg comunidad-navbar mb-4">
-    <div class="container">
-        <div class="navbar-nav">
-            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" && ViewContext.RouteData.Values["controller"]?.ToString() == "Comunidad" ? "active" : "")" 
-               asp-controller="Comunidad" asp-action="Index">
-                <i class="fas fa-home me-2"></i>Feed
-            </a>
-            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Amigos" ? "active" : "")" 
-               asp-controller="Amigos" asp-action="Index">
-                <i class="fas fa-user-friends me-2"></i>Amigos
-            </a>
-            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Grupos" ? "active" : "")" 
-               asp-controller="Grupos" asp-action="Index">
-                <i class="fas fa-users me-2"></i>Grupos
-            </a>
-        </div>
+<!-- Navbar Secundaria para Comunidad - Diseño Cuadrangular -->
+<nav class="navbar navbar-expand-lg catalog-navbar comunidad-navbar">
+    <div class="container-fluid justify-content-center">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" && ViewContext.RouteData.Values["controller"]?.ToString() == "Comunidad" ? "active" : "")" 
+                   asp-controller="Comunidad" asp-action="Index">
+                    <i class="fas fa-home me-2"></i>Inicio
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Amigos" ? "active" : "")" 
+                   asp-controller="Amigos" asp-action="Index">
+                    <i class="fas fa-user-friends me-2"></i>Amigos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Grupos" ? "active" : "")" 
+                   asp-controller="Grupos" asp-action="Index">
+                    <i class="fas fa-users me-2"></i>Grupos
+                </a>
+            </li>
+        </ul>
     </div>
 </nav>
 
-<div class="row">
-    <div class="col-12">
-        <div class="stats-card text-center">
-            <h1 class="display-4 mb-4">🎮 Bienvenido a la Comunidad Gaming</h1>
-            <p class="lead mb-5">Conecta con otros gamers, únete a grupos y comparte tu pasión por los videojuegos</p>
-            
-            <div class="row">
-                <div class="col-md-3 col-6 mb-4">
-                    <div class="stat-number">@Model.UsuariosConectados</div>
-                    <p class="mb-0">Usuarios Conectados</p>
-                </div>
-                <div class="col-md-3 col-6 mb-4">
-                    <div class="stat-number">@Model.GruposActivos</div>
-                    <p class="mb-0">Grupos Activos</p>
-                </div>
-                <div class="col-md-3 col-6 mb-4">
-                    <div class="stat-number">@Model.PublicacionesMensuales</div>
-                    <p class="mb-0">Publicaciones Mensuales</p>
-                </div>
-                <div class="col-md-3 col-6 mb-4">
-                    <div class="stat-number">@Model.UsuariosSatisfechos</div>
-                    <p class="mb-0">Usuarios Satisfechos</p>
+<div class="container-fluid comunidad-container">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header Principal -->
+            <div class="card comunidad-header mb-4">
+                <div class="card-body text-center p-5">
+                    <h1 class="comunidad-main-title mb-3">🎮 Centro de la Comunidad Gaming</h1>
+                    <p class="comunidad-subtitle">Tu hub central para conectar con gamers, unirte a grupos y compartir tu pasión por los videojuegos</p>
+                    
+                    <!-- Estadísticas de la Comunidad -->
+                    <div class="row justify-content-center mt-4">
+                        <div class="col-md-3 col-6 mb-4">
+                            <div class="comunidad-stat">
+                                <div class="stat-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="stat-number">+1.2K</div>
+                                <p class="stat-label">Jugadores Activos</p>
+                                <div class="stat-trend up">
+                                    <i class="fas fa-arrow-up"></i> +15% este mes
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-4">
+                            <div class="comunidad-stat">
+                                <div class="stat-icon">
+                                    <i class="fas fa-layer-group"></i>
+                                </div>
+                                <div class="stat-number">+5K</div>
+                                <p class="stat-label">Comunidades Activas</p>
+                                <div class="stat-trend up">
+                                    <i class="fas fa-arrow-up"></i> +32 nuevas
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-4">
+                            <div class="comunidad-stat">
+                                <div class="stat-icon">
+                                    <i class="fas fa-comments"></i>
+                                </div>
+                                <div class="stat-number">+3.2K</div>
+                                <p class="stat-label">Interacciones Diarias</p>
+                                <div class="stat-trend up">
+                                    <i class="fas fa-arrow-up"></i> Comunicación activa
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-4">
+                            <div class="comunidad-stat">
+                                <div class="stat-icon">
+                                    <i class="fas fa-heart"></i>
+                                </div>
+                                <div class="stat-number">+500</div>
+                                <p class="stat-label">Miembros Satisfechos</p>
+                                <div class="stat-trend up">
+                                    <i class="fas fa-arrow-up"></i> 4.8★ Rating
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
 
-<div class="row mb-5">
-    <div class="col-12">
-        <div class="stats-card">
-            <h3 class="mb-4">🌟 ¿Qué ofrece nuestra comunidad?</h3>
-            <p class="mb-4">Nuestra plataforma está diseñada para conectar a gamers de todo el mundo. Comparte tus logros, descubre nuevos juegos, únete a grupos temáticos y haz amigos que compartan tus mismos intereses gaming.</p>
-            
-            <div class="row">
+            <!-- Sección: ¿Qué es la Comunidad Gaming? -->
+            <div class="card comunidad-section mb-4">
+                <div class="card-body p-4">
+                    <h2 class="section-title mb-4">🌟 ¿Qué es la Comunidad Gaming?</h2>
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <p class="section-description">
+                                La <strong>Comunidad Gaming</strong> es el corazón social de nuestra plataforma. Es el lugar donde los jugadores 
+                                se conectan, comparten experiencias, forman amistades y crean grupos alrededor de sus juegos favoritos.
+                            </p>
+                            <div class="feature-list">
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <span><strong>Conecta</strong> con jugadores que comparten tus mismos intereses</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <span><strong>Descubre</strong> nuevos juegos a través de recomendaciones de la comunidad</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <span><strong>Comparte</strong> tus logros, reseñas y experiencias de juego</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <span><strong>Colabora</strong> en grupos temáticos y organiza partidas</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="info-graphic">
+                                <i class="fas fa-globe-americas fa-4x text-primary mb-3"></i>
+                                <p class="small text-muted">Comunidad global de gamers conectados</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección: Características Principales -->
+            <div class="row mb-4">
                 <div class="col-md-4 mb-4">
-                    <div class="feature-card text-center">
-                        <i class="fas fa-user-friends fa-3x mb-3 text-primary"></i>
-                        <h4>Feed de Amigos</h4>
-                        <p class="mb-0">Mantente al día con las actividades de tus amigos, sus logros en juegos y sus publicaciones.</p>
+                    <div class="card feature-highlight h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon-large mb-3">
+                                <i class="fas fa-user-friends fa-3x"></i>
+                            </div>
+                            <h4 class="feature-title">Sistema de Amigos</h4>
+                            <p class="feature-description">
+                                Construye tu red gaming personal. Agrega amigos, sigue sus progresos, 
+                                envía solicitudes y mantente conectado con los jugadores que más admiras.
+                            </p>
+                            <div class="feature-stats">
+                                <small class="text-muted">+5,000 conexiones diarias</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-4 mb-4">
-                    <div class="feature-card text-center">
-                        <i class="fas fa-users fa-3x mb-3 text-primary"></i>
-                        <h4>Sistema de Amigos</h4>
-                        <p class="mb-0">Agrega amigos, envía solicitudes y construye tu red gaming personalizada.</p>
+                    <div class="card feature-highlight h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon-large mb-3">
+                                <i class="fas fa-users fa-3x"></i>
+                            </div>
+                            <h4 class="feature-title">Grupos Temáticos</h4>
+                            <p class="feature-description">
+                                Únete a comunidades especializadas por juego, género o plataforma. 
+                                Comparte estrategias, organiza torneos y participa en discusiones exclusivas.
+                            </p>
+                            <div class="feature-stats">
+                                <small class="text-muted">200+ grupos activos</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-4 mb-4">
-                    <div class="feature-card text-center">
-                        <i class="fas fa-layer-group fa-3x mb-3 text-primary"></i>
-                        <h4>Grupos Temáticos</h4>
-                        <p class="mb-0">Únete a grupos por juego, género o plataforma. Comparte estrategias y organiza partidas.</p>
+                    <div class="card feature-highlight h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon-large mb-3">
+                                <i class="fas fa-broadcast-tower fa-3x"></i>
+                            </div>
+                            <h4 class="feature-title">Feed de Actividad</h4>
+                            <p class="feature-description">
+                                Mantente actualizado con las últimas actividades de tus amigos y grupos. 
+                                Logros desbloqueados, reseñas publicadas y sesiones de juego en tiempo real.
+                            </p>
+                            <div class="feature-stats">
+                                <small class="text-muted">Actualizaciones en vivo</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección: Cómo Empezar -->
+            <div class="card comunidad-guide mb-4">
+                <div class="card-body p-4">
+                    <h2 class="section-title mb-4">🚀 ¿Cómo Empezar en la Comunidad?</h2>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="guide-step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h5>Completa tu Perfil</h5>
+                                    <p>Agrega tus juegos favoritos, plataformas preferidas y una biografía para que otros jugadores te conozcan mejor.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="guide-step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h5>Explora Grupos</h5>
+                                    <p>Busca comunidades relacionadas con tus juegos favoritos y únete para empezar a interactuar.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="guide-step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h5>Conecta con Amigos</h5>
+                                    <p>Busca jugadores con intereses similares y envíales solicitudes de amistad para expandir tu red.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="guide-step">
+                                <div class="step-number">4</div>
+                                <div class="step-content">
+                                    <h5>Participa Activamente</h5>
+                                    <p>Comparte tus logros, escribe reseñas y participa en discusiones para hacer crecer la comunidad.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección: Beneficios -->
+            <div class="card comunidad-benefits">
+                <div class="card-body p-4">
+                    <h2 class="section-title mb-4">💫 Beneficios de Unirte a la Comunidad</h2>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="benefit-item">
+                                <i class="fas fa-gamepad benefit-icon"></i>
+                                <div class="benefit-content">
+                                    <h5>Descubre Nuevos Juegos</h5>
+                                    <p>Recibe recomendaciones personalizadas basadas en los gustos de jugadores similares a ti.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="benefit-item">
+                                <i class="fas fa-trophy benefit-icon"></i>
+                                <div class="benefit-content">
+                                    <h5>Mejora tu Gameplay</h5>
+                                    <p>Aprende estrategias y consejos de jugadores experimentados en tus juegos favoritos.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="benefit-item">
+                                <i class="fas fa-calendar-alt benefit-icon"></i>
+                                <div class="benefit-content">
+                                    <h5>Eventos Exclusivos</h5>
+                                    <p>Participa en torneos, giveaways y eventos especiales organizados por la comunidad.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="benefit-item">
+                                <i class="fas fa-shield-alt benefit-icon"></i>
+                                <div class="benefit-content">
+                                    <h5>Ambiente Seguro</h5>
+                                    <p>Disfruta de un espacio gaming libre de toxicidad con moderación activa.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -85,58 +280,505 @@
 </div>
 
 <style>
-    .comunidad-navbar {
-        background: rgba(35, 40, 48, 0.95) !important;
+    /* PALETA DE COLORES GAMING - CONSISTENTE */
+    :root {
+        --bg-dark: #070714;
+        --bg-primary: #0f0f1f;
+        --card-bg: #151530;
+        --accent-purple: #8b2ce6;
+        --accent-blue: #2c5be6;
+        --neon-purple: #b042ff;
+        --neon-blue: #428bff;
+        --text-primary: #ffffff;
+        --text-secondary: #b8b8d0;
+        --navbar-bg: rgba(15, 15, 31, 0.95);
+        --success: #06d6a0;
+        --warning: #ff9e1a;
+        --danger: #dc3545;
+    }
+
+    /* NAVBAR SECUNDARIA - DISEÑO CUADRANGULAR */
+    .comunidad-navbar.catalog-navbar {
+        background: linear-gradient(135deg, var(--accent-purple), var(--neon-purple)) !important;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(139, 44, 230, 0.3);
+        height: 60px;
+        padding: 8px 0;
+        max-width: 500px;
+        margin: 0 auto 2rem auto;
+        border: 1px solid rgba(139, 44, 230, 0.4);
         backdrop-filter: blur(10px);
-        border-bottom: 2px solid var(--primary);
-        padding: 0.8rem 0;
-        margin-top: -1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .comunidad-navbar.catalog-navbar::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--accent-blue));
+        background-size: 200% 100%;
+    }
+
+    .comunidad-navbar .navbar-nav {
+        gap: 8px;
     }
 
     .comunidad-navbar .nav-link {
-        color: rgba(255, 255, 255, 0.8) !important;
-        font-weight: 600;
-        padding: 0.7rem 1.5rem !important;
-        border-radius: 25px;
-        margin: 0 0.3rem;
+        color: var(--text-primary) !important;
+        font-weight: 700;
+        padding: 12px 24px !important;
+        border-radius: 8px;
         transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+        position: relative;
+        overflow: hidden;
+        border: 2px solid transparent;
     }
 
-    .comunidad-navbar .nav-link:hover,
-    .comunidad-navbar .nav-link.active {
-        color: white !important;
-        background: var(--primary-gradient);
+    .comunidad-navbar .nav-link::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .comunidad-navbar .nav-link:hover::before {
+        left: 100%;
+    }
+
+    .comunidad-navbar .nav-link:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.3);
         transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
     }
 
-    .stats-card {
-        background: var(--card-bg);
-        border-radius: var(--border-radius);
-        padding: 2rem;
-        margin-bottom: 2rem;
-        border: 1px solid rgba(108, 92, 231, 0.3);
+    .comunidad-navbar .nav-link.active {
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid var(--neon-blue);
+        box-shadow: 0 0 20px rgba(66, 139, 255, 0.4);
+        font-weight: 800;
+        border-radius: 8px;
+    }
+
+    /* CONTENEDOR PRINCIPAL */
+    .comunidad-container {
+        background: var(--bg-dark);
+        min-height: 100vh;
+        padding: 2rem 0;
+        color: var(--text-primary);
+    }
+
+    /* HEADER PRINCIPAL */
+    .comunidad-header {
+        background: var(--card-bg) !important;
+        border: 1px solid rgba(139, 44, 230, 0.3) !important;
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(139, 44, 230, 0.15);
+        background: linear-gradient(135deg, rgba(139, 44, 230, 0.1) 0%, rgba(66, 139, 255, 0.1) 100%) !important;
+    }
+
+    .comunidad-main-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--text-primary), var(--neon-purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 0 30px rgba(139, 44, 230, 0.5);
+    }
+
+    .comunidad-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.2rem;
+        font-weight: 500;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    /* ESTADÍSTICAS MEJORADAS */
+    .comunidad-stat {
+        text-align: center;
+        padding: 2rem 1rem;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        animation: statPulse 2s ease-in-out;
+    }
+
+    .comunidad-stat:hover {
+        background: rgba(255, 255, 255, 0.12);
+        transform: translateY(-8px) scale(1.02);
+        border-color: var(--neon-purple);
+        box-shadow: 
+            0 15px 35px rgba(139, 44, 230, 0.25),
+            0 0 0 1px rgba(139, 44, 230, 0.1);
+    }
+
+    .stat-icon {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 1.8rem;
+        color: var(--text-primary);
+        box-shadow: 
+            0 8px 25px rgba(139, 44, 230, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .comunidad-stat:hover .stat-icon {
+        transform: scale(1.1) rotate(5deg);
+        box-shadow: 
+            0 12px 30px rgba(139, 44, 230, 0.6),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    .stat-icon::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+        border-radius: 17px;
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .comunidad-stat:hover .stat-icon::before {
+        opacity: 1;
     }
 
     .stat-number {
-        font-size: 3rem;
-        font-weight: 800;
-        background: var(--primary-gradient);
+        font-size: 2.8rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #ffffff, var(--neon-blue), var(--neon-purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 10px rgba(139, 44, 230, 0.3);
+        letter-spacing: -1px;
+        animation: numberGlow 3s ease-in-out infinite;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 700;
+        margin: 0 0 1rem 0;
+        opacity: 0.9;
+    }
+
+    .stat-trend {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.3s ease;
+    }
+
+    .stat-trend.up {
+        background: linear-gradient(135deg, rgba(6, 214, 160, 0.2), rgba(66, 139, 255, 0.2));
+        color: var(--success);
+        border: 1px solid rgba(6, 214, 160, 0.4);
+        box-shadow: 0 2px 8px rgba(6, 214, 160, 0.2);
+    }
+
+    .comunidad-stat:hover .stat-trend.up {
+        background: linear-gradient(135deg, rgba(6, 214, 160, 0.3), rgba(66, 139, 255, 0.3));
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(6, 214, 160, 0.3);
+    }
+
+    /* EFECTO DE BRILLO EN EL BORDE */
+    .comunidad-stat::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+            transparent, 
+            rgba(255, 255, 255, 0.1), 
+            transparent
+        );
+        transition: left 0.6s ease;
+    }
+
+    .comunidad-stat:hover::after {
+        left: 100%;
+    }
+
+    /* EFECTO DE PARTICULAS DECORATIVAS */
+    .comunidad-stat {
+        position: relative;
+    }
+
+    .comunidad-stat::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        width: 20px;
+        height: 20px;
+        background: radial-gradient(circle, var(--neon-purple) 0%, transparent 70%);
+        border-radius: 50%;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .comunidad-stat:hover::before {
+        opacity: 0.3;
+        animation: floatParticle 2s ease-in-out infinite;
+    }
+
+
+    /* SECCIONES INFORMATIVAS */
+    .comunidad-section,
+    .comunidad-guide,
+    .comunidad-benefits {
+        background: var(--card-bg) !important;
+        border: 1px solid rgba(139, 44, 230, 0.3) !important;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 25px rgba(139, 44, 230, 0.1);
+        transition: all 0.3s ease;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .comunidad-section:hover,
+    .comunidad-guide:hover,
+    .comunidad-benefits:hover {
+        transform: translateY(-5px);
+        border-color: var(--neon-purple);
+        box-shadow: 0 12px 35px rgba(139, 44, 230, 0.2);
+    }
+
+    .section-title {
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 1.5rem;
+        background: linear-gradient(135deg, var(--text-primary), var(--neon-purple));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
 
-    .feature-card {
-        background: var(--card-bg);
-        border-radius: var(--border-radius);
-        padding: 2rem;
-        height: 100%;
-        border: 1px solid rgba(108, 92, 231, 0.2);
-        transition: all 0.3s ease;
+    .section-description {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
     }
 
-    .feature-card:hover {
-        transform: translateY(-5px);
-        border-color: var(--primary);
+    /* LISTA DE CARACTERÍSTICAS */
+    .feature-list {
+        margin-top: 1.5rem;
     }
+
+    .feature-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+        color: var(--text-secondary);
+    }
+
+    .feature-item i {
+        margin-top: 0.2rem;
+    }
+
+    /* GRÁFICOS INFORMATIVOS */
+    .info-graphic {
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* DESTACADO DE CARACTERÍSTICAS */
+    .feature-highlight {
+        background: var(--card-bg) !important;
+        border: 1px solid rgba(139, 44, 230, 0.3) !important;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .feature-highlight:hover {
+        transform: translateY(-8px);
+        border-color: var(--neon-purple);
+        box-shadow: 0 15px 35px rgba(139, 44, 230, 0.2);
+    }
+
+    .feature-icon-large {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        color: var(--text-primary);
+        box-shadow: 0 8px 25px rgba(139, 44, 230, 0.3);
+    }
+
+    .feature-title {
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+
+    .feature-description {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+    }
+
+    .feature-stats {
+        margin-top: auto;
+    }
+
+    /* GUÍA PASO A PASO */
+    .guide-step {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+    }
+
+    .step-number {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+
+    .step-content h5 {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .step-content p {
+        color: var(--text-secondary);
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    /* BENEFICIOS */
+    .benefit-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+    }
+
+    .benefit-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: var(--text-primary);
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+
+    .benefit-content h5 {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .benefit-content p {
+        color: var(--text-secondary);
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    /* ANIMACIONES DE ENTRADA ESCALONADAS */
+    .comunidad-header {
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .comunidad-stat:nth-child(1) { animation-delay: 0.1s; }
+    .comunidad-stat:nth-child(2) { animation-delay: 0.2s; }
+    .comunidad-stat:nth-child(3) { animation-delay: 0.3s; }
+    .comunidad-stat:nth-child(4) { animation-delay: 0.4s; }
+
+    .comunidad-section { animation-delay: 0.5s; }
+    .feature-highlight:nth-child(1) { animation-delay: 0.6s; }
+    .feature-highlight:nth-child(2) { animation-delay: 0.7s; }
+    .feature-highlight:nth-child(3) { animation-delay: 0.8s; }
+    .comunidad-guide { animation-delay: 0.9s; }
+    .comunidad-benefits { animation-delay: 1s; }
+
+    
 </style>
+
+<script>
+    // Efectos interactivos adicionales para las estadísticas
+    document.addEventListener('DOMContentLoaded', function() {
+        const stats = document.querySelectorAll('.comunidad-stat');
+        
+        stats.forEach((stat, index) => {
+            // Animación escalonada de entrada
+            stat.style.animationDelay = `${index * 0.1}s`;
+            
+            // Efecto de click
+            stat.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+            
+            // Efecto de sonido (opcional)
+            stat.addEventListener('mouseenter', function() {
+                this.style.cursor = 'pointer';
+            });
+        });
+    });
+</script>

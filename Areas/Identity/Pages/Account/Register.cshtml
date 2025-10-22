@@ -1,67 +1,480 @@
 ﻿@page
 @model RegisterModel
+
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Registro";
+    Layout = "_AuthLayout"; // ← AÑADE ESTA LÍNEA
 }
 
-<h1>@ViewData["Title"]</h1>
+<style>
+    /* PALETA DE COLORES GAMING */
+    :root {
+        --bg-dark: #070714;
+        --bg-primary: #0f0f1f;
+        --card-bg: #151530;
+        --accent-purple: #8b2ce6;
+        --accent-blue: #2c5be6;
+        --neon-purple: #b042ff;
+        --neon-blue: #428bff;
+        --text-primary: #ffffff;
+        --text-secondary: #b8b8d0;
+        --navbar-bg: rgba(15, 15, 31, 0.95);
+    }
 
-<div class="row">
-    <div class="col-md-4">
-        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <h2>Create a new account.</h2>
-            <hr />
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                <label asp-for="Input.Email">Email</label>
-                <span asp-validation-for="Input.Email" class="text-danger"></span>
-            </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.Password">Password</label>
-                <span asp-validation-for="Input.Password" class="text-danger"></span>
-            </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.ConfirmPassword">Confirm Password</label>
-                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
-            </div>
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
-        </form>
-    </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            @{
-                if ((Model.ExternalLogins?.Count ?? 0) == 0)
-                {
-                    <div>
-                        <p>
-                            There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">article
-                            about setting up this ASP.NET application to support logging in via external services</a>.
-                        </p>
+    .register-container {
+        min-height: 100vh;
+        background: var(--bg-dark);
+        background-image: 
+            radial-gradient(circle at 20% 30%, rgba(139, 44, 230, 0.15) 0%, transparent 40%),
+            radial-gradient(circle at 80% 70%, rgba(44, 91, 230, 0.15) 0%, transparent 40%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .register-card {
+        background: var(--card-bg);
+        border: 1px solid rgba(139, 44, 230, 0.3);
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .register-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+    }
+
+    .register-header {
+        text-align: center;
+        padding: 2rem 2rem 1rem;
+    }
+
+    .register-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(to right, var(--neon-purple), var(--neon-blue));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .register-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 0;
+    }
+
+    .form-floating {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-control {
+        background: rgba(255, 255, 255, 0.08);
+        border: 2px solid rgba(139, 44, 230, 0.3);
+        border-radius: 12px;
+        color: var(--text-primary);
+        padding: 1rem 1.2rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(5px);
+    }
+
+    .form-control:focus {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: var(--neon-purple);
+        box-shadow: 0 0 0 0.3rem rgba(139, 44, 230, 0.25), 
+                    0 0 20px rgba(139, 44, 230, 0.2);
+        color: var(--text-primary);
+        outline: none;
+    }
+
+    .form-control::placeholder {
+        color: var(--text-secondary);
+        opacity: 0.6;
+    }
+
+    .floating-label {
+        position: absolute;
+        top: 1rem;
+        left: 1.2rem;
+        color: var(--text-secondary);
+        transition: all 0.3s ease;
+        pointer-events: none;
+        background: transparent;
+        padding: 0 0.5rem;
+    }
+
+    .form-control:focus + .floating-label,
+    .form-control:not(:placeholder-shown) + .floating-label {
+        top: -0.5rem;
+        left: 0.8rem;
+        font-size: 0.8rem;
+        color: var(--neon-blue);
+        background: var(--card-bg);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+        border: none;
+        color: white;
+        font-weight: 700;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-primary:hover {
+        box-shadow: 0 10px 25px rgba(139, 44, 230, 0.4);
+    }
+
+    .btn-outline-light {
+        border: 2px solid rgba(139, 44, 230, 0.3);
+        color: var(--text-secondary);
+        font-weight: 600;
+        padding: 0.8rem 1.5rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        background: transparent;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .btn-outline-light:hover {
+        border-color: var(--accent-purple);
+        background: rgba(139, 44, 230, 0.1);
+        color: var(--text-primary);
+    }
+
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 2rem 0;
+        color: var(--text-secondary);
+    }
+
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid rgba(139, 44, 230, 0.3);
+    }
+
+    .divider span {
+        padding: 0 1rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .external-register {
+        text-align: center;
+    }
+
+    .external-register h3 {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .text-danger {
+        color: #ff6b6b !important;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        display: block;
+        font-weight: 600;
+    }
+
+    .validation-summary-errors {
+        background: rgba(255, 107, 107, 0.1);
+        border: 1px solid #ff6b6b;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        color: #ff6b6b;
+    }
+
+    .validation-summary-errors ul {
+        margin: 0;
+        padding-left: 1rem;
+    }
+
+    .password-strength {
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .strength-bar {
+        height: 4px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 2px;
+        margin-top: 0.25rem;
+        overflow: hidden;
+    }
+
+    .strength-fill {
+        height: 100%;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+    }
+
+    .strength-weak {
+        background: #ff6b6b;
+        width: 25%;
+    }
+
+    .strength-medium {
+        background: #ffd166;
+        width: 50%;
+    }
+
+    .strength-strong {
+        background: #06d6a0;
+        width: 75%;
+    }
+
+    .strength-very-strong {
+        background: #118ab2;
+        width: 100%;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .register-card {
+            margin: 1rem;
+        }
+        
+        .register-title {
+            font-size: 2rem;
+        }
+        
+        .btn-primary, .btn-outline-light {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="register-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-8 col-lg-10">
+                <div class="register-card">
+                    <div class="register-header">
+                        <h1 class="register-title">UNIRSE A LA COMUNIDAD</h1>
+                        <p class="register-subtitle">Crea tu cuenta y comienza tu aventura gaming</p>
                     </div>
-                }
-                else
-                {
-                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in Model.ExternalLogins!)
-                                {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
-                                }
-                            </p>
+                    
+                    <div class="p-4 p-sm-5">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <section>
+                                    <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                                        <div asp-validation-summary="ModelOnly" class="validation-summary-errors" role="alert"></div>
+                                        
+                                        <div class="form-floating">
+                                            <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder=" " />
+                                            <label class="floating-label">Correo Electrónico</label>
+                                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                                        </div>
+                                        
+                                        <div class="form-floating">
+                                            <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder=" " 
+                                                   oninput="checkPasswordStrength(this.value)" />
+                                            <label class="floating-label">Contraseña</label>
+                                            <span asp-validation-for="Input.Password" class="text-danger"></span>
+                                            <div class="password-strength">
+                                                <div id="passwordStrengthText" class="text-white-50"></div>
+                                                <div class="strength-bar">
+                                                    <div id="passwordStrengthBar" class="strength-fill"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-floating">
+                                            <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder=" " />
+                                            <label class="floating-label">Confirmar Contraseña</label>
+                                            <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                                        </div>
+                                        
+                                        <div class="d-grid gap-2 mt-4">
+                                            <button id="registerSubmit" type="submit" class="btn btn-primary">
+                                                <i class="fas fa-user-plus me-2"></i>CREAR CUENTA
+                                            </button>
+                                        </div>
+
+                                        <div class="text-center mt-3">
+                                            <p class="text-white-50">
+                                                ¿Ya tienes cuenta? 
+                                                <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="text-neon-blue" style="color: var(--neon-blue); text-decoration: none;">
+                                                    Inicia sesión aquí
+                                                </a>
+                                            </p>
+                                        </div>
+                                    </form>
+                                </section>
+                            </div>
+
+                            <div class="col-lg-6 mt-5 mt-lg-0">
+                                <div class="divider">
+                                    <span>O regístrate con</span>
+                                </div>
+                                
+                                <section class="external-register">
+                                    <h3>Conecta tus cuentas gaming</h3>
+                                    @{
+                                        if ((Model.ExternalLogins?.Count ?? 0) == 0)
+                                        {
+                                            <div class="text-center">
+                                                <p class="text-white-50">
+                                                    Próximamente: registro con plataformas gaming
+                                                </p>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                                                <div class="d-grid gap-2">
+                                                    @foreach (var provider in Model.ExternalLogins!)
+                                                    {
+                                                        <button type="submit" class="btn btn-outline-light" name="provider" value="@provider.Name" title="Regístrate usando tu cuenta de @provider.DisplayName">
+                                                            @if (provider.Name.ToLower() == "steam")
+                                                            {
+                                                                <i class="fab fa-steam me-2"></i>
+                                                            }
+                                                            else if (provider.Name.ToLower() == "discord")
+                                                            {
+                                                                <i class="fab fa-discord me-2"></i>
+                                                            }
+                                                            else if (provider.Name.ToLower() == "google")
+                                                            {
+                                                                <i class="fab fa-google me-2"></i>
+                                                            }
+                                                            else if (provider.Name.ToLower() == "microsoft")
+                                                            {
+                                                                <i class="fab fa-microsoft me-2"></i>
+                                                            }
+                                                            else if (provider.Name.ToLower() == "playstation")
+                                                            {
+                                                                <i class="fab fa-playstation me-2"></i>
+                                                            }
+                                                            else if (provider.Name.ToLower() == "xbox")
+                                                            {
+                                                                <i class="fab fa-xbox me-2"></i>
+                                                            }
+                                                            else
+                                                            {
+                                                                <i class="fas fa-gamepad me-2"></i>
+                                                            }
+                                                            @provider.DisplayName
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </form>
+                                        }
+                                    }
+                                </section>
+
+                                <div class="mt-4 p-3" style="background: rgba(139, 44, 230, 0.1); border-radius: 10px; border: 1px solid rgba(139, 44, 230, 0.3);">
+                                    <h4 class="h6 text-neon-purple mb-2" style="color: var(--neon-purple);">
+                                        <i class="fas fa-gift me-2"></i>Ventajas de registrarte
+                                    </h4>
+                                    <ul class="list-unstyled text-white-50 small mb-0">
+                                        <li><i class="fas fa-check text-success me-2"></i> Biblioteca personal de juegos</li>
+                                        <li><i class="fas fa-check text-success me-2"></i> Estadísticas detalladas</li>
+                                        <li><i class="fas fa-check text-success me-2"></i> Logros y recompensas</li>
+                                        <li><i class="fas fa-check text-success me-2"></i> Comunidad gaming activa</li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
-                    </form>
-                }
-            }
-        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        function checkPasswordStrength(password) {
+            const strengthText = document.getElementById('passwordStrengthText');
+            const strengthBar = document.getElementById('passwordStrengthBar');
+            
+            // Reset
+            strengthBar.className = 'strength-fill';
+            
+            if (!password) {
+                strengthText.textContent = '';
+                strengthBar.style.width = '0%';
+                return;
+            }
+            
+            let strength = 0;
+            let feedback = '';
+            
+            // Longitud
+            if (password.length >= 8) strength += 1;
+            if (password.length >= 12) strength += 1;
+            
+            // Complejidad
+            if (/[a-z]/.test(password)) strength += 1;
+            if (/[A-Z]/.test(password)) strength += 1;
+            if (/[0-9]/.test(password)) strength += 1;
+            if (/[^a-zA-Z0-9]/.test(password)) strength += 1;
+            
+            // Determinar fuerza
+            if (strength <= 2) {
+                feedback = 'Débil';
+                strengthBar.className = 'strength-fill strength-weak';
+            } else if (strength <= 4) {
+                feedback = 'Moderada';
+                strengthBar.className = 'strength-fill strength-medium';
+            } else if (strength <= 5) {
+                feedback = 'Fuerte';
+                strengthBar.className = 'strength-fill strength-strong';
+            } else {
+                feedback = 'Muy fuerte';
+                strengthBar.className = 'strength-fill strength-very-strong';
+            }
+            
+            strengthText.textContent = `Seguridad: ${feedback}`;
+        }
+    </script>
 }

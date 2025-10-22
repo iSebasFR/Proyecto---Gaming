@@ -3,161 +3,194 @@
     ViewData["Title"] = "Configuración del Perfil";
 }
 
-<!-- Segunda Navbar (Secundaria) -->
-<nav class="navbar navbar-expand-lg mb-4" style="background-color: #B62DCE; border-radius: 25px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); height: 50px; padding: 5px 0; max-width: 650px; margin: 0 auto;">
-    <div class="container-fluid justify-content-center">
-        <ul class="navbar-nav">
-            <li class="nav-item">
-                <a class="nav-link text-white fw-bold" asp-controller="Biblioteca" asp-action="Pendientes">Biblioteca</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-white fw-bold" href="#">Comunidad</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-white fw-bold" href="#">Rankings</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-white fw-bold" href="#">Estadísticas</a>
-            </li>
-        </ul>
-    </div>
-</nav>
-
-<div class="container">
+<div class="container config-container">
     <div class="row">
-        <!-- Sidebar de Navegación -->
+        <!-- Sidebar de Navegación Mejorado -->
         <div class="col-md-3">
-            <div class="card config-sidebar" style="background: rgba(35, 40, 48, 0.9); border: none; border-radius: 15px;">
+            <div class="card config-sidebar">
                 <div class="card-body">
                     <div class="text-center mb-4">
                         <div class="avatar-container mb-3">
                             @if (!string.IsNullOrEmpty(Model.FotoPerfilUrl))
                             {
                                 <img src="@Model.FotoPerfilUrl" class="avatar-img" alt="Avatar">
+                                <div class="avatar-status online"></div>
                             }
                             else
                             {
                                 <div class="avatar-placeholder">
-                                    <i class="fas fa-user fa-2x text-white"></i>
+                                    <i class="fas fa-user fa-2x"></i>
                                 </div>
+                                <div class="avatar-status online"></div>
                             }
                         </div>
-                        <h5 class="text-white mb-1">@Model.UserName</h5>
-                        <small class="text-white">Miembro desde @DateTime.Now.ToString("MM/yyyy")</small>
+                        <h5 class="user-name mb-1">@Model.UserName</h5>
+                        <small class="user-since">Miembro desde @DateTime.Now.ToString("MM/yyyy")</small>
                     </div>
 
-                    <nav class="nav flex-column">
+                    <nav class="nav flex-column config-nav">
                         <a class="nav-link config-nav-link active" href="#editar-perfil" data-bs-toggle="tab">
-                            <i class="fas fa-user-edit me-2"></i>Editar Perfil
+                            <div class="nav-icon">
+                                <i class="fas fa-user-edit"></i>
+                            </div>
+                            <span>Editar Perfil</span>
                         </a>
                         <a class="nav-link config-nav-link" href="#plataformas" data-bs-toggle="tab">
-                            <i class="fas fa-gamepad me-2"></i>Plataformas Preferidas
+                            <div class="nav-icon">
+                                <i class="fas fa-gamepad"></i>
+                            </div>
+                            <span>Plataformas</span>
                         </a>
                         <a class="nav-link config-nav-link" href="#seguridad" data-bs-toggle="tab">
-                            <i class="fas fa-shield-alt me-2"></i>Seguridad y Privacidad
+                            <div class="nav-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <span>Seguridad</span>
                         </a>
-                        <hr class="my-3">
-                        <a class="nav-link config-nav-link text-danger" href="#zona-peligrosa" data-bs-toggle="tab">
-                            <i class="fas fa-exclamation-triangle me-2"></i>Zona Peligrosa
+                        <div class="nav-divider"></div>
+                        <a class="nav-link config-nav-link danger-link" href="#zona-peligrosa" data-bs-toggle="tab">
+                            <div class="nav-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <span>Zona Peligrosa</span>
                         </a>
                     </nav>
                 </div>
             </div>
         </div>
 
-        <!-- Contenido Principal -->
+        <!-- Contenido Principal Mejorado -->
         <div class="col-md-9">
-            <div class="tab-content">
+            <div class="tab-content config-content">
                 <!-- Pestaña: Editar Perfil -->
                 <div class="tab-pane fade show active" id="editar-perfil">
-                    <div class="card" style="background: rgba(35, 40, 48, 0.9); border: none; border-radius: 15px;">
-                        <div class="card-header bg-transparent border-bottom">
-                            <h4 class="text-white mb-0"><i class="fas fa-user-edit me-2"></i>Información Personal</h4>
+                    <div class="config-card">
+                        <div class="card-header config-card-header">
+                            <div class="header-icon">
+                                <i class="fas fa-user-edit"></i>
+                            </div>
+                            <h4 class="config-title">Información Personal</h4>
                         </div>
                         <div class="card-body">
                             <form asp-action="ActualizarPerfil" method="post" enctype="multipart/form-data">
                                 @Html.AntiForgeryToken()
                                 
-                                <!-- Avatar -->
-                                <div class="row mb-4">
-                                    <div class="col-12 text-center">
-                                        <div class="avatar-upload-container mb-3">
-                                            @if (!string.IsNullOrEmpty(Model.FotoPerfilUrl))
-                                            {
-                                                <img src="@Model.FotoPerfilUrl" class="avatar-preview" id="avatarPreview" alt="Avatar">
-                                            }
-                                            else
-                                            {
-                                                <div class="avatar-preview placeholder" id="avatarPreview">
-                                                    <i class="fas fa-user fa-3x text-white"></i>
+                                <!-- Avatar Section -->
+                                <div class="avatar-upload-section mb-5">
+                                    <div class="avatar-preview-container">
+                                        @if (!string.IsNullOrEmpty(Model.FotoPerfilUrl))
+                                        {
+                                            <div class="avatar-wrapper">
+                                                <img src="@Model.FotoPerfilUrl" class="avatar-preview-img" id="avatarPreview" alt="Avatar">
+                                                <div class="avatar-overlay">
+                                                    <i class="fas fa-camera"></i>
                                                 </div>
-                                            }
-                                        </div>
-                                        <label for="fotoPerfil" class="btn btn-outline-primary btn-sm">
-                                            <i class="fas fa-camera me-2"></i>Cambiar avatar
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="avatar-wrapper placeholder" id="avatarPreview">
+                                                <div class="avatar-placeholder-large">
+                                                    <i class="fas fa-user fa-3x"></i>
+                                                </div>
+                                                <div class="avatar-overlay">
+                                                    <i class="fas fa-camera"></i>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="avatar-controls">
+                                        <label for="fotoPerfil" class="btn btn-primary btn-avatar">
+                                            <i class="fas fa-upload me-2"></i>Subir nueva foto
                                         </label>
                                         <input type="file" asp-for="FotoPerfil" id="fotoPerfil" class="d-none" accept="image/*">
-                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="resetAvatar()">
+                                        <button type="button" class="btn btn-secondary btn-avatar" onclick="resetAvatar()">
                                             <i class="fas fa-sync me-2"></i>Restablecer
                                         </button>
                                     </div>
                                 </div>
 
                                 <!-- Información Básica -->
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label text-white">Nombre de usuario *</label>
-                                        <input type="text" asp-for="UserName" class="form-control config-input" 
-                                            placeholder="Ej: iSebasFR" value="@Model.UserName">
-                                        <span asp-validation-for="UserName" class="text-danger small"></span>
-                                        <small class="text-white opacity-75">Este será tu nombre público en la plataforma</small>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Nombre de usuario *</label>
+                                            <div class="input-with-icon">
+                                                <i class="fas fa-at"></i>
+                                                <input type="text" asp-for="UserName" class="form-control config-input" 
+                                                    placeholder="Ej: iSebasFR" value="@Model.UserName">
+                                            </div>
+                                            <span asp-validation-for="UserName" class="text-danger small"></span>
+                                            <small class="form-hint">Este será tu nombre público en la plataforma</small>
+                                        </div>
                                     </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label text-white">Nombre real</label>
-                                        <input type="text" asp-for="NombreReal" class="form-control config-input" 
-                                            placeholder="Ej: Sebastian Fernandez" value="@Model.NombreReal">
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label text-white">Correo electrónico</label>
-                                        <input type="email" value="@Model.Email" class="form-control config-input" readonly disabled>
-                                        <small class="text-white opacity-75">El email no se puede modificar</small>
-                                        <!-- Campo oculto para mantener el valor en el modelo -->
-                                        <input type="hidden" asp-for="Email">
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label text-white">Fecha de nacimiento</label>
-                                        <input type="date" asp-for="FechaNacimiento" class="form-control config-input" 
-                                            value="@(Model.FechaNacimiento?.ToString("yyyy-MM-dd"))">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Nombre real</label>
+                                            <div class="input-with-icon">
+                                                <i class="fas fa-user"></i>
+                                                <input type="text" asp-for="NombreReal" class="form-control config-input" 
+                                                    placeholder="Ej: Sebastian Fernandez" value="@Model.NombreReal">
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label text-white">Biografía</label>
-                                    <textarea asp-for="Biografia" class="form-control config-input" rows="4" 
-                                              placeholder="Cuéntanos sobre ti...">@Model.Biografia</textarea>
-                                    <div class="form-text text-white">@(Model.Biografia?.Length ?? 0)/500 caracteres</div>
+                                <div class="row g-3 mt-2">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Correo electrónico</label>
+                                            <div class="input-with-icon">
+                                                <i class="fas fa-envelope"></i>
+                                                <input type="email" value="@Model.Email" class="form-control config-input" readonly disabled>
+                                            </div>
+                                            <small class="form-hint">El email no se puede modificar</small>
+                                            <input type="hidden" asp-for="Email">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Fecha de nacimiento</label>
+                                            <div class="input-with-icon">
+                                                <i class="fas fa-calendar"></i>
+                                                <input type="date" asp-for="FechaNacimiento" class="form-control config-input" 
+                                                    value="@(Model.FechaNacimiento?.ToString("yyyy-MM-dd"))">
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="mb-4">
-                                    <label class="form-label text-white">País</label>
-                                    <select asp-for="Pais" class="form-select config-input">
-                                        <option value="">Seleccionar país</option>
-                                        <option value="Argentina">Argentina</option>
-                                        <option value="Chile">Chile</option>
-                                        <option value="Colombia">Colombia</option>
-                                        <option value="España">España</option>
-                                        <option value="México">México</option>
-                                        <option value="Perú">Perú</option>
-                                        <option value="Estados Unidos">Estados Unidos</option>
-                                        <option value="Otro">Otro</option>
-                                    </select>
+                                <div class="form-group mt-4">
+                                    <label class="form-label">Biografía</label>
+                                    <div class="bio-container">
+                                        <textarea asp-for="Biografia" class="form-control config-input bio-textarea" rows="4" 
+                                                  placeholder="Cuéntanos sobre ti, tus juegos favoritos, género preferido...">@Model.Biografia</textarea>
+                                        <div class="bio-counter">
+                                            <span class="char-count">@(Model.Biografia?.Length ?? 0)</span>/500 caracteres
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="text-end">
-                                    <button type="submit" class="btn btn-primary">
+                                <div class="form-group mt-4">
+                                    <label class="form-label">País</label>
+                                    <div class="input-with-icon">
+                                        <i class="fas fa-globe"></i>
+                                        <select asp-for="Pais" class="form-select config-input">
+                                            <option value="">Seleccionar país</option>
+                                            <option value="Argentina">Argentina</option>
+                                            <option value="Chile">Chile</option>
+                                            <option value="Colombia">Colombia</option>
+                                            <option value="España">España</option>
+                                            <option value="México">México</option>
+                                            <option value="Perú">Perú</option>
+                                            <option value="Estados Unidos">Estados Unidos</option>
+                                            <option value="Otro">Otro</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-actions mt-5">
+                                    <button type="submit" class="btn btn-primary btn-save">
                                         <i class="fas fa-save me-2"></i>Guardar cambios
                                     </button>
                                 </div>
@@ -168,37 +201,44 @@
 
                 <!-- Pestaña: Plataformas Preferidas -->
                 <div class="tab-pane fade" id="plataformas">
-                    <div class="card" style="background: rgba(35, 40, 48, 0.9); border: none; border-radius: 15px;">
-                        <div class="card-header bg-transparent border-bottom">
-                            <h4 class="text-white mb-0"><i class="fas fa-gamepad me-2"></i>Plataformas Preferidas</h4>
+                    <div class="config-card">
+                        <div class="card-header config-card-header">
+                            <div class="header-icon">
+                                <i class="fas fa-gamepad"></i>
+                            </div>
+                            <h4 class="config-title">Plataformas Preferidas</h4>
                         </div>
                         <div class="card-body">
-                            <p class="text-white mb-4">Selecciona tus plataformas de juego preferidas.</p>
+                            <p class="config-description">Selecciona tus plataformas de juego preferidas para personalizar tu experiencia.</p>
                             
                             <form asp-action="ActualizarPlataformas" method="post" id="plataformasForm">
                                 @Html.AntiForgeryToken()
                                 
-                                <div class="row">
+                                <div class="platforms-grid">
                                     @foreach (var plataforma in Model.PlataformasPreferidas)
                                     {
-                                        <div class="col-md-6 mb-3">
-                                            <div class="platform-card @(plataforma.Seleccionada ? "selected" : "")">
-                                                <input type="checkbox" name="plataformasSeleccionadas" value="@plataforma.Id" 
-                                                       id="platform-@plataforma.Id" @(plataforma.Seleccionada ? "checked" : "") class="d-none">
-                                                <label for="platform-@plataforma.Id" class="platform-label w-100">
-                                                    <div class="platform-icon mb-2">
-                                                        <i class="fas @GetPlatformIcon(plataforma.Id) fa-2x"></i>
-                                                    </div>
-                                                    <h6 class="text-white mb-1">@plataforma.Nombre</h6>
-                                                    <small class="text-white">@GetPlatformDescription(plataforma.Id)</small>
-                                                </label>
-                                            </div>
+                                        <div class="platform-card @(plataforma.Seleccionada ? "selected" : "")" 
+                                             data-platform="@plataforma.Id">
+                                            <input type="checkbox" name="plataformasSeleccionadas" value="@plataforma.Id" 
+                                                   id="platform-@plataforma.Id" @(plataforma.Seleccionada ? "checked" : "") class="d-none">
+                                            <label for="platform-@plataforma.Id" class="platform-label">
+                                                <div class="platform-icon">
+                                                    <i class="fab @GetPlatformIcon(plataforma.Id)"></i>
+                                                </div>
+                                                <div class="platform-info">
+                                                    <h6 class="platform-name">@plataforma.Nombre</h6>
+                                                    <small class="platform-desc">@GetPlatformDescription(plataforma.Id)</small>
+                                                </div>
+                                                <div class="platform-check">
+                                                    <i class="fas fa-check"></i>
+                                                </div>
+                                            </label>
                                         </div>
                                     }
                                 </div>
 
-                                <div class="text-end mt-4">
-                                    <button type="submit" class="btn btn-primary">
+                                <div class="form-actions mt-4">
+                                    <button type="submit" class="btn btn-primary btn-save">
                                         <i class="fas fa-save me-2"></i>Guardar plataformas
                                     </button>
                                 </div>
@@ -209,55 +249,69 @@
 
                 <!-- Pestaña: Seguridad y Privacidad -->
                 <div class="tab-pane fade" id="seguridad">
-                    <div class="card" style="background: rgba(35, 40, 48, 0.9); border: none; border-radius: 15px;">
-                        <div class="card-header bg-transparent border-bottom">
-                            <h4 class="text-white mb-0"><i class="fas fa-shield-alt me-2"></i>Configuración de Seguridad</h4>
+                    <div class="config-card">
+                        <div class="card-header config-card-header">
+                            <div class="header-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <h4 class="config-title">Configuración de Seguridad</h4>
                         </div>
                         <div class="card-body">
                             <!-- Cambiar Contraseña -->
-                            <div class="security-section mb-5">
-                                <h5 class="text-white mb-3">Cambiar Contraseña</h5>
+                            <div class="security-section">
+                                <h5 class="security-title">
+                                    <i class="fas fa-key me-2"></i>Cambiar Contraseña
+                                </h5>
                                 <form asp-action="CambiarContrasena" method="post" id="passwordForm">
                                     @Html.AntiForgeryToken()
                                     
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label text-white">Contraseña actual</label>
-                                            <div class="password-input-group">
-                                                <input type="password" name="currentPassword" class="form-control config-input" 
-                                                       placeholder="Ingresa tu contraseña actual">
-                                                <button type="button" class="btn btn-outline-secondary toggle-password">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">Contraseña actual</label>
+                                                <div class="password-input-group">
+                                                    <i class="fas fa-lock"></i>
+                                                    <input type="password" name="currentPassword" class="form-control config-input" 
+                                                           placeholder="Ingresa tu contraseña actual">
+                                                    <button type="button" class="btn btn-toggle-password">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                     
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label text-white">Nueva contraseña</label>
-                                            <div class="password-input-group">
-                                                <input type="password" name="newPassword" class="form-control config-input" 
-                                                       placeholder="Ingresa nueva contraseña">
-                                                <button type="button" class="btn btn-outline-secondary toggle-password">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
+                                    <div class="row g-3 mt-2">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">Nueva contraseña</label>
+                                                <div class="password-input-group">
+                                                    <i class="fas fa-lock"></i>
+                                                    <input type="password" name="newPassword" class="form-control config-input" 
+                                                           placeholder="Ingresa nueva contraseña">
+                                                    <button type="button" class="btn btn-toggle-password">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label text-white">Confirmar nueva contraseña</label>
-                                            <div class="password-input-group">
-                                                <input type="password" name="confirmPassword" class="form-control config-input" 
-                                                       placeholder="Confirma nueva contraseña">
-                                                <button type="button" class="btn btn-outline-secondary toggle-password">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label">Confirmar nueva contraseña</label>
+                                                <div class="password-input-group">
+                                                    <i class="fas fa-lock"></i>
+                                                    <input type="password" name="confirmPassword" class="form-control config-input" 
+                                                           placeholder="Confirma nueva contraseña">
+                                                    <button type="button" class="btn btn-toggle-password">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="text-end">
-                                        <button type="submit" class="btn btn-primary">
+                                    <div class="form-actions mt-4">
+                                        <button type="submit" class="btn btn-primary btn-save">
                                             <i class="fas fa-key me-2"></i>Cambiar contraseña
                                         </button>
                                     </div>
@@ -265,15 +319,17 @@
                             </div>
 
                             <!-- Cerrar Sesión -->
-                            <div class="security-section">
-                                <h5 class="text-white mb-3">Sesión</h5>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h6 class="text-white mb-1">Cerrar sesión en todos los dispositivos</h6>
-                                        <p class="text-white mb-0">Terminará tu sesión en este y todos los demás dispositivos.</p>
+                            <div class="security-section logout-section">
+                                <h5 class="security-title">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Sesión
+                                </h5>
+                                <div class="logout-content">
+                                    <div class="logout-info">
+                                        <h6 class="logout-title">Cerrar sesión en todos los dispositivos</h6>
+                                        <p class="logout-desc">Terminará tu sesión en este y todos los demás dispositivos.</p>
                                     </div>
                                     <form asp-area="Identity" asp-page="/Account/Logout" method="post">
-                                        <button type="submit" class="btn btn-outline-warning">
+                                        <button type="submit" class="btn btn-warning btn-logout">
                                             <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
                                         </button>
                                     </form>
@@ -285,38 +341,48 @@
 
                 <!-- Pestaña: Zona Peligrosa -->
                 <div class="tab-pane fade" id="zona-peligrosa">
-                    <div class="card border-danger" style="background: rgba(35, 40, 48, 0.9); border: 2px solid #dc3545 !important; border-radius: 15px;">
-                        <div class="card-header bg-transparent border-bottom border-danger">
-                            <h4 class="text-danger mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Zona Peligrosa</h4>
+                    <div class="config-card danger-card">
+                        <div class="card-header config-card-header danger-header">
+                            <div class="header-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <h4 class="config-title">Zona Peligrosa</h4>
                         </div>
                         <div class="card-body">
-                            <div class="text-center mb-4">
-                                <i class="fas fa-skull-crossbones fa-3x text-danger mb-3"></i>
-                                <h4 class="text-danger">¡Precaución!</h4>
-                                <p class="text-white">Esta acción es irreversible. Por favor, procede con precaución.</p>
+                            <div class="danger-warning text-center mb-5">
+                                <div class="danger-icon">
+                                    <i class="fas fa-skull-crossbones"></i>
+                                </div>
+                                <h3 class="danger-title">¡Precaución!</h3>
+                                <p class="danger-text">Esta acción es irreversible. Por favor, procede con precaución.</p>
                             </div>
 
                             <!-- Eliminar Cuenta -->
-                            <div class="danger-section p-4 rounded" style="background: rgba(220, 53, 69, 0.1);">
-                                <h5 class="text-danger mb-3">Eliminar Cuenta Permanentemente</h5>
-                                <p class="text-white mb-3">
-                                    Una vez que elimines tu cuenta, no podrás recuperarla. Se perderán todos tus datos, 
-                                    incluyendo tu biblioteca de juegos, reseñas y estadísticas.
-                                </p>
+                            <div class="danger-section">
+                                <h5 class="danger-section-title">Eliminar Cuenta Permanentemente</h5>
+                                <div class="danger-alert">
+                                    <i class="fas fa-info-circle"></i>
+                                    <p>
+                                        Una vez que elimines tu cuenta, no podrás recuperarla. Se perderán todos tus datos, 
+                                        incluyendo tu biblioteca de juegos, reseñas y estadísticas.
+                                    </p>
+                                </div>
                                 
                                 <form asp-action="EliminarCuenta" method="post" id="deleteAccountForm" onsubmit="return confirmDelete()">
                                     @Html.AntiForgeryToken()
                                     
-                                    <div class="mb-3">
-                                        <label class="form-label text-white">
-                                            Escribe <strong class="text-danger">ELIMINAR</strong> para confirmar:
+                                    <div class="form-group mt-4">
+                                        <label class="form-label danger-label">
+                                            Escribe <strong class="confirm-text">ELIMINAR</strong> para confirmar:
                                         </label>
-                                        <input type="text" name="confirmacion" class="form-control config-input" 
-                                               placeholder="ELIMINAR" required>
+                                        <div class="confirm-input-group">
+                                            <input type="text" name="confirmacion" class="form-control config-input danger-input" 
+                                                   placeholder="ELIMINAR" required>
+                                        </div>
                                     </div>
 
-                                    <div class="text-end">
-                                        <button type="submit" class="btn btn-danger">
+                                    <div class="form-actions mt-4">
+                                        <button type="submit" class="btn btn-danger btn-delete">
                                             <i class="fas fa-trash me-2"></i>Eliminar Cuenta Permanentemente
                                         </button>
                                     </div>
@@ -339,7 +405,12 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const preview = document.getElementById('avatarPreview');
-                    preview.innerHTML = `<img src="${e.target.result}" class="avatar-preview-img" alt="Preview">`;
+                    preview.innerHTML = `
+                        <img src="${e.target.result}" class="avatar-preview-img" alt="Preview">
+                        <div class="avatar-overlay">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                    `;
                     preview.classList.remove('placeholder');
                 }
                 reader.readAsDataURL(file);
@@ -348,13 +419,20 @@
 
         function resetAvatar() {
             const preview = document.getElementById('avatarPreview');
-            preview.innerHTML = '<i class="fas fa-user fa-3x text-white"></i>';
+            preview.innerHTML = `
+                <div class="avatar-placeholder-large">
+                    <i class="fas fa-user fa-3x"></i>
+                </div>
+                <div class="avatar-overlay">
+                    <i class="fas fa-camera"></i>
+                </div>
+            `;
             preview.classList.add('placeholder');
             document.getElementById('fotoPerfil').value = '';
         }
 
         // Toggle password visibility
-        document.querySelectorAll('.toggle-password').forEach(button => {
+        document.querySelectorAll('.btn-toggle-password').forEach(button => {
             button.addEventListener('click', function() {
                 const input = this.parentElement.querySelector('input');
                 const icon = this.querySelector('i');
@@ -371,15 +449,25 @@
             });
         });
 
-        // Platform selection
-        document.querySelectorAll('.platform-label').forEach(label => {
-            label.addEventListener('click', function() {
-                const card = this.parentElement;
-                card.classList.toggle('selected');
+        // Platform selection with animation
+        document.querySelectorAll('.platform-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const checkbox = this.querySelector('input[type="checkbox"]');
+                checkbox.checked = !checkbox.checked;
+                this.classList.toggle('selected');
+                
+                // Add ripple effect
+                const ripple = document.createElement('span');
+                ripple.classList.add('platform-ripple');
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
             });
         });
 
-        // Tab navigation
+        // Tab navigation with smooth transitions
         document.querySelectorAll('.config-nav-link').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -391,13 +479,22 @@
                 });
                 this.classList.add('active');
                 
-                // Show target tab
+                // Show target tab with fade
                 document.querySelectorAll('.tab-pane').forEach(tab => {
                     tab.classList.remove('show', 'active');
                 });
                 document.querySelector(target).classList.add('show', 'active');
             });
         });
+
+        // Character counter for bio
+        const bioTextarea = document.querySelector('.bio-textarea');
+        if (bioTextarea) {
+            bioTextarea.addEventListener('input', function() {
+                const counter = this.parentElement.querySelector('.char-count');
+                counter.textContent = this.value.length;
+            });
+        }
 
         function confirmDelete() {
             const confirmation = document.querySelector('input[name="confirmacion"]').value;
@@ -407,6 +504,17 @@
             }
             return confirm('¿Estás absolutamente seguro? Esta acción no se puede deshacer.');
         }
+
+        // Add hover effects to platform cards
+        document.querySelectorAll('.platform-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
     </script>
 }
 
@@ -415,10 +523,10 @@
     {
         return platformId switch
         {
-            "pc" => "fa-desktop",
-            "playstation" => "fa-gamepad",
+            "pc" => "fa-windows",
+            "playstation" => "fa-playstation",
             "xbox" => "fa-xbox",
-            "nintendo" => "fa-game-console",
+            "nintendo" => "fa-gamepad",
             "mobile" => "fa-mobile-alt",
             _ => "fa-gamepad"
         };
@@ -440,130 +548,620 @@
 
 @section Styles {
     <style>
+        /* PALETA DE COLORES GAMING */
+        :root {
+            --bg-dark: #070714;
+            --bg-primary: #0f0f1f;
+            --card-bg: #151530;
+            --accent-purple: #8b2ce6;
+            --accent-blue: #2c5be6;
+            --neon-purple: #b042ff;
+            --neon-blue: #428bff;
+            --text-primary: #ffffff;
+            --text-secondary: #b8b8d0;
+            --success-green: #06d6a0;
+            --danger-red: #dc3545;
+            --warning-orange: #ff9e1a;
+        }
+
+        .config-container {
+            background: var(--bg-dark);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        /* SIDEBAR MEJORADO */
         .config-sidebar {
+            background: var(--card-bg) !important;
+            border: 1px solid rgba(139, 44, 230, 0.3);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
             position: sticky;
             top: 20px;
+            box-shadow: 0 8px 32px rgba(139, 44, 230, 0.1);
         }
 
-        .config-nav-link {
-            color: rgba(255, 255, 255, 0.7);
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 5px;
-            transition: all 0.3s ease;
-            text-decoration: none;
-        }
-
-        .config-nav-link:hover,
-        .config-nav-link.active {
-            color: white;
-            background: rgba(108, 92, 231, 0.2);
-        }
-
-        .config-nav-link.text-danger:hover {
-            background: rgba(220, 53, 69, 0.2);
-        }
-
-        .config-input {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            border-radius: 8px;
-        }
-
-        .config-input:focus {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: var(--primary);
-            color: white;
-            box-shadow: 0 0 0 0.2rem rgba(108, 92, 231, 0.25);
-        }
-
-        .avatar-upload-container {
+        .avatar-container {
             position: relative;
             display: inline-block;
         }
 
-        .avatar-preview {
+        .avatar-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--neon-purple);
+            box-shadow: 0 0 20px rgba(139, 44, 230, 0.4);
+        }
+
+        .avatar-placeholder {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid var(--neon-purple);
+            box-shadow: 0 0 20px rgba(139, 44, 230, 0.4);
+        }
+
+        .avatar-status {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            border: 2px solid var(--card-bg);
+        }
+
+        .avatar-status.online {
+            background: var(--success-green);
+            box-shadow: 0 0 10px rgba(6, 214, 160, 0.5);
+        }
+
+        .user-name {
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .user-since {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .config-nav {
+            gap: 8px;
+        }
+
+        .config-nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .config-nav-link:hover {
+            color: var(--text-primary);
+            background: rgba(139, 44, 230, 0.1);
+            border-color: rgba(139, 44, 230, 0.3);
+            transform: translateX(5px);
+        }
+
+        .config-nav-link.active {
+            color: var(--text-primary);
+            background: linear-gradient(135deg, rgba(139, 44, 230, 0.2), rgba(66, 139, 255, 0.2));
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 15px rgba(139, 44, 230, 0.3);
+        }
+
+        .nav-icon {
+            width: 20px;
+            margin-right: 12px;
+            text-align: center;
+        }
+
+        .nav-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 15px 0;
+        }
+
+        .config-nav-link.danger-link:hover,
+        .config-nav-link.danger-link.active {
+            background: rgba(220, 53, 69, 0.1);
+            border-color: rgba(220, 53, 69, 0.3);
+            box-shadow: 0 0 15px rgba(220, 53, 69, 0.3);
+        }
+
+        /* CONTENIDO PRINCIPAL */
+        .config-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(139, 44, 230, 0.3);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(139, 44, 230, 0.1);
+        }
+
+        .config-card-header {
+            background: rgba(139, 44, 230, 0.1);
+            border-bottom: 1px solid rgba(139, 44, 230, 0.3);
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .config-title {
+            color: var(--text-primary);
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        /* AVATAR UPLOAD SECTION */
+        .avatar-upload-section {
+            text-align: center;
+        }
+
+        .avatar-preview-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            border-radius: 50%;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .avatar-wrapper:hover {
+            transform: scale(1.05);
+        }
+
+        .avatar-preview-img {
             width: 120px;
             height: 120px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid var(--primary);
+            border: 3px solid var(--neon-purple);
+            box-shadow: 0 0 30px rgba(139, 44, 230, 0.4);
         }
 
-        .avatar-preview.placeholder {
-            background: var(--primary-gradient);
+        .avatar-placeholder-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            border: 3px solid var(--neon-purple);
+            box-shadow: 0 0 30px rgba(139, 44, 230, 0.4);
         }
 
-        .avatar-preview-img {
+        .avatar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
             border-radius: 50%;
-            object-fit: cover;
+        }
+
+        .avatar-wrapper:hover .avatar-overlay {
+            opacity: 1;
+        }
+
+        .avatar-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-avatar {
+            border-radius: 25px;
+            padding: 8px 20px;
+            font-weight: 600;
+        }
+
+        /* FORMULARIOS MEJORADOS */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .config-input {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-primary);
+            border-radius: 10px;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+        }
+
+        .config-input:focus {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 0 0.2rem rgba(139, 44, 230, 0.25);
+            color: var(--text-primary);
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            z-index: 2;
+        }
+
+        .input-with-icon .config-input {
+            padding-left: 45px;
+        }
+
+        .form-hint {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+
+        .bio-container {
+            position: relative;
+        }
+
+        .bio-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .bio-counter {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .char-count {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* PLATAFORMAS GRID */
+        .platforms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
         }
 
         .platform-card {
-            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
             border: 2px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
-            text-align: center;
+            padding: 1.5rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
         }
 
-        .platform-card:hover,
+        .platform-card:hover {
+            border-color: var(--neon-purple);
+            background: rgba(139, 44, 230, 0.1);
+            transform: translateY(-3px);
+        }
+
         .platform-card.selected {
-            border-color: var(--primary);
-            background: rgba(108, 92, 231, 0.1);
-            transform: translateY(-2px);
+            border-color: var(--neon-purple);
+            background: rgba(139, 44, 230, 0.2);
+            box-shadow: 0 0 20px rgba(139, 44, 230, 0.3);
+        }
+
+        .platform-label {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            margin: 0;
         }
 
         .platform-icon {
-            color: var(--primary);
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
         }
 
-        .platform-card.selected .platform-icon {
-            color: white;
+        .platform-info {
+            flex: 1;
+        }
+
+        .platform-name {
+            color: var(--text-primary);
+            margin: 0 0 0.25rem 0;
+            font-weight: 600;
+        }
+
+        .platform-desc {
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .platform-check {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            color: var(--success-green);
+        }
+
+        .platform-card.selected .platform-check {
+            opacity: 1;
+        }
+
+        .platform-ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(139, 44, 230, 0.3);
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+
+        
+
+        /* SECCIÓN SEGURIDAD */
+        .security-section {
+            padding: 2rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .security-section:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .security-title {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
         }
 
         .password-input-group {
             position: relative;
         }
 
-        .password-input-group .toggle-password {
+        .password-input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            z-index: 2;
+        }
+
+        .password-input-group .config-input {
+            padding-left: 45px;
+            padding-right: 50px;
+        }
+
+        .btn-toggle-password {
             position: absolute;
             right: 10px;
             top: 50%;
             transform: translateY(-50%);
+            background: none;
             border: none;
-            background: transparent;
-            color: rgba(255, 255, 255, 0.5);
+            color: var(--text-secondary);
+            cursor: pointer;
+            z-index: 2;
         }
 
-        .security-section {
-            padding: 20px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        .logout-section {
+            background: rgba(255, 158, 26, 0.05);
+            border: 1px solid rgba(255, 158, 26, 0.2);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 2rem;
         }
 
-        .security-section:last-child {
-            border-bottom: none;
+        .logout-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logout-info {
+            flex: 1;
+        }
+
+        .logout-title {
+            color: var(--text-primary);
+            margin: 0 0 0.5rem 0;
+            font-weight: 600;
+        }
+
+        .logout-desc {
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .btn-logout {
+            background: linear-gradient(135deg, var(--warning-orange), #ff6b35);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* ZONA PELIGROSA */
+        .danger-card {
+            border: 2px solid var(--danger-red) !important;
+        }
+
+        .danger-header {
+            background: rgba(220, 53, 69, 0.1);
+            border-bottom: 1px solid rgba(220, 53, 69, 0.3);
+        }
+
+        .danger-warning {
+            padding: 2rem 0;
+        }
+
+        .danger-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(220, 53, 69, 0.2);
+            border: 2px solid var(--danger-red);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2rem;
+            color: var(--danger-red);
+        }
+
+        .danger-title {
+            color: var(--danger-red);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .danger-text {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
         }
 
         .danger-section {
-            border-left: 4px solid #dc3545;
+            background: rgba(220, 53, 69, 0.05);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+            border-radius: 10px;
+            padding: 2rem;
         }
 
-        .form-text {
-            font-size: 0.8rem;
+        .danger-section-title {
+            color: var(--danger-red);
+            font-weight: 600;
+            margin-bottom: 1rem;
         }
 
-        .text-white {
-            color: white !important;
+        .danger-alert {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
         }
+
+        .danger-alert i {
+            color: var(--danger-red);
+            margin-top: 2px;
+        }
+
+        .danger-alert p {
+            color: var(--text-primary);
+            margin: 0;
+            flex: 1;
+        }
+
+        .danger-label {
+            color: var(--text-primary);
+        }
+
+        .confirm-text {
+            color: var(--danger-red);
+        }
+
+        .danger-input {
+            border-color: rgba(220, 53, 69, 0.3);
+        }
+
+        .danger-input:focus {
+            border-color: var(--danger-red);
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+
+        /* BOTONES */
+        .form-actions {
+            text-align: right;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(139, 44, 230, 0.4);
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, var(--danger-red), #c82333);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-delete:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(220, 53, 69, 0.4);
+        }
+
     </style>
 }

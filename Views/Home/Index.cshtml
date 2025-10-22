@@ -3,40 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gamer Tracker - Juega, registra y comparte tu pasión</title>
+    <title>GamerHub - Tu Plataforma Definitiva de Gaming</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* PALETA DE COLORES GAMING */
         :root {
-            --primary: #6c5ce7;
-            --primary-dark: #5649c7;
-            --primary-gradient: linear-gradient(135deg, #6c5ce7 0%, #8a7dff 100%);
-            --secondary: #a29bfe;
-            --dark: #2d3436;
-            --light: #f5f6fa;
-            --accent: #fd79a8;
-            --success: #00b894;
-            --warning: #fdcb6e;
-            --danger: #d63031;
-            --card-bg: #ffffff;
-            --border-radius: 8px;
-            --box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-            --transition: all 0.3s ease;
+            --bg-dark: #070714;
+            --bg-primary: #0f0f1f;
+            --card-bg: #151530;
+            --accent-purple: #8b2ce6;
+            --accent-blue: #2c5be6;
+            --neon-purple: #b042ff;
+            --neon-blue: #428bff;
+            --text-primary: #ffffff;
+            --text-secondary: #b8b8d0;
+            --navbar-bg: rgba(15, 15, 31, 0.95);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Montserrat', 'Segoe UI', sans-serif;
         }
 
         body {
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
-                        url('https://sdmntpreastus.oaiusercontent.com/files/00000000-5200-61f9-9d5a-e769a80c45f8/raw?se=2025-09-27T15%3A46%3A29Z&sp=r&sv=2024-08-04&sr=b&scid=6b1b60cf-cd32-5a76-8aac-19884b02ec94&skoid=ea0c7534-f237-4ccd-b7ea-766c4ed977ad&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-09-27T13%3A29%3A12Z&ske=2025-09-28T13%3A29%3A12Z&sks=b&skv=2024-08-04&sig=5fjM9gwH/zWYbd26H23N1TJw/Vlw1WvxYm9FNt7nijI%3D') no-repeat center center fixed;
-            background-size: cover;
-            color: var(--light);
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
             min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(139, 44, 230, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(44, 91, 230, 0.15) 0%, transparent 40%);
             padding: 20px;
+            overflow-x: hidden;
         }
 
         .container {
@@ -60,13 +59,13 @@
         .logo-text {
             font-size: 2.5rem;
             font-weight: 800;
-            background: var(--primary-gradient);
+            background: linear-gradient(to right, var(--neon-purple), var(--neon-blue));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             letter-spacing: 1px;
             text-transform: uppercase;
-            text-shadow: 0 2px 10px rgba(108, 92, 231, 0.3);
+            text-shadow: 0 2px 10px rgba(139, 44, 230, 0.3);
         }
 
         nav ul {
@@ -76,16 +75,35 @@
         }
 
         nav a {
-            color: var(--light);
+            color: var(--text-secondary);
             text-decoration: none;
-            font-weight: 500;
-            transition: var(--transition);
+            font-weight: 600;
+            transition: all 0.3s ease;
             padding: 8px 15px;
-            border-radius: var(--border-radius);
+            border-radius: 8px;
+            position: relative;
         }
 
         nav a:hover {
-            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            background: rgba(139, 44, 230, 0.15);
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 3px;
+            background: linear-gradient(to right, var(--accent-purple), var(--accent-blue));
+            transition: width 0.3s;
+            border-radius: 2px;
+        }
+
+        nav a:hover::after {
+            width: 80%;
         }
 
         .auth-buttons {
@@ -94,142 +112,344 @@
         }
 
         .btn {
-            padding: 10px 20px;
-            border-radius: var(--border-radius);
+            padding: 12px 25px;
+            border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.3s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
         }
 
         .btn-primary {
-            background: var(--primary-gradient);
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
             color: white;
             border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+            box-shadow: 0 8px 20px rgba(139, 44, 230, 0.4);
         }
 
         .btn-secondary {
             background: transparent;
-            color: var(--light);
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-secondary);
+            border: 2px solid rgba(139, 44, 230, 0.3);
         }
 
         .btn-secondary:hover {
-            border-color: var(--primary);
-            background: rgba(108, 92, 231, 0.1);
+            border-color: var(--accent-purple);
+            background: rgba(139, 44, 230, 0.1);
+            color: var(--text-primary);
         }
 
+        /* HERO SECTION MEJORADA */
         .hero {
             text-align: center;
-            padding: 60px 0;
-            max-width: 800px;
-            margin: 0 auto 80px;
+            padding: 100px 0 80px;
+            max-width: 900px;
+            margin: 0 auto 100px;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(139, 44, 230, 0.2) 0%, transparent 70%);
+            z-index: -1;
         }
 
         .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 20px;
-            line-height: 1.2;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            font-size: 4rem;
+            margin-bottom: 25px;
+            line-height: 1.1;
+            background: linear-gradient(to right, var(--neon-purple), var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: uppercase;
+            letter-spacing: 3px;
         }
 
         .hero p {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             margin-bottom: 40px;
-            color: var(--secondary);
+            color: var(--text-secondary);
             line-height: 1.6;
         }
 
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        /* STATS SECTION NUEVA */
+        .stats-section {
+            display: flex;
+            justify-content: space-around;
+            margin: 80px 0;
+            padding: 40px 0;
+            background: rgba(21, 21, 48, 0.5);
+            border-radius: 15px;
+            border: 1px solid rgba(139, 44, 230, 0.2);
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--neon-purple), var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* FEATURES SECTION MEJORADA */
         .features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
-            margin-bottom: 80px;
+            margin-bottom: 100px;
         }
 
         .feature-card {
-            background: rgba(35, 40, 48, 0.9);
+            background: var(--card-bg);
             backdrop-filter: blur(10px);
-            border-radius: var(--border-radius);
-            padding: 30px;
+            border-radius: 15px;
+            padding: 40px 30px;
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: var(--transition);
+            border: 1px solid rgba(139, 44, 230, 0.2);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--accent-purple), var(--accent-blue));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
         }
 
         .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 40px rgba(139, 44, 230, 0.3);
+            border-color: rgba(139, 44, 230, 0.6);
         }
 
         .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            background: var(--primary-gradient);
+            font-size: 3rem;
+            margin-bottom: 25px;
+            background: linear-gradient(to right, var(--neon-purple), var(--neon-blue));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.2);
         }
 
         .feature-card h3 {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             margin-bottom: 15px;
+            color: var(--neon-blue);
         }
 
         .feature-card p {
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--text-secondary);
             line-height: 1.6;
+            font-size: 1rem;
         }
 
+        /* ABOUT SECTION MEJORADA */
         .about {
-            background: rgba(35, 40, 48, 0.9);
+            background: var(--card-bg);
             backdrop-filter: blur(10px);
-            border-radius: var(--border-radius);
-            padding: 50px;
-            margin-bottom: 80px;
+            border-radius: 20px;
+            padding: 60px 50px;
+            margin-bottom: 100px;
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(139, 44, 230, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--accent-purple), var(--accent-blue));
         }
 
         .about h2 {
+            font-size: 3rem;
+            margin-bottom: 30px;
+            background: linear-gradient(to right, var(--neon-purple), var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            display: inline-block;
+        }
+
+        .about h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, var(--neon-purple), var(--neon-blue));
+            border-radius: 2px;
+        }
+
+        .about p {
+            font-size: 1.3rem;
+            line-height: 1.8;
+            max-width: 800px;
+            margin: 0 auto;
+            color: var(--text-secondary);
+        }
+
+        /* GAME SHOWCASE NUEVO */
+        .game-showcase {
+            margin-bottom: 100px;
+            text-align: center;
+        }
+
+        .showcase-title {
             font-size: 2.5rem;
-            margin-bottom: 20px;
-            background: var(--primary-gradient);
+            margin-bottom: 50px;
+            background: linear-gradient(to right, var(--neon-purple), var(--neon-blue));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
-        .about p {
-            font-size: 1.2rem;
-            line-height: 1.7;
-            max-width: 800px;
-            margin: 0 auto;
-            color: rgba(255, 255, 255, 0.8);
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
         }
 
+        .game-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(139, 44, 230, 0.2);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .game-card:hover {
+            box-shadow: 0 15px 30px rgba(139, 44, 230, 0.2);
+            border-color: rgba(139, 44, 230, 0.4);
+        }
+
+        .game-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--neon-purple);
+        }
+
+        .game-card h4 {
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .game-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* CTA SECTION MEJORADA */
         .cta-section {
             text-align: center;
-            padding: 60px 0;
+            padding: 80px 0;
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid rgba(139, 44, 230, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--accent-purple), var(--accent-blue));
         }
 
         .cta-section h2 {
-            font-size: 2.5rem;
+            font-size: 3rem;
             margin-bottom: 20px;
+            color: var(--text-primary);
         }
 
         .cta-section p {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             margin-bottom: 40px;
-            color: var(--secondary);
+            color: var(--text-secondary);
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
@@ -246,129 +466,174 @@
             text-align: center;
             padding: 40px 0;
             margin-top: 60px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.6);
+            border-top: 1px solid rgba(139, 44, 230, 0.3);
+            color: var(--text-secondary);
         }
 
         footer a {
-            color: var(--secondary);
+            color: var(--text-secondary);
             text-decoration: none;
-            transition: var(--transition);
+            transition: all 0.3s ease;
         }
 
         footer a:hover {
-            color: var(--primary);
+            color: var(--neon-purple);
             text-decoration: underline;
         }
-
-
-        
-                /* Estilos adicionales para la funcionalidad de mostrar contraseña */
-        .toggle-password {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: var(--secondary);
-            transition: var(--transition);
-        }
-
-        .toggle-password:hover {
-            color: var(--primary);
-        }
-
-        
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- HERO SECTION MEJORADA -->
         <section class="hero">
-            <h1>Juega, registra y comparte tu pasión por los videojuegos</h1>
-            <p>La plataforma definitiva para gamers que quieren llevar un registro de sus juegos, descubrir nuevas experiencias y compartir sus logros con la comunidad.</p>
-            <a href="Register.cshtml" class="btn btn-primary" style="padding: 15px 30px; font-size: 1.1rem;">
-                <i class="fas fa-rocket"></i> Comenzar Ahora
-            </a>
+            <h1>Transforma Tu Experiencia Gaming</h1>
+            <p>La plataforma definitiva donde los gamers se conectan, comparten y evolucionan juntos. Gestiona tu biblioteca, analiza tus estadísticas y únete a una comunidad apasionada.</p>
+            <div class="hero-buttons">
+                <a href="Register.cshtml" class="btn btn-primary" style="padding: 15px 35px; font-size: 1.1rem;">
+                    <i class="fas fa-rocket"></i> Comenzar Ahora
+                </a>
+                <a href="#features" class="btn btn-secondary">
+                    <i class="fas fa-play-circle"></i> Continuar como invitado
+                </a>
+            </div>
         </section>
         
-        <section class="features">
+        <!-- FEATURES SECTION MEJORADA -->
+        <section id="features" class="features">
             <div class="feature-card">
                 <div class="feature-icon">
                     <i class="fas fa-gamepad"></i>
                 </div>
-
-                <h3>Lleva tu biblioteca gamer siempre contigo</h3>
-                <p>Organiza y accede a tu colección de juegos desde cualquier dispositivo, en cualquier momento.</p>
+                <h3>Biblioteca Inteligente</h3>
+                <p>Organiza tu colección completa de juegos con filtros avanzados, categorías personalizadas y seguimiento de progreso en tiempo real.</p>
             </div>
             
             <div class="feature-card">
                 <div class="feature-icon">
                     <i class="fas fa-chart-bar"></i>
-
                 </div>
-                <h3>Consulta tus estadísticas de juego</h3>
-                <p>Analiza tu progreso, horas jugadas y logros desbloqueados con detalladas estadísticas.</p>
+                <h3>Análisis Detallado</h3>
+                <p>Visualiza tus estadísticas de juego con gráficos interactivos, seguimiento de horas y comparativas con la comunidad.</p>
             </div>
             
             <div class="feature-card">
                 <div class="feature-icon">
-                    <i class="fas fa-pencil-alt"></i>
+                    <i class="fas fa-trophy"></i>
                 </div>
-                <h3>Escribe y lee reseñas de otros jugadores</h3>
-                <p>Comparte tus opiniones y descubre qué piensa la comunidad sobre tus juegos favoritos.</p>
+                <h3>Sistema de Logros</h3>
+                <p>Desbloquea insignias exclusivas, compite con amigos y muestra tus conquistas gaming en tu perfil personalizado.</p>
             </div>
             
             <div class="feature-card">
                 <div class="feature-icon">
                     <i class="fas fa-users"></i>
                 </div>
-                <h3>Comparte con amigos y comunidad</h3>
-                <p>Conecta con otros gamers, comparte tus logros y descubre nuevas recomendaciones.</p>
+                <h3>Comunidad Activa</h3>
+                <p>Conecta con jugadores de todo el mundo, forma equipos, comparte estrategias y descubre nuevos juegos.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h3>Multiplataforma</h3>
+                <p>Accede a tu perfil desde cualquier dispositivo - PC, móvil o tablet - con sincronización en la nube.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <h3>Notificaciones Inteligentes</h3>
+                <p>Recibe alertas personalizadas sobre nuevos lanzamientos, eventos especiales y actividad de tus amigos.</p>
             </div>
         </section>
         
+        <!-- GAME SHOWCASE NUEVO -->
+        <section class="game-showcase">
+            <h2 class="showcase-title">Juegos Populares en Nuestra Plataforma</h2>
+            <div class="game-grid">
+                <div class="game-card">
+                    <div class="game-icon">
+                        <i class="fas fa-dragon"></i>
+                    </div>
+                    <h4>RPG Épicos</h4>
+                    <p>Sumérgete en mundos fantásticos y vive aventuras inolvidables</p>
+                </div>
+                <div class="game-card">
+                    <div class="game-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h4>Shooters</h4>
+                    <p>Acción intensa y competencia en los mejores FPS del momento</p>
+                </div>
+                <div class="game-card">
+                    <div class="game-icon">
+                        <i class="fas fa-puzzle-piece"></i>
+                    </div>
+                    <h4>Estrategia</h4>
+                    <p>Planifica tus movimientos y domina el campo de batalla</p>
+                </div>
+                <div class="game-card">
+                    <div class="game-icon">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <h4>Carreras</h4>
+                    <p>Velocidad, adrenalina y competición al máximo nivel</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- ABOUT SECTION MEJORADA -->
         <section class="about">
-            <h2>¿Quiénes somos?</h2>
-            <p>"Somos una plataforma creada por gamers y para gamers. Nuestra misión es ayudarte a llevar un registro fácil de tus videojuegos, descubrir nuevas experiencias y compartir tus logros con la comunidad."</p>
+            <h2>Más Que Una Plataforma, Una Comunidad</h2>
+            <p>En GamerHub, creemos que los videojuegos son más que solo entretenimiento: son experiencias que nos conectan, historias que nos inspiran y desafíos que nos unen. Nuestra misión es crear el espacio perfecto donde los gamers puedan compartir su pasión, descubrir nuevas aventuras y llevar su experiencia gaming al siguiente nivel.</p>
+            <p style="margin-top: 20px; font-style: italic; color: var(--neon-purple);">"Donde cada jugador encuentra su lugar en el universo gaming"</p>
         </section>
         
+        <!-- CTA SECTION MEJORADA -->
         <section class="cta-section">
-            <h2>¿Listo para unirte a la comunidad?</h2>
-            <p>Regístrate ahora y comienza a disfrutar de todas las funciones que ofrecemos para mejorar tu experiencia gamer.</p>
+            <h2>¿Listo Para Elevar Tu Experiencia Gaming?</h2>
+            <p>Únete a miles de jugadores que ya están transformando su forma de jugar, conectar y compartir.</p>
             <div class="cta-buttons">
-                <a href="Register.cshtml" class="btn btn-primary">
-                    <i class="fas fa-user-plus"></i> Crear Cuenta
+                <a href="Register.cshtml" class="btn btn-primary" style="padding: 15px 40px; font-size: 1.1rem;">
+                    <i class="fas fa-crown"></i> Unirse a un Grupo
                 </a>
-                <a href="#" class="btn btn-secondary" id="guest-btn">
-                    <i class="fas fa-user"></i> Continuar como Invitado
+                <a href="Register.cshtml" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Crear una Cuenta
+                </a>
+                <a href="#" class="btn btn-secondary">
+                    <i class="fas fa-play-circle"></i> Continuar como invitado
                 </a>
             </div>
         </section>
-        
-        <footer>
-            <p>© 2025 GAMING · <a href="#">Términos</a> · <a href="#">Privacidad</a> · <a href="#">Soporte</a></p>
-        </footer>
     </div>
 
     <script>
-        // Funcionalidad para los botones
-        document.getElementById('register-btn').addEventListener('click', function(e) {
-            e.preventDefault();
-            // Redirigir a página de registro (ya configurado en el href)
-            console.log('Redirigiendo a página de registro...');
-        });
-        
+        // Animación de scroll suave para enlaces
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if(target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
 
-        document.getElementById('login-btn').addEventListener('click', function(e) {
-            e.preventDefault();
-            // Aquí podrías redirigir a la página de login si la tienes
-            alert('Redirigiendo a página de inicio de sesión...');
-
-        
-        document.getElementById('guest-btn').addEventListener('click', function(e) {
-            e.preventDefault();
-            // Continuar como invitado
-            alert('Continuando como invitado...');
+            // Funcionalidad para los botones de invitado
+            document.querySelectorAll('.btn-secondary').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    if(this.getAttribute('href') === '#') {
+                        e.preventDefault();
+                        alert('Explorando la plataforma como invitado...');
+                    }
+                });
+            });
         });
     </script>
 </body>

@@ -1,45 +1,267 @@
 @model Proyecto_Gaming.ViewModels.ContactFormViewModel
 
-<div class="card bg-dark text-white shadow mt-4">
-  <div class="card-body">
-    <h5 class="card-title mb-3">
-      <i class="fa-solid fa-envelope me-2"></i>Contáctanos
-    </h5>
+<style>
+    /* ESTILOS MEJORADOS PARA FORMULARIO DE CONTACTO */
+    .card.bg-dark {
+        background: var(--card-bg) !important;
+        border: 1px solid rgba(139, 44, 230, 0.4) !important;
+        border-radius: 15px !important;
+        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
 
-    <form asp-controller="Contact" asp-action="Send" method="post" novalidate>
-      @Html.AntiForgeryToken()
+    .card.bg-dark::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue), var(--neon-purple));
+        background-size: 200% 100%;
+        animation: gradientShift 3s ease infinite;
+    }
 
-      <div class="row g-3">
-        <div class="col-md-6">
-          <label asp-for="Nombre" class="form-label"></label>
-          <input asp-for="Nombre" class="form-control" />
-          <span asp-validation-for="Nombre" class="text-warning"></span>
-        </div>
-        <div class="col-md-6">
-          <label asp-for="Email" class="form-label"></label>
-          <input asp-for="Email" class="form-control" />
-          <span asp-validation-for="Email" class="text-warning"></span>
-        </div>
-        <div class="col-12">
-          <label asp-for="Asunto" class="form-label"></label>
-          <input asp-for="Asunto" class="form-control" />
-          <span asp-validation-for="Asunto" class="text-warning"></span>
-        </div>
-        <div class="col-12">
-          <label asp-for="Mensaje" class="form-label"></label>
-          <textarea asp-for="Mensaje" class="form-control" rows="4"></textarea>
-          <span asp-validation-for="Mensaje" class="text-warning"></span>
-        </div>
-        <div class="col-12">
-          <button type="submit" class="btn btn-primary">
-            <i class="fa-solid fa-paper-plane me-2"></i>Enviar
-          </button>
-        </div>
-      </div>
-    </form>
-  </div>
+    
+
+    .card-body {
+        padding: 2.5rem !important;
+    }
+
+    /* TÍTULO MEJORADO */
+    .card-title {
+        color: var(--neon-blue) !important;
+        font-weight: 800 !important;
+        font-size: 1.8rem !important;
+        margin-bottom: 2rem !important;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-shadow: 0 0 10px rgba(66, 139, 255, 0.3);
+        position: relative;
+        display: inline-block;
+    }
+
+    .card-title::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue));
+        border-radius: 2px;
+    }
+
+    .card-title i {
+        color: var(--neon-purple);
+        text-shadow: 0 0 8px rgba(176, 66, 255, 0.5);
+    }
+
+    /* ETIQUETAS MEJORADAS */
+    .form-label {
+        color: var(--text-primary) !important;
+        font-weight: 700 !important;
+        margin-bottom: 0.8rem !important;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* CAMPOS DE FORMULARIO MEJORADOS */
+    .form-control {
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 2px solid rgba(139, 44, 230, 0.3) !important;
+        color: var(--text-primary) !important;
+        border-radius: 10px !important;
+        padding: 1rem 1.2rem !important;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        backdrop-filter: blur(5px);
+    }
+
+    .form-control:focus {
+        background: rgba(255, 255, 255, 0.12) !important;
+        border-color: var(--neon-purple) !important;
+        color: var(--text-primary) !important;
+        box-shadow: 0 0 0 0.3rem rgba(139, 44, 230, 0.25), 
+                    0 0 20px rgba(139, 44, 230, 0.2) !important;
+        outline: none;
+        transform: translateY(-2px);
+    }
+
+    .form-control::placeholder {
+        color: var(--text-secondary) !important;
+        opacity: 0.6;
+        font-weight: 500;
+    }
+
+    /* TEXTAREA MEJORADA */
+    textarea.form-control {
+        resize: vertical;
+        min-height: 140px;
+        line-height: 1.6;
+    }
+
+    /* BOTÓN DE ENVÍO MEJORADO */
+    .btn-primary {
+        background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue)) !important;
+        border: none !important;
+        color: white !important;
+        font-weight: 700 !important;
+        padding: 1rem 2.5rem !important;
+        border-radius: 10px !important;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-size: 1rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(139, 44, 230, 0.3);
+    }
+
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.6s;
+    }
+
+    .btn-primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(139, 44, 230, 0.5) !important;
+        background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue)) !important;
+    }
+
+    .btn-primary:active {
+        transform: translateY(-1px);
+    }
+
+    .btn-primary i {
+        color: white !important;
+        filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+    }
+
+    /* MENSAJES DE VALIDACIÓN MEJORADOS */
+    .text-warning {
+        color: #ffd166 !important;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        display: block;
+        font-weight: 600;
+        padding: 0.3rem 0.8rem;
+        background: rgba(255, 209, 102, 0.1);
+        border-radius: 6px;
+        border-left: 3px solid #ffd166;
+    }
+
+    .field-validation-error {
+        color: #ff6b6b !important;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        display: block;
+        font-weight: 600;
+        padding: 0.3rem 0.8rem;
+        background: rgba(255, 107, 107, 0.1);
+        border-radius: 6px;
+        border-left: 3px solid #ff6b6b;
+    }
+
+    .input-validation-error {
+        border-color: #ff6b6b !important;
+        background: rgba(255, 107, 107, 0.05) !important;
+        box-shadow: 0 0 0 0.2rem rgba(255, 107, 107, 0.15) !important;
+    }
+
+    .input-validation-error:focus {
+        border-color: #ff6b6b !important;
+        box-shadow: 0 0 0 0.3rem rgba(255, 107, 107, 0.2) !important;
+    }
+
+    /* ESPACIADO MEJORADO */
+    .row.g-3 {
+        margin: 0 -1rem;
+    }
+
+    .col-md-6, .col-12 {
+        padding: 0 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /* EFECTOS DE HOVER EN GRUPOS */
+    .form-group {
+        transition: transform 0.3s ease;
+    }
+
+    .form-group:hover {
+        transform: translateX(5px);
+    }
+
+    /* ANIMACIÓN DE CARGA MEJORADA */
+    .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: 0 2px 8px rgba(139, 44, 230, 0.2) !important;
+    }
+
+    .btn-primary:disabled::before {
+        display: none;
+    }
+
+    /* EFECTO GLOW EN FOCUS */
+    .form-control:focus {
+        animation: inputGlow 0.6s ease;
+    }
+
+  
+</style>
+
+<div class="card bg-dark text-white shadow">
+    <div class="card-body">
+        <h5 class="card-title mb-3">
+            <i class="fa-solid fa-envelope me-2"></i>Envíanos un Mensaje
+        </h5>
+
+        <form asp-controller="Contact" asp-action="Send" method="post" novalidate>
+            @Html.AntiForgeryToken()
+
+            <div class="row g-3">
+                <div class="col-md-6 form-group">
+                    <label asp-for="Nombre" class="form-label">Nombre Completo</label>
+                    <input asp-for="Nombre" class="form-control" placeholder="Tu nombre completo" />
+                    <span asp-validation-for="Nombre" class="text-warning"></span>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label asp-for="Email" class="form-label">Correo Electrónico</label>
+                    <input asp-for="Email" class="form-control" placeholder="tu@email.com" />
+                    <span asp-validation-for="Email" class="text-warning"></span>
+                </div>
+                <div class="col-12 form-group">
+                    <label asp-for="Asunto" class="form-label">Asunto</label>
+                    <input asp-for="Asunto" class="form-control" placeholder="¿En qué podemos ayudarte?" />
+                    <span asp-validation-for="Asunto" class="text-warning"></span>
+                </div>
+                <div class="col-12 form-group">
+                    <label asp-for="Mensaje" class="form-label">Mensaje</label>
+                    <textarea asp-for="Mensaje" class="form-control" rows="4" placeholder="Escribe tu mensaje aquí..."></textarea>
+                    <span asp-validation-for="Mensaje" class="text-warning"></span>
+                </div>
+                <div class="col-12 text-center">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-paper-plane me-2"></i>Enviar Mensaje
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
-
-@section Scripts{
-    <partial name="_ValidationScriptsPartial" />
-}

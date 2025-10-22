@@ -405,3 +405,445 @@
         });
     })();
 </script>
+
+<style>
+    /* PALETA DE COLORES GAMING PARA ESTADÍSTICAS */
+    :root {
+        --stats-bg-dark: #0a0a1a;
+        --stats-card-bg: #151530;
+        --stats-accent-purple: #8b2ce6;
+        --stats-accent-blue: #2c5be6;
+        --stats-neon-purple: #b042ff;
+        --stats-neon-blue: #428bff;
+        --stats-success: #06d6a0;
+        --stats-warning: #ff9e1a;
+        --stats-text-primary: #ffffff;
+        --stats-text-secondary: #b8b8d0;
+        --stats-border: rgba(139, 44, 230, 0.3);
+    }
+
+    /* TARJETAS DE ESTADÍSTICAS */
+    .stats-card {
+        background: var(--stats-card-bg) !important;
+        border: 1px solid var(--stats-border) !important;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 25px rgba(139, 44, 230, 0.1);
+        transition: all 0.3s ease;
+        margin-bottom: 1.5rem !important;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 35px rgba(139, 44, 230, 0.2);
+        border-color: rgba(139, 44, 230, 0.5) !important;
+    }
+
+    .stats-card .card-header {
+        background: rgba(139, 44, 230, 0.1) !important;
+        border-bottom: 1px solid var(--stats-border) !important;
+        padding: 1.25rem 1.5rem;
+    }
+
+    .stats-card .card-header h5 {
+        color: var(--stats-text-primary);
+        font-weight: 700;
+        margin: 0;
+        font-size: 1.1rem;
+        background: linear-gradient(135deg, var(--stats-text-primary), var(--stats-text-secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stats-card .card-body {
+        padding: 1.5rem;
+        background: transparent;
+    }
+
+    /* CAJAS DE ESTADÍSTICAS PRINCIPALES */
+    .stat-box {
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-box::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .stat-box:hover::before {
+        left: 100%;
+    }
+
+    .stat-box:hover {
+        transform: translateY(-3px);
+        border-color: var(--stats-neon-purple);
+        box-shadow: 0 5px 15px rgba(139, 44, 230, 0.3);
+    }
+
+    .stat-box h3 {
+        color: var(--stats-text-primary);
+        font-weight: 800;
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .stat-box small {
+        color: var(--stats-text-secondary);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    /* COLORES ESPECÍFICOS PARA LAS CAJAS DE ESTADÍSTICAS */
+    .stat-box[style*="background:#d0e7ff"] {
+        background: linear-gradient(135deg, rgba(66, 139, 255, 0.15), rgba(139, 44, 230, 0.15)) !important;
+        border: 1px solid rgba(66, 139, 255, 0.3) !important;
+    }
+
+    .stat-box[style*="background:#d0ffd8"] {
+        background: linear-gradient(135deg, rgba(6, 214, 160, 0.15), rgba(66, 139, 255, 0.15)) !important;
+        border: 1px solid rgba(6, 214, 160, 0.3) !important;
+    }
+
+    .stat-box[style*="background:#ffe4b8"] {
+        background: linear-gradient(135deg, rgba(255, 158, 26, 0.15), rgba(139, 44, 230, 0.15)) !important;
+        border: 1px solid rgba(255, 158, 26, 0.3) !important;
+    }
+
+    .stat-box[style*="background:#4dc9f6"] {
+        background: linear-gradient(135deg, rgba(77, 201, 246, 0.15), rgba(66, 139, 255, 0.15)) !important;
+        border: 1px solid rgba(77, 201, 246, 0.3) !important;
+    }
+
+    .stat-box[style*="background:#f67019"] {
+        background: linear-gradient(135deg, rgba(246, 112, 25, 0.15), rgba(139, 44, 230, 0.15)) !important;
+        border: 1px solid rgba(246, 112, 25, 0.3) !important;
+    }
+
+    .stat-box[style*="background:#f53794"] {
+        background: linear-gradient(135deg, rgba(245, 55, 148, 0.15), rgba(139, 44, 230, 0.15)) !important;
+        border: 1px solid rgba(245, 55, 148, 0.3) !important;
+    }
+
+    .stat-box[style*="background:#537bc4"] {
+        background: linear-gradient(135deg, rgba(83, 123, 196, 0.15), rgba(66, 139, 255, 0.15)) !important;
+        border: 1px solid rgba(83, 123, 196, 0.3) !important;
+    }
+
+    /* LEYENDA MEJORADA */
+    #perfilStatsLegend {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+
+    #perfilStatsLegend li {
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    #perfilStatsLegend li:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: var(--stats-neon-purple);
+        transform: translateX(5px);
+    }
+
+    #perfilStatsLegend li span {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        margin-right: 12px;
+        display: inline-block;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    #perfilStatsLegend li:hover span {
+        transform: scale(1.1);
+        border-color: rgba(255, 255, 255, 0.6);
+    }
+
+    #perfilStatsLegend li div > div:first-child {
+        font-weight: 700;
+        color: var(--stats-text-primary);
+        font-size: 0.9rem;
+    }
+
+    #perfilStatsLegend li div > div:last-child {
+        opacity: 0.9;
+        font-size: 0.8rem;
+        color: var(--stats-text-secondary);
+        font-weight: 600;
+    }
+
+    /* CANVAS DE GRÁFICAS MEJORADO */
+    canvas {
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 10px;
+    }
+
+    /* ESTADOS VACÍOS MEJORADOS */
+    .text-center[style*="position:absolute"] {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .text-center[style*="position:absolute"] span {
+        color: var(--stats-text-secondary) !important;
+        font-style: italic;
+        font-size: 0.9rem;
+    }
+
+    /* GRID RESPONSIVE MEJORADO */
+    .row-cols-3 .col,
+    .row-cols-2 .col {
+        margin-bottom: 1rem;
+    }
+
+    /* EFECTOS DE TEXTO */
+    .fw-bold {
+        font-weight: 700 !important;
+    }
+
+    .opacity-75 {
+        opacity: 0.85 !important;
+    }
+
+    /* MEJORAS PARA LAS GRÁFICAS DE BARRAS HORIZONTALES */
+    .card-body[style*="height: 300px"] {
+        position: relative;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* ANIMACIONES SUAVES */
+    .stats-card,
+    .stat-box,
+    #perfilStatsLegend li {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    /* SCROLLBAR PERSONALIZADO PARA CONTENEDORES */
+    .card-body::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .card-body::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+    }
+
+    .card-body::-webkit-scrollbar-thumb {
+        background: var(--stats-neon-purple);
+        border-radius: 3px;
+    }
+
+    .card-body::-webkit-scrollbar-thumb:hover {
+        background: var(--stats-accent-purple);
+    }
+
+    /* EFECTO DE BRILLO EN LOS BORDES */
+    .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, 
+            transparent, 
+            var(--stats-neon-purple), 
+            var(--stats-neon-blue), 
+            transparent
+        );
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .stats-card:hover::before {
+        opacity: 1;
+    }
+
+    /* MEJORAS EN LOS TÍTULOS DE LAS GRÁFICAS */
+    .card-header h5.mb-0 {
+        position: relative;
+        display: inline-block;
+    }
+
+    .card-header h5.mb-0::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, var(--stats-neon-purple), var(--stats-neon-blue));
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .stats-card:hover .card-header h5.mb-0::after {
+        transform: scaleX(1);
+    }
+
+    /* CORRECCIÓN: TEXTO BLANCO EN LAS GRÁFICAS */
+    /* Override para los textos de Chart.js */
+    .chartjs-render-monitor {
+        filter: invert(1) hue-rotate(180deg);
+    }
+
+    /* Alternativa: Forzar colores blancos en los elementos de texto */
+    .chartjs-size-monitor,
+    .chartjs-render-monitor {
+        color: var(--stats-text-primary) !important;
+    }
+
+    /* Estilos específicos para los textos de las gráficas */
+    #perfilTopGamesChart,
+    #perfilTrendChart,
+    #perfilFriendsChart,
+    #perfilGroupsChart {
+        color: var(--stats-text-primary) !important;
+    }
+
+    /* Override directo para los elementos de texto de Chart.js */
+    .chartjs-tooltip,
+    .chartjs-legend,
+    .chartjs-scale,
+    .chartjs-axis {
+        color: var(--stats-text-primary) !important;
+    }
+
+    /* Forzar colores blancos en los ticks y labels */
+    .chartjs-chart canvas {
+        filter: none !important;
+    }
+
+    /* JavaScript inline para forzar colores blancos en las gráficas */
+</style>
+
+<script>
+    // Override de colores para las gráficas - TEXTO BLANCO
+    document.addEventListener('DOMContentLoaded', function() {
+        // Configuración global para Chart.js - Textos en blanco
+        if (typeof Chart !== 'undefined') {
+            Chart.defaults.color = '#ffffff';
+            Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+            
+            // Override específico para escalas
+            Chart.defaults.scales.category.ticks.color = '#ffffff';
+            Chart.defaults.scales.linear.ticks.color = '#ffffff';
+            Chart.defaults.scales.time.ticks.color = '#ffffff';
+            
+            // Override para leyendas
+            Chart.defaults.plugins.legend.labels.color = '#ffffff';
+            
+            // Override para tooltips
+            Chart.defaults.plugins.tooltip.titleColor = '#ffffff';
+            Chart.defaults.plugins.tooltip.bodyColor = '#ffffff';
+            Chart.defaults.plugins.tooltip.footerColor = '#ffffff';
+            Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+        }
+
+        // Función para actualizar gráficas existentes
+        setTimeout(function() {
+            // Actualizar gráfica de Top Juegos
+            const topGamesChart = Chart.getChart('perfilTopGamesChart');
+            if (topGamesChart) {
+                topGamesChart.options.scales.x.ticks.color = '#ffffff';
+                topGamesChart.options.scales.y.ticks.color = '#ffffff';
+                topGamesChart.update();
+            }
+
+            // Actualizar gráfica de Tendencia
+            const trendChart = Chart.getChart('perfilTrendChart');
+            if (trendChart) {
+                trendChart.options.scales.x.ticks.color = '#ffffff';
+                trendChart.options.scales.y.ticks.color = '#ffffff';
+                trendChart.update();
+            }
+
+            // Actualizar gráfica de Amigos
+            const friendsChart = Chart.getChart('perfilFriendsChart');
+            if (friendsChart) {
+                friendsChart.options.scales.x.ticks.color = '#ffffff';
+                friendsChart.options.scales.y.ticks.color = '#ffffff';
+                friendsChart.update();
+            }
+
+            // Actualizar gráfica de Grupos
+            const groupsChart = Chart.getChart('perfilGroupsChart');
+            if (groupsChart) {
+                groupsChart.options.scales.x.ticks.color = '#ffffff';
+                groupsChart.options.scales.y.ticks.color = '#ffffff';
+                groupsChart.update();
+            }
+
+            // Actualizar gráfica de estadísticas principal
+            const statsChart = Chart.getChart('perfilStatsChart');
+            if (statsChart) {
+                statsChart.update();
+            }
+        }, 100);
+    });
+
+    // Override específico para las opciones de las gráficas
+    function updateChartColors() {
+        // Top Juegos Finalizados
+        const topGamesOptions = {
+            scales: {
+                y: { ticks: { color: '#ffffff' } },
+                x: { ticks: { color: '#ffffff' } }
+            },
+            plugins: {
+                legend: { labels: { color: '#ffffff' } },
+                title: { color: '#ffffff' }
+            }
+        };
+
+        // Tendencia de Reseñas
+        const trendOptions = {
+            scales: {
+                x: { ticks: { color: '#ffffff' } },
+                y: { ticks: { color: '#ffffff' } }
+            }
+        };
+
+        // Amigos y Grupos
+        const barOptions = {
+            scales: {
+                x: { ticks: { color: '#ffffff' } },
+                y: { ticks: { color: '#ffffff' } }
+            },
+            plugins: {
+                legend: { labels: { color: '#ffffff' } },
+                title: { color: '#ffffff' }
+            }
+        };
+
+        return { topGamesOptions, trendOptions, barOptions };
+    }
+</script>

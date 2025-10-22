@@ -3,336 +3,571 @@
     ViewData["Title"] = "Grupos";
 }
 
-<!-- Navbar Secundaria para Comunidad -->
-<nav class="navbar navbar-expand-lg comunidad-navbar mb-4">
-    <div class="container">
-        <div class="navbar-nav">
-            <a class="nav-link" asp-controller="Comunidad" asp-action="Index">
-                <i class="fas fa-home me-2"></i>Feed
-            </a>
-            <a class="nav-link" asp-controller="Amigos" asp-action="Index">
-                <i class="fas fa-user-friends me-2"></i>Amigos
-            </a>
-            <a class="nav-link active" asp-controller="Grupos" asp-action="Index">
-                <i class="fas fa-users me-2"></i>Grupos
-            </a>
-        </div>
+<!-- Navbar Secundaria para Comunidad - Diseño Cuadrangular -->
+<nav class="navbar navbar-expand-lg catalog-navbar comunidad-navbar">
+    <div class="container-fluid justify-content-center">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" && ViewContext.RouteData.Values["controller"]?.ToString() == "Comunidad" ? "active" : "")" 
+                   asp-controller="Comunidad" asp-action="Index">
+                    <i class="fas fa-home me-2"></i>Inicio
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Amigos" ? "active" : "")" 
+                   asp-controller="Amigos" asp-action="Index">
+                    <i class="fas fa-user-friends me-2"></i>Amigos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Grupos" ? "active" : "")" 
+                   asp-controller="Grupos" asp-action="Index">
+                    <i class="fas fa-users me-2"></i>Grupos
+                </a>
+            </li>
+        </ul>
     </div>
 </nav>
 
-<div class="row">
-    <div class="col-md-3">
-        <div class="sidebar-comunidad">
-            <h5 class="mb-3">Navegación</h5>
-            <a class="sidebar-link @(Model.VistaActiva == "Recomendados" ? "active" : "")" 
-               asp-action="Index" asp-route-vista="Recomendados">
-                <i class="fas fa-star me-2"></i>Grupos Recomendados
-            </a>
-            <a class="sidebar-link @(Model.VistaActiva == "MisGrupos" ? "active" : "")" 
-               asp-action="Index" asp-route-vista="MisGrupos">
-                <i class="fas fa-users me-2"></i>Mis Grupos
-            </a>
-            <a class="sidebar-link @(Model.VistaActiva == "Todos" ? "active" : "")" 
-               asp-action="Index" asp-route-vista="Todos">
-                <i class="fas fa-globe me-2"></i>Todos los Grupos
-            </a>
-            <hr>
-            <a class="sidebar-link text-success" asp-action="Crear">
-                <i class="fas fa-plus me-2"></i>Crear Nuevo Grupo
-            </a>
+<div class="container-fluid comunidad-container">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="sidebar-comunidad">
+                <h5 class="mb-3">Navegación</h5>
+                <a class="sidebar-link @(Model.VistaActiva == "Recomendados" ? "active" : "")" 
+                   asp-action="Index" asp-route-vista="Recomendados">
+                    <i class="fas fa-star me-2"></i>Grupos Recomendados
+                </a>
+                <a class="sidebar-link @(Model.VistaActiva == "MisGrupos" ? "active" : "")" 
+                   asp-action="Index" asp-route-vista="MisGrupos">
+                    <i class="fas fa-users me-2"></i>Mis Grupos
+                </a>
+                <a class="sidebar-link @(Model.VistaActiva == "Todos" ? "active" : "")" 
+                   asp-action="Index" asp-route-vista="Todos">
+                    <i class="fas fa-globe me-2"></i>Todos los Grupos
+                </a>
+                <hr>
+                <a class="sidebar-link text-success" asp-action="Crear">
+                    <i class="fas fa-plus me-2"></i>Crear Nuevo Grupo
+                </a>
+            </div>
         </div>
-    </div>
 
-    <div class="col-md-9">
-        @if (Model.VistaActiva == "Recomendados")
-        {
-            <h3 class="mb-4">Grupos Recomendados</h3>
-            
-            @if (!Model.GruposRecomendados.Any())
+        <div class="col-md-9">
+            @if (Model.VistaActiva == "Recomendados")
             {
-                <div class="text-center py-5">
-                    <i class="fas fa-users fa-4x text-muted mb-3"></i>
-                    <h4 class="text-muted">No hay grupos recomendados</h4>
-                    <a asp-action="Crear" class="btn btn-primary mt-3">Crear Primer Grupo</a>
-                </div>
-            }
-            else
-            {
-                <div class="row">
-                    @foreach (var grupo in Model.GruposRecomendados)
-                    {
-                        <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="grupo-card-mejorado">
-                                <!-- Banner del Grupo con avatar superpuesto -->
-                                <div class="grupo-banner-container">
-                                    @if (!string.IsNullOrEmpty(grupo.BannerGrupo))
-                                    {
-                                        <img src="@grupo.BannerGrupo" class="grupo-banner-img" alt="Banner @grupo.Nombre">
-                                    }
-                                    else
-                                    {
-                                        <div class="grupo-banner-default"></div>
-                                    }
-                                    
-                                    <!-- Avatar del grupo superpuesto -->
-                                    <div class="grupo-avatar-overlay">
-                                        @if (!string.IsNullOrEmpty(grupo.FotoGrupo))
+                <h3 class="mb-4">Grupos Recomendados</h3>
+                
+                @if (!Model.GruposRecomendados.Any())
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-users fa-4x text-muted mb-3"></i>
+                        <h4 class="text-muted">No hay grupos recomendados</h4>
+                        <a asp-action="Crear" class="btn-gaming mt-3">Crear Primer Grupo</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        @foreach (var grupo in Model.GruposRecomendados)
+                        {
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="grupo-card-mejorado">
+                                    <!-- Banner del Grupo con avatar superpuesto -->
+                                    <div class="grupo-banner-container">
+                                        @if (!string.IsNullOrEmpty(grupo.BannerGrupo))
                                         {
-                                            <img src="@grupo.FotoGrupo" class="grupo-avatar-img" alt="Foto @grupo.Nombre">
+                                            <img src="@grupo.BannerGrupo" class="grupo-banner-img" alt="Banner @grupo.Nombre">
                                         }
                                         else
                                         {
-                                            <div class="grupo-avatar-default">
-                                                @grupo.Nombre[0].ToString().ToUpper()
-                                            </div>
+                                            <div class="grupo-banner-default"></div>
                                         }
-                                    </div>
-                                </div>
-
-                                <!-- Contenido del grupo -->
-                                <div class="grupo-content">
-                                    <h5 class="grupo-nombre">@grupo.Nombre</h5>
-                                    
-                                    @if (!string.IsNullOrEmpty(grupo.Descripcion))
-                                    {
-                                        <p class="grupo-descripcion">@grupo.Descripcion</p>
-                                    }
-                                    
-                                    <div class="grupo-info">
-                                        <span class="grupo-categoria">@grupo.Categoria</span>
-                                        <div class="grupo-miembros">
-                                            <i class="fas fa-users me-1"></i>
-                                            <span>@grupo.Miembros?.Count</span>
+                                        
+                                        <!-- Avatar del grupo superpuesto -->
+                                        <div class="grupo-avatar-overlay">
+                                            @if (!string.IsNullOrEmpty(grupo.FotoGrupo))
+                                            {
+                                                <img src="@grupo.FotoGrupo" class="grupo-avatar-img" alt="Foto @grupo.Nombre">
+                                            }
+                                            else
+                                            {
+                                                <div class="grupo-avatar-default">
+                                                    @grupo.Nombre[0].ToString().ToUpper()
+                                                </div>
+                                            }
                                         </div>
                                     </div>
 
-                                    <div class="grupo-actions">
-                                        <button class="btn btn-primary btn-sm w-100" onclick="unirseGrupo(@grupo.Id)">
-                                            <i class="fas fa-plus me-1"></i>Unirse al Grupo
-                                        </button>
+                                    <!-- Contenido del grupo -->
+                                    <div class="grupo-content">
+                                        <h5 class="grupo-nombre">@grupo.Nombre</h5>
+                                        
+                                        @if (!string.IsNullOrEmpty(grupo.Descripcion))
+                                        {
+                                            <p class="grupo-descripcion">@grupo.Descripcion</p>
+                                        }
+                                        
+                                        <div class="grupo-info">
+                                            <span class="grupo-categoria">@grupo.Categoria</span>
+                                            <div class="grupo-miembros">
+                                                <i class="fas fa-users me-1"></i>
+                                                <span>@grupo.Miembros?.Count</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="grupo-actions">
+                                            <button class="btn-gaming btn-gaming-sm w-100" onclick="unirseGrupo(@grupo.Id)">
+                                                <i class="fas fa-plus me-1"></i>Unirse al Grupo
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    }
-                </div>
+                        }
+                    </div>
+                }
             }
-        }
-        else if (Model.VistaActiva == "MisGrupos")
-        {
-            <h3 class="mb-4">Mis Grupos</h3>
-            
-            @if (!Model.MisGrupos.Any())
+            else if (Model.VistaActiva == "MisGrupos")
             {
-                <div class="text-center py-5">
-                    <i class="fas fa-users fa-4x text-muted mb-3"></i>
-                    <h4 class="text-muted">No perteneces a ningún grupo</h4>
-                    <p class="text-muted">Únete a algunos grupos para verlos aquí</p>
-                    <a asp-action="Index" asp-route-vista="Recomendados" class="btn btn-primary mt-3">Ver Grupos Recomendados</a>
-                </div>
-            }
-            else
-            {
-                <div class="row">
-                    @foreach (var grupo in Model.MisGrupos)
-                    {
-                        <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="grupo-card-mejorado">
-                                <!-- Banner del Grupo con avatar superpuesto -->
-                                <div class="grupo-banner-container">
-                                    @if (!string.IsNullOrEmpty(grupo.BannerGrupo))
-                                    {
-                                        <img src="@grupo.BannerGrupo" class="grupo-banner-img" alt="Banner @grupo.Nombre">
-                                    }
-                                    else
-                                    {
-                                        <div class="grupo-banner-default"></div>
-                                    }
-                                    
-                                    <!-- Avatar del grupo superpuesto -->
-                                    <div class="grupo-avatar-overlay">
-                                        @if (!string.IsNullOrEmpty(grupo.FotoGrupo))
+                <h3 class="mb-4">Mis Grupos</h3>
+                
+                @if (!Model.MisGrupos.Any())
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-users fa-4x text-muted mb-3"></i>
+                        <h4 class="text-muted">No perteneces a ningún grupo</h4>
+                        <p class="text-muted">Únete a algunos grupos para verlos aquí</p>
+                        <a asp-action="Index" asp-route-vista="Recomendados" class="btn-gaming mt-3">Ver Grupos Recomendados</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        @foreach (var grupo in Model.MisGrupos)
+                        {
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="grupo-card-mejorado">
+                                    <!-- Banner del Grupo con avatar superpuesto -->
+                                    <div class="grupo-banner-container">
+                                        @if (!string.IsNullOrEmpty(grupo.BannerGrupo))
                                         {
-                                            <img src="@grupo.FotoGrupo" class="grupo-avatar-img" alt="Foto @grupo.Nombre">
+                                            <img src="@grupo.BannerGrupo" class="grupo-banner-img" alt="Banner @grupo.Nombre">
                                         }
                                         else
                                         {
-                                            <div class="grupo-avatar-default">
-                                                @grupo.Nombre[0].ToString().ToUpper()
-                                            </div>
+                                            <div class="grupo-banner-default"></div>
                                         }
-                                    </div>
-                                </div>
-
-                                <!-- Contenido del grupo -->
-                                <div class="grupo-content">
-                                    <h5 class="grupo-nombre">@grupo.Nombre</h5>
-                                    
-                                    @if (!string.IsNullOrEmpty(grupo.Descripcion))
-                                    {
-                                        <p class="grupo-descripcion">@grupo.Descripcion</p>
-                                    }
-                                    
-                                    <div class="grupo-info">
-                                        <span class="grupo-categoria">@grupo.Categoria</span>
-                                        <div class="grupo-miembros">
-                                            <i class="fas fa-users me-1"></i>
-                                            <span>@grupo.Miembros?.Count</span>
+                                        
+                                        <!-- Avatar del grupo superpuesto -->
+                                        <div class="grupo-avatar-overlay">
+                                            @if (!string.IsNullOrEmpty(grupo.FotoGrupo))
+                                            {
+                                                <img src="@grupo.FotoGrupo" class="grupo-avatar-img" alt="Foto @grupo.Nombre">
+                                            }
+                                            else
+                                            {
+                                                <div class="grupo-avatar-default">
+                                                    @grupo.Nombre[0].ToString().ToUpper()
+                                                </div>
+                                            }
                                         </div>
                                     </div>
 
-                                    <div class="grupo-actions">
-                                        <a asp-action="Detalle" asp-route-id="@grupo.Id" class="btn btn-outline-primary btn-sm w-100">
-                                            <i class="fas fa-eye me-1"></i>Ver Grupo
-                                        </a>
+                                    <!-- Contenido del grupo -->
+                                    <div class="grupo-content">
+                                        <h5 class="grupo-nombre">@grupo.Nombre</h5>
+                                        
+                                        @if (!string.IsNullOrEmpty(grupo.Descripcion))
+                                        {
+                                            <p class="grupo-descripcion">@grupo.Descripcion</p>
+                                        }
+                                        
+                                        <div class="grupo-info">
+                                            <span class="grupo-categoria">@grupo.Categoria</span>
+                                            <div class="grupo-miembros">
+                                                <i class="fas fa-users me-1"></i>
+                                                <span>@grupo.Miembros?.Count</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="grupo-actions">
+                                            <a asp-action="Detalle" asp-route-id="@grupo.Id" class="btn-gaming btn-gaming-outline btn-gaming-sm w-100">
+                                                <i class="fas fa-eye me-1"></i>Ver Grupo
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    }
-                </div>
+                        }
+                    </div>
+                }
             }
-        }
-        else if (Model.VistaActiva == "Todos")
-        {
-            <h3 class="mb-4">Todos los Grupos</h3>
-            
-            @if (!Model.TodosLosGrupos.Any())
+            else if (Model.VistaActiva == "Todos")
             {
-                <div class="text-center py-5">
-                    <i class="fas fa-users fa-4x text-muted mb-3"></i>
-                    <h4 class="text-muted">No hay grupos disponibles</h4>
-                    <a asp-action="Crear" class="btn btn-primary mt-3">Crear Primer Grupo</a>
-                </div>
-            }
-            else
-            {
-                <div class="row">
-                    @foreach (var grupo in Model.TodosLosGrupos)
-                    {
-                        <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="grupo-card-mejorado">
-                                <!-- Banner del Grupo con avatar superpuesto -->
-                                <div class="grupo-banner-container">
-                                    @if (!string.IsNullOrEmpty(grupo.BannerGrupo))
-                                    {
-                                        <img src="@grupo.BannerGrupo" class="grupo-banner-img" alt="Banner @grupo.Nombre">
-                                    }
-                                    else
-                                    {
-                                        <div class="grupo-banner-default"></div>
-                                    }
-                                    
-                                    <!-- Avatar del grupo superpuesto -->
-                                    <div class="grupo-avatar-overlay">
-                                        @if (!string.IsNullOrEmpty(grupo.FotoGrupo))
+                <h3 class="mb-4">Todos los Grupos</h3>
+                
+                @if (!Model.TodosLosGrupos.Any())
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-users fa-4x text-muted mb-3"></i>
+                        <h4 class="text-muted">No hay grupos disponibles</h4>
+                        <a asp-action="Crear" class="btn-gaming mt-3">Crear Primer Grupo</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        @foreach (var grupo in Model.TodosLosGrupos)
+                        {
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="grupo-card-mejorado">
+                                    <!-- Banner del Grupo con avatar superpuesto -->
+                                    <div class="grupo-banner-container">
+                                        @if (!string.IsNullOrEmpty(grupo.BannerGrupo))
                                         {
-                                            <img src="@grupo.FotoGrupo" class="grupo-avatar-img" alt="Foto @grupo.Nombre">
+                                            <img src="@grupo.BannerGrupo" class="grupo-banner-img" alt="Banner @grupo.Nombre">
                                         }
                                         else
                                         {
-                                            <div class="grupo-avatar-default">
-                                                @grupo.Nombre[0].ToString().ToUpper()
-                                            </div>
+                                            <div class="grupo-banner-default"></div>
                                         }
-                                    </div>
-                                </div>
-
-                                <!-- Contenido del grupo -->
-                                <div class="grupo-content">
-                                    <h5 class="grupo-nombre">@grupo.Nombre</h5>
-                                    
-                                    @if (!string.IsNullOrEmpty(grupo.Descripcion))
-                                    {
-                                        <p class="grupo-descripcion">@grupo.Descripcion</p>
-                                    }
-                                    
-                                    <div class="grupo-info">
-                                        <span class="grupo-categoria">@grupo.Categoria</span>
-                                        <div class="grupo-miembros">
-                                            <i class="fas fa-users me-1"></i>
-                                            <span>@grupo.Miembros?.Count</span>
+                                        
+                                        <!-- Avatar del grupo superpuesto -->
+                                        <div class="grupo-avatar-overlay">
+                                            @if (!string.IsNullOrEmpty(grupo.FotoGrupo))
+                                            {
+                                                <img src="@grupo.FotoGrupo" class="grupo-avatar-img" alt="Foto @grupo.Nombre">
+                                            }
+                                            else
+                                            {
+                                                <div class="grupo-avatar-default">
+                                                    @grupo.Nombre[0].ToString().ToUpper()
+                                                </div>
+                                            }
                                         </div>
                                     </div>
 
-                                    <div class="grupo-actions">
-                                        <button class="btn btn-primary btn-sm w-100" onclick="unirseGrupo(@grupo.Id)">
-                                            <i class="fas fa-plus me-1"></i>Unirse al Grupo
-                                        </button>
+                                    <!-- Contenido del grupo -->
+                                    <div class="grupo-content">
+                                        <h5 class="grupo-nombre">@grupo.Nombre</h5>
+                                        
+                                        @if (!string.IsNullOrEmpty(grupo.Descripcion))
+                                        {
+                                            <p class="grupo-descripcion">@grupo.Descripcion</p>
+                                        }
+                                        
+                                        <div class="grupo-info">
+                                            <span class="grupo-categoria">@grupo.Categoria</span>
+                                            <div class="grupo-miembros">
+                                                <i class="fas fa-users me-1"></i>
+                                                <span>@grupo.Miembros?.Count</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="grupo-actions">
+                                            <button class="btn-gaming btn-gaming-sm w-100" onclick="unirseGrupo(@grupo.Id)">
+                                                <i class="fas fa-plus me-1"></i>Unirse al Grupo
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    }
-                </div>
+                        }
+                    </div>
+                }
             }
-        }
+        </div>
     </div>
 </div>
 
 <style>
-    .comunidad-navbar {
-        background: rgba(35, 40, 48, 0.95) !important;
+    /* PALETA DE COLORES GAMING - CONSISTENTE */
+    :root {
+        --bg-dark: #070714;
+        --bg-primary: #0f0f1f;
+        --card-bg: #151530;
+        --accent-purple: #8b2ce6;
+        --accent-blue: #2c5be6;
+        --neon-purple: #b042ff;
+        --neon-blue: #428bff;
+        --text-primary: #ffffff;
+        --text-secondary: #b8b8d0;
+        --navbar-bg: rgba(15, 15, 31, 0.95);
+        --success: #06d6a0;
+        --warning: #ff9e1a;
+        --danger: #dc3545;
+        --border-radius-sm: 8px;
+        --border-radius-md: 12px;
+        --border-radius-lg: 15px;
+    }
+
+    /* CONTENEDOR PRINCIPAL */
+    .comunidad-container {
+        background: var(--bg-dark);
+        min-height: 100vh;
+        padding: 2rem 0;
+        color: var(--text-primary);
+    }
+
+    /* NAVBAR SECUNDARIA - DISEÑO CUADRANGULAR */
+    .comunidad-navbar.catalog-navbar {
+        background: linear-gradient(135deg, var(--accent-purple), var(--neon-purple)) !important;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(139, 44, 230, 0.3);
+        height: 60px;
+        padding: 8px 0;
+        max-width: 500px;
+        margin: 0 auto 2rem auto;
+        border: 1px solid rgba(139, 44, 230, 0.4);
         backdrop-filter: blur(10px);
-        border-bottom: 2px solid var(--primary);
-        padding: 0.8rem 0;
-        margin-top: -1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .comunidad-navbar.catalog-navbar::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--accent-blue));
+        background-size: 200% 100%;
+        animation: gradientFlow 3s ease-in-out infinite;
+    }
+
+    .comunidad-navbar .navbar-nav {
+        gap: 8px;
     }
 
     .comunidad-navbar .nav-link {
-        color: rgba(255, 255, 255, 0.8) !important;
-        font-weight: 600;
-        padding: 0.7rem 1.5rem !important;
-        border-radius: 25px;
-        margin: 0 0.3rem;
+        color: var(--text-primary) !important;
+        font-weight: 700;
+        padding: 12px 24px !important;
+        border-radius: 8px;
         transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+        position: relative;
+        overflow: hidden;
+        border: 2px solid transparent;
     }
 
-    .comunidad-navbar .nav-link:hover,
-    .comunidad-navbar .nav-link.active {
-        color: white !important;
-        background: var(--primary-gradient);
+    .comunidad-navbar .nav-link::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .comunidad-navbar .nav-link:hover::before {
+        left: 100%;
+    }
+
+    .comunidad-navbar .nav-link:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.3);
         transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
     }
 
+    .comunidad-navbar .nav-link.active {
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid var(--neon-blue);
+        box-shadow: 0 0 20px rgba(66, 139, 255, 0.4);
+        font-weight: 800;
+    }
+
+    /* SIDEBAR MEJORADO */
     .sidebar-comunidad {
-        background: var(--card-bg);
-        border-radius: var(--border-radius);
+        background: var(--card-bg) !important;
+        border: 1px solid rgba(139, 44, 230, 0.3) !important;
+        border-radius: var(--border-radius-lg);
         padding: 1.5rem;
-        border: 1px solid rgba(108, 92, 231, 0.2);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 25px rgba(139, 44, 230, 0.1);
+        position: sticky;
+        top: 2rem;
+    }
+
+    .sidebar-comunidad h5 {
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 1.1rem;
+        background: linear-gradient(135deg, var(--text-primary), var(--neon-purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
     .sidebar-link {
         display: block;
-        padding: 0.8rem 1rem;
-        color: rgba(255, 255, 255, 0.8);
+        padding: 1rem 1.25rem;
+        color: var(--text-secondary);
         text-decoration: none;
-        border-radius: 8px;
+        border-radius: var(--border-radius-md);
         margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid transparent;
+    }
+
+    .sidebar-link::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 3px;
+        background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar-link:hover {
+        background: rgba(139, 44, 230, 0.1);
+        color: var(--text-primary);
+        border-color: rgba(139, 44, 230, 0.2);
+        transform: translateX(5px);
+    }
+
+    .sidebar-link.active {
+        background: rgba(139, 44, 230, 0.15);
+        color: var(--text-primary);
+        border-color: rgba(139, 44, 230, 0.3);
+    }
+
+    .sidebar-link.active::before {
+        transform: scaleY(1);
+    }
+
+    .sidebar-link i {
+        width: 20px;
+        text-align: center;
+        margin-right: 0.5rem;
         transition: all 0.3s ease;
     }
 
-    .sidebar-link:hover,
-    .sidebar-link.active {
-        background: rgba(108, 92, 231, 0.2);
-        color: var(--primary);
+    .sidebar-link:hover i,
+    .sidebar-link.active i {
+        color: var(--neon-purple);
+        transform: scale(1.1);
     }
 
-    /* NUEVO ESTILO MEJORADO PARA TARJETAS */
+    .sidebar-link.text-success {
+        background: rgba(6, 214, 160, 0.1);
+        border: 1px solid rgba(6, 214, 160, 0.3) !important;
+    }
+
+    .sidebar-link.text-success:hover {
+        background: rgba(6, 214, 160, 0.2) !important;
+        border-color: var(--success) !important;
+    }
+
+    .sidebar-comunidad hr {
+        background: linear-gradient(90deg, transparent, rgba(139, 44, 230, 0.5), transparent);
+        height: 1px;
+        border: none;
+        margin: 1.5rem 0;
+    }
+
+    /* BOTONES GAMING */
+    .btn-gaming {
+        background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+        color: var(--text-primary);
+        border: none;
+        border-radius: var(--border-radius-sm);
+        padding: 12px 24px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-gaming::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-gaming:hover::before {
+        left: 100%;
+    }
+
+    .btn-gaming:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 20px rgba(66, 139, 255, 0.4);
+        color: var(--text-primary);
+        text-decoration: none;
+    }
+
+    .btn-gaming-outline {
+        background: transparent;
+        border: 2px solid var(--accent-purple);
+        color: var(--text-primary);
+    }
+
+    .btn-gaming-outline:hover {
+        background: var(--accent-purple);
+    }
+
+    .btn-gaming-sm {
+        padding: 8px 16px;
+        font-size: 0.875rem;
+    }
+
+    /* TARJETAS DE GRUPO MEJORADAS */
     .grupo-card-mejorado {
         background: var(--card-bg);
-        border-radius: 16px;
-        border: 1px solid rgba(108, 92, 231, 0.15);
+        border: 1px solid rgba(139, 44, 230, 0.3);
+        border-radius: var(--border-radius-lg);
         overflow: hidden;
         transition: all 0.3s ease;
         height: 100%;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        position: relative;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 25px rgba(139, 44, 230, 0.1);
+    }
+
+    .grupo-card-mejorado::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+        opacity: 0;
+        transition: opacity 0.3s ease;
     }
 
     .grupo-card-mejorado:hover {
         transform: translateY(-8px);
-        border-color: var(--primary);
-        box-shadow: 0 12px 40px rgba(108, 92, 231, 0.25);
+        border-color: var(--neon-purple);
+        box-shadow: 0 15px 35px rgba(139, 44, 230, 0.25);
+    }
+
+    .grupo-card-mejorado:hover::before {
+        opacity: 1;
     }
 
     .grupo-banner-container {
@@ -345,7 +580,7 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.3s ease;
+        transition: transform 0.5s ease;
     }
 
     .grupo-card-mejorado:hover .grupo-banner-img {
@@ -355,7 +590,7 @@
     .grupo-banner-default {
         width: 100%;
         height: 100%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
         position: relative;
     }
 
@@ -366,61 +601,61 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: linear-gradient(45deg, rgba(108, 92, 231, 0.4), rgba(162, 155, 254, 0.4));
+        background: linear-gradient(45deg, rgba(139, 44, 230, 0.4), rgba(66, 139, 255, 0.4));
     }
 
     .grupo-avatar-overlay {
         position: absolute;
-        bottom: -30px;
+        bottom: -25px;
         left: 20px;
-        border: 5px solid var(--card-bg);
-        border-radius: 20px;
+        border: 4px solid var(--card-bg);
+        border-radius: 16px;
         background: var(--card-bg);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 8px 25px rgba(139, 44, 230, 0.3);
         transition: all 0.3s ease;
     }
 
     .grupo-card-mejorado:hover .grupo-avatar-overlay {
         transform: scale(1.1) translateY(-5px);
-        box-shadow: 0 8px 30px rgba(108, 92, 231, 0.4);
+        box-shadow: 0 0 20px rgba(66, 139, 255, 0.4);
     }
 
     .grupo-avatar-img {
-        width: 80px;
-        height: 80px;
-        border-radius: 16px;
+        width: 70px;
+        height: 70px;
+        border-radius: 14px;
         object-fit: cover;
         display: block;
     }
 
     .grupo-avatar-default {
-        width: 80px;
-        height: 80px;
-        border-radius: 16px;
-        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        width: 70px;
+        height: 70px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
         display: flex;
         align-items: center;
         justify-content: center;
-        color: white;
+        color: var(--text-primary);
         font-weight: 800;
-        font-size: 2rem;
+        font-size: 1.5rem;
         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
 
     .grupo-content {
-        padding: 45px 20px 20px 20px;
+        padding: 40px 20px 20px 20px;
     }
 
     .grupo-nombre {
         font-weight: 800;
         margin-bottom: 10px;
-        color: white;
+        color: var(--text-primary);
         font-size: 1.2rem;
         line-height: 1.3;
     }
 
     .grupo-descripcion {
-        color: rgba(255, 255, 255, 0.7);
+        color: var(--text-secondary);
         font-size: 0.9rem;
         margin-bottom: 15px;
         line-height: 1.5;
@@ -440,18 +675,18 @@
     }
 
     .grupo-categoria {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-        color: white;
+        background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+        color: var(--text-primary);
         padding: 6px 12px;
         border-radius: 20px;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
 
     .grupo-miembros {
-        color: rgba(255, 255, 255, 0.8);
+        color: var(--text-secondary);
         font-size: 0.85rem;
         display: flex;
         align-items: center;
@@ -459,23 +694,63 @@
     }
 
     .grupo-miembros i {
-        color: var(--primary);
+        color: var(--accent-purple);
+        margin-right: 4px;
     }
 
     .grupo-actions {
         margin-top: 15px;
     }
 
-    .grupo-actions .btn {
-        border-radius: 12px;
-        font-weight: 600;
-        padding: 8px 16px;
-        transition: all 0.3s ease;
+    .grupo-actions .btn-gaming {
+        width: 100%;
+        justify-content: center;
     }
 
-    .grupo-actions .btn:hover {
-        transform: translateY(-2px);
+    /* ESTADOS VACÍOS */
+    .text-center.py-5 {
+        background: var(--card-bg);
+        border: 2px dashed rgba(139, 44, 230, 0.3);
+        border-radius: var(--border-radius-lg);
+        padding: 3rem 2rem !important;
     }
+
+    .text-center.py-5 .fa-users {
+        color: var(--text-muted);
+        opacity: 0.5;
+    }
+
+    .text-center.py-5 h4 {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .text-center.py-5 .text-muted {
+        color: var(--text-secondary) !important;
+    }
+
+    /* TÍTULOS DE SECCIÓN */
+    h3.mb-4 {
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 1.75rem;
+        background: linear-gradient(135deg, var(--text-primary), var(--neon-purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+
+    .grupo-card-mejorado {
+        animation: fadeInUp 0.6s ease-out both;
+    }
+
+    .grupo-card-mejorado:nth-child(1) { animation-delay: 0.1s; }
+    .grupo-card-mejorado:nth-child(2) { animation-delay: 0.2s; }
+    .grupo-card-mejorado:nth-child(3) { animation-delay: 0.3s; }
+    .grupo-card-mejorado:nth-child(4) { animation-delay: 0.4s; }
+    .grupo-card-mejorado:nth-child(5) { animation-delay: 0.5s; }
+    .grupo-card-mejorado:nth-child(6) { animation-delay: 0.6s; }
 </style>
 
 @section Scripts {

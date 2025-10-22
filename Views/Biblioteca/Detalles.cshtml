@@ -4,44 +4,395 @@
     ViewData["Title"] = "Detalles del Juego";
 }
 
-<div class="container mt-4">
+<div class="game-details-container">
     <div class="row">
+        <!-- Imagen del Juego -->
         <div class="col-md-4">
-            <img src="@Model.BackgroundImage" class="img-fluid rounded" alt="@Model.Name">
+            <img src="@Model.BackgroundImage" class="game-image img-fluid" alt="@Model.Name">
         </div>
+        
+        <!-- Información del Juego -->
         <div class="col-md-8">
-            <h1>@Model.Name</h1>
-            
-            @if (!string.IsNullOrEmpty(Model.Released))
-            {
-                <p><strong>Fecha de lanzamiento:</strong> @DateTime.Parse(Model.Released).ToString("dd/MM/yyyy")</p>
-            }
-            
-            <p><strong>Rating:</strong> @Model.Rating.ToString("0.0")/5.0</p>
-            
-            @if (Model.Metacritic.HasValue)
-            {
-                <p><strong>Metacritic:</strong> @Model.Metacritic</p>
-            }
-            
-            <p><strong>Géneros:</strong>
-                @foreach (var genre in Model.Genres)
-                {
-                    <span class="badge bg-primary me-1">@genre.Name</span>
-                }
-            </p>
-            
-            <p><strong>Plataformas:</strong>
-                @foreach (var platform in Model.Platforms)
-                {
-                    <span class="badge bg-secondary me-1">@platform.Platform.Name</span>
-                }
-            </p>
+            <div class="game-info">
+                <h1 class="game-title">@Model.Name</h1>
+                
+                <!-- Información Básica -->
+                <div class="game-detail-item">
+                    <div class="game-detail-label">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>FECHA DE LANZAMIENTO</span>
+                    </div>
+                    <div class="game-detail-value">
+                        @if (!string.IsNullOrEmpty(Model.Released))
+                        {
+                            @DateTime.Parse(Model.Released).ToString("dd/MM/yyyy")
+                        }
+                        else
+                        {
+                            <span class="text-muted">No disponible</span>
+                        }
+                    </div>
+                </div>
 
-            <div class="mt-4">
-                <a asp-action="AddToLibrary" asp-route-id="@Model.Id" class="btn btn-success">Añadir a mi biblioteca</a>
-                <a asp-action="Index" class="btn btn-secondary">Volver al catálogo</a>
+                <!-- Rating -->
+                <div class="game-detail-item">
+                    <div class="game-detail-label">
+                        <i class="fas fa-star"></i>
+                        <span>RATING</span>
+                    </div>
+                    <div class="rating-display">
+                        <div class="stars">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                if (i <= Model.Rating)
+                                {
+                                    <i class="fas fa-star"></i>
+                                }
+                                else if (i - 0.5 <= Model.Rating)
+                                {
+                                    <i class="fas fa-star-half-alt"></i>
+                                }
+                                else
+                                {
+                                    <i class="far fa-star"></i>
+                                }
+                            }
+                        </div>
+                        <span class="rating-value">@Model.Rating.ToString("0.0")</span>
+                        @if (Model.Metacritic.HasValue)
+                        {
+                            <span class="metacritic-score" title="Puntuación Metacritic">
+                                @Model.Metacritic
+                            </span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Géneros -->
+                <div class="game-detail-item">
+                    <div class="game-detail-label">
+                        <i class="fas fa-tags"></i>
+                        <span>GÉNEROS</span>
+                    </div>
+                    <div class="tags-container">
+                        @foreach (var genre in Model.Genres)
+                        {
+                            <span class="badge bg-primary">@genre.Name</span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Plataformas -->
+                <div class="game-detail-item">
+                    <div class="game-detail-label">
+                        <i class="fas fa-gamepad"></i>
+                        <span>PLATAFORMAS</span>
+                    </div>
+                    <div class="tags-container">
+                        @foreach (var platform in Model.Platforms)
+                        {
+                            <span class="badge bg-secondary">@platform.Platform.Name</span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="action-buttons">
+                    <a asp-action="AddToLibrary" asp-route-id="@Model.Id" class="btn btn-success">
+                        <i class="fas fa-plus-circle me-2"></i>Añadir a mi biblioteca
+                    </a>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Volver al catálogo
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* PALETA DE COLORES GAMING */
+    :root {
+        --bg-dark: #070714;
+        --bg-primary: #0f0f1f;
+        --card-bg: #151530;
+        --accent-purple: #8b2ce6;
+        --accent-blue: #2c5be6;
+        --neon-purple: #b042ff;
+        --neon-blue: #428bff;
+        --text-primary: #ffffff;
+        --text-secondary: #b8b8d0;
+        --navbar-bg: rgba(15, 15, 31, 0.95);
+    }
+
+    /* CONTENEDOR PRINCIPAL */
+    .game-details-container {
+        background: var(--card-bg);
+        border: 1px solid rgba(139, 44, 230, 0.3);
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        position: relative;
+        margin-top: 2rem;
+    }
+
+    .game-details-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue), var(--neon-purple));
+    }
+
+    .game-details-container .row {
+        margin: 0;
+        padding: 2rem;
+    }
+
+    /* IMAGEN DEL JUEGO */
+    .game-image {
+        border-radius: 15px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 2px solid rgba(139, 44, 230, 0.3);
+    }
+
+    .game-image:hover {
+        transform: scale(1.02);
+        box-shadow: 0 20px 40px rgba(139, 44, 230, 0.3);
+    }
+
+    /* INFORMACIÓN DEL JUEGO */
+    .game-info {
+        color: var(--text-primary);
+    }
+
+    .game-title {
+        background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 800;
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        line-height: 1.2;
+    }
+
+    .game-detail-item {
+        margin-bottom: 1rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(139, 44, 230, 0.2);
+    }
+
+    .game-detail-item:last-child {
+        border-bottom: none;
+    }
+
+    .game-detail-label {
+        color: var(--neon-blue);
+        font-weight: 700;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .game-detail-label i {
+        font-size: 1.1rem;
+    }
+
+    .game-detail-value {
+        color: var(--text-primary);
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    /* RATING Y METACRITIC */
+    .rating-display {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .stars {
+        display: flex;
+        gap: 0.2rem;
+    }
+
+    .stars .fas.fa-star,
+    .stars .fas.fa-star-half-alt {
+        color: #ffd166;
+        text-shadow: 0 0 8px rgba(255, 209, 102, 0.5);
+        font-size: 1.2rem;
+    }
+
+    .stars .far.fa-star {
+        color: rgba(255, 255, 255, 0.3);
+        font-size: 1.2rem;
+    }
+
+    .rating-value {
+        background: linear-gradient(135deg, #ffd166, #ff9e00);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 800;
+        font-size: 1.3rem;
+    }
+
+    .metacritic-score {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #6ac045, #2e7d32);
+        color: white;
+        font-weight: 800;
+        font-size: 1.1rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(106, 192, 69, 0.3);
+        margin-left: 1rem;
+    }
+
+    /* BADGES MEJORADOS */
+    .badge.bg-primary {
+        background: linear-gradient(135deg, var(--accent-purple), var(--neon-purple)) !important;
+        border: none;
+        padding: 0.6rem 1rem;
+        border-radius: 25px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.8rem;
+        margin: 0.2rem 0.3rem;
+        box-shadow: 0 4px 10px rgba(139, 44, 230, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .badge.bg-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(139, 44, 230, 0.4);
+    }
+
+    .badge.bg-secondary {
+        background: linear-gradient(135deg, var(--accent-blue), var(--neon-blue)) !important;
+        border: none;
+        padding: 0.6rem 1rem;
+        border-radius: 25px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.8rem;
+        margin: 0.2rem 0.3rem;
+        box-shadow: 0 4px 10px rgba(66, 139, 255, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .badge.bg-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(66, 139, 255, 0.4);
+    }
+
+    /* BOTONES DE ACCIÓN */
+    .action-buttons {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(139, 44, 230, 0.3);
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #06d6a0, #118ab2);
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(6, 214, 160, 0.3);
+    }
+
+    .btn-success::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-success:hover::before {
+        left: 100%;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 25px rgba(6, 214, 160, 0.4);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, var(--text-secondary), #6c757d);
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(108, 117, 125, 0.3);
+    }
+
+    .btn-secondary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-secondary:hover::before {
+        left: 100%;
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 25px rgba(108, 117, 125, 0.4);
+    }
+
+    /* SECCIÓN DE GÉNEROS Y PLATAFORMAS */
+    .tags-section {
+        margin: 1.5rem 0;
+    }
+
+    .tags-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    
+</style>

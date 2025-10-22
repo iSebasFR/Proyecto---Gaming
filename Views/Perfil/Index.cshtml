@@ -3,15 +3,13 @@
     ViewData["Title"] = "Perfil de Usuario";
 }
 
-
-
-<div class="container-fluid">
+<div class="container-fluid profile-container">
     <div class="row">
         <!-- Columna Principal -->
-        <div class="col-lg-8">
-            <!-- Header del Perfil - MEJORADO -->
-            <div class="card profile-header mb-4" style="background: rgba(35, 40, 48, 0.95); border: none; border-radius: 15px; backdrop-filter: blur(10px);">
-                <div class="card-body p-4">
+        <div class="col-lg-12">
+            <!-- Header del Perfil -->
+            <div class="card profile-header mb-4">
+                <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-md-3 text-center">
                             <div class="avatar-container mb-3">
@@ -22,47 +20,42 @@
                                 else
                                 {
                                     <div class="avatar-placeholder">
-                                        <i class="fas fa-user fa-3x text-white"></i>
+                                        <i class="fas fa-user fa-3x"></i>
                                     </div>
                                 }
                                 <div class="online-status"></div>
                             </div>
-                            <!-- CAMBIO: Usar DisplayName si existe, sino UserName -->
-                            <h4 class="text-white mb-1 fw-bold">@(Model.Usuario.DisplayName ?? Model.Usuario.UserName)</h4>
+                            <h4 class="user-name">@(Model.Usuario.DisplayName ?? Model.Usuario.UserName)</h4>
                             @if (!string.IsNullOrEmpty(Model.Usuario.NombreReal))
                             {
-                                <p class="text-white mb-2 opacity-75">@Model.Usuario.NombreReal</p>
+                                <p class="user-realname">@Model.Usuario.NombreReal</p>
                             }
-                            <span class="badge bg-success px-3 py-2">En línea</span>
+                            <span class="status-badge">En línea</span>
                         </div>
                         <div class="col-md-5">
-                            <blockquote class="blockquote m-0">
-                                <p class="mb-2 text-white fs-6">
+                            <div class="user-bio">
+                                <p class="bio-text">
                                     <i>"@(string.IsNullOrEmpty(Model.Usuario.Biografia) ? "Este usuario aún no ha agregado una biografía." : Model.Usuario.Biografia)"</i>
                                 </p>
-                            </blockquote>
+                            </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="stats-grid text-center">
+                            <div class="stats-grid">
                                 <div class="stat-item">
-                                    <h4 class="text-white mb-1 fw-bold">@Model.TotalJuegos</h4>
-                                    <small class="text-white opacity-75">Juegos</small>
+                                    <h4 class="stat-number">@Model.TotalJuegos</h4>
+                                    <small class="stat-label">Juegos</small>
                                 </div>
                                 <div class="stat-item">
-                                    <h4 class="text-white mb-1 fw-bold">@Model.AmigosCount</h4>
-                                    <small class="text-white opacity-75">Amigos</small>
+                                    <h4 class="stat-number">@Model.AmigosCount</h4>
+                                    <small class="stat-label">Amigos</small>
                                 </div>
                                 <div class="stat-item">
-                                    <h4 class="text-white mb-1 fw-bold">@Model.TotalHoras</h4>
-                                    <small class="text-white opacity-75">Horas</small>
+                                    <h4 class="stat-number">@Model.JuegosCompletados</h4>
+                                    <small class="stat-label">Completados</small>
                                 </div>
                                 <div class="stat-item">
-                                    <h4 class="text-white mb-1 fw-bold">@Model.JuegosCompletados</h4>
-                                    <small class="text-white opacity-75">Completados</small>
-                                </div>
-                                <div class="stat-item">
-                                    <h4 class="text-white mb-1 fw-bold">@Model.GruposCount</h4>
-                                    <small class="text-white opacity-75">Grupos</small>
+                                    <h4 class="stat-number">@Model.GruposCount</h4>
+                                    <small class="stat-label">Grupos</small>
                                 </div>
                             </div>
                         </div>
@@ -70,26 +63,26 @@
                 </div>
             </div>
 
-            <!-- Contenido Principal - MEJORADO -->
+            <!-- Contenido Principal -->
             <div class="row g-4">
-                <!-- Columna Izquierda - MEJORADA -->
-                <div class="col-md-7">
+                <!-- Columna Izquierda -->
+                <div class="col-md-6">
                     <!-- Actividad Reciente -->
-                    <div class="card h-100" style="background: rgba(35, 40, 48, 0.95); border: none; border-radius: 15px; backdrop-filter: blur(10px);">
-                        <div class="card-header bg-transparent border-secondary">
-                            <h5 class="text-white mb-0 fw-bold"><i class="fas fa-history me-2"></i>Actividad Reciente</h5>
+                    <div class="card activity-card">
+                        <div class="card-header">
+                            <h5 class="card-title"><i class="fas fa-history me-2"></i>Actividad Reciente</h5>
                         </div>
                         <div class="card-body">
                             @if (Model.BibliotecaReciente!.Any())
                             {
                                 foreach (var juego in Model.BibliotecaReciente!)
                                 {
-                                    <div class="activity-item mb-3 p-3 rounded-3">
+                                    <div class="activity-item">
                                         <div class="d-flex align-items-center">
-                                            <img src="@juego.GameImage" class="activity-game-img shadow" alt="@juego.GameName">
+                                            <img src="@juego.GameImage" class="activity-game-img" alt="@juego.GameName">
                                             <div class="ms-3 flex-grow-1">
-                                                <h6 class="text-white mb-1 fw-bold">@juego.GameName</h6>
-                                                <p class="text-white mb-1 opacity-75">
+                                                <h6 class="game-title">@juego.GameName</h6>
+                                                <p class="activity-details">
                                                     @if (juego.Estado == "Completado" && juego.FechaCompletado.HasValue)
                                                     {
                                                         <span>Completado el @juego.FechaCompletado.Value.ToString("dd/MM/yyyy")</span>
@@ -99,7 +92,7 @@
                                                         <span>Agregado a @juego.Estado</span>
                                                     }
                                                 </p>
-                                                <small class="text-white opacity-50">Hace 2 días</small>
+                                                <small class="activity-time">Hace 2 días</small>
                                             </div>
                                         </div>
                                     </div>
@@ -107,86 +100,96 @@
                             }
                             else
                             {
-                                <div class="text-center py-4">
-                                    <i class="fas fa-inbox fa-2x text-white opacity-50 mb-3"></i>
-                                    <p class="text-white opacity-75">Aún no hay actividad reciente</p>
+                                <div class="empty-state">
+                                    <i class="fas fa-inbox fa-2x"></i>
+                                    <p>Aún no hay actividad reciente</p>
                                 </div>
                             }
                         </div>
                     </div>
                 </div>
 
-                <!-- Columna Derecha - MEJORADA -->
-                <div class="col-md-5">
+                <!-- Columna Derecha -->
+                <div class="col-md-6">
                     <!-- Información del Usuario -->
-                    <div class="card mb-4" style="background: rgba(35, 40, 48, 0.95); border: none; border-radius: 15px; backdrop-filter: blur(10px);">
-                        <div class="card-header bg-transparent border-secondary">
-                            <h5 class="text-white mb-0 fw-bold"><i class="fas fa-info-circle me-2"></i>Información</h5>
+                    <div class="card info-card mb-4">
+                        <div class="card-header">
+                            <h5 class="card-title"><i class="fas fa-info-circle me-2"></i>Información</h5>
                         </div>
                         <div class="card-body">
-                            <div class="info-item mb-3 p-3 rounded-3 bg-dark bg-opacity-25">
-                                <small class="text-white opacity-75 d-block">Miembro desde</small>
-                                <p class="text-white mb-0 fw-semibold">@Model.Usuario.FechaRegistro.ToString("dd/MM/yyyy")</p>
+                            <div class="info-item">
+                                <small class="info-label">Miembro desde</small>
+                                <p class="info-value">@Model.Usuario.FechaRegistro.ToString("dd/MM/yyyy")</p>
                             </div>
                             @if (Model.Usuario.FechaNacimiento != DateTime.MinValue)
                             {
-                                <div class="info-item mb-3 p-3 rounded-3 bg-dark bg-opacity-25">
-                                    <small class="text-white opacity-75 d-block">Fecha de nacimiento</small>
-                                    <p class="text-white mb-0 fw-semibold">@Model.Usuario.FechaNacimiento.ToString("dd/MM/yyyy")</p>
+                                <div class="info-item">
+                                    <small class="info-label">Fecha de nacimiento</small>
+                                    <p class="info-value">@Model.Usuario.FechaNacimiento.ToString("dd/MM/yyyy")</p>
                                 </div>
                             }
                             @if (!string.IsNullOrEmpty(Model.Usuario.Pais))
                             {
-                                <div class="info-item mb-3 p-3 rounded-3 bg-dark bg-opacity-25">
-                                    <small class="text-white opacity-75 d-block">País</small>
-                                    <p class="text-white mb-0 fw-semibold">@Model.Usuario.Pais</p>
+                                <div class="info-item">
+                                    <small class="info-label">País</small>
+                                    <p class="info-value">@Model.Usuario.Pais</p>
                                 </div>
                             }
                             @if (!string.IsNullOrEmpty(Model.Usuario.PlataformaPreferida))
                             {
-                                <div class="info-item p-3 rounded-3 bg-dark bg-opacity-25">
-                                    <small class="text-white opacity-75 d-block">Plataformas preferidas</small>
-                                    <p class="text-white mb-0 fw-semibold">@Model.Usuario.PlataformaPreferida.Replace(",", ", ")</p>
+                                <div class="info-item">
+                                    <small class="info-label">Plataformas preferidas</small>
+                                    <p class="info-value">@Model.Usuario.PlataformaPreferida.Replace(",", ", ")</p>
                                 </div>
                             }
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Biblioteca de Juegos -->
-                    <div class="card" style="background: rgba(35, 40, 48, 0.95); border: none; border-radius: 15px; backdrop-filter: blur(10px);">
-                        <div class="card-header bg-transparent border-secondary">
-                            <h5 class="text-white mb-0 fw-bold"><i class="fas fa-gamepad me-2"></i>Biblioteca de Juegos</h5>
+            <!-- Biblioteca de Juegos - CENTRADA -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card library-card-centered">
+                        <div class="card-header">
+                            <h5 class="card-title"><i class="fas fa-gamepad me-2"></i>Biblioteca de Juegos</h5>
                         </div>
                         <div class="card-body">
                             @if (Model.JuegosDestacados!.Any())
                             {
-                                foreach (var juego in Model.JuegosDestacados!)
-                                {
-                                    <div class="game-item mb-3 p-3 rounded-3">
-                                        <div class="d-flex align-items-center">
-                                            <img src="@juego.GameImage" class="game-thumbnail shadow" alt="@juego.GameName">
-                                            <div class="ms-3 flex-grow-1">
-                                                <h6 class="text-white mb-1 fw-bold">@juego.GameName</h6>
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <span class="badge bg-primary px-2 py-1">@juego.Estado</span>
-                                                    <small class="text-white opacity-75">20 horas</small>
+                                <div class="games-grid-centered">
+                                    @foreach (var juego in Model.JuegosDestacados!)
+                                    {
+                                        <div class="game-card-centered">
+                                            <div class="game-cover">
+                                                <img src="@juego.GameImage" alt="@juego.GameName">
+                                                <div class="game-overlay">
+                                                    <span class="game-status-centered">@juego.Estado</span>
+                                                </div>
+                                            </div>
+                                            <div class="game-info-centered">
+                                                <h6 class="game-name-centered">@juego.GameName</h6>
+                                                <div class="game-meta-centered">
+                                                    <span class="play-time-centered">
+                                                        <i class="fas fa-clock me-1"></i>20h
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                }
-                                <div class="text-center mt-3 pt-3 border-top border-secondary">
-                                    <a asp-controller="Biblioteca" asp-action="Index" class="btn btn-primary btn-sm px-4">
+                                    }
+                                </div>
+                                <div class="text-center mt-4">
+                                    <a asp-controller="Biblioteca" asp-action="Index" class="btn btn-primary btn-view-all">
                                         <i class="fas fa-list me-2"></i>Ver Biblioteca Completa
                                     </a>
                                 </div>
                             }
                             else
                             {
-                                <div class="text-center py-4">
-                                    <i class="fas fa-gamepad fa-2x text-white opacity-50 mb-3"></i>
-                                    <p class="text-white opacity-75">Aún no hay juegos en la biblioteca</p>
-                                    <a asp-controller="Biblioteca" asp-action="Index" class="btn btn-primary btn-sm mt-2">
+                                <div class="empty-state-centered">
+                                    <i class="fas fa-gamepad fa-2x"></i>
+                                    <p>Aún no hay juegos en la biblioteca</p>
+                                    <a asp-controller="Biblioteca" asp-action="Index" class="btn btn-primary">
                                         <i class="fas fa-plus me-2"></i>Explorar Juegos
                                     </a>
                                 </div>
@@ -196,84 +199,42 @@
                 </div>
             </div>
         </div>
-
-        <!-- Sidebar de Estadísticas - MEJORADO -->
-        <div class="col-lg-4">
-            <!-- Amigos en Común -->
-            <div class="card mb-4" style="background: rgba(35, 40, 48, 0.95); border: none; border-radius: 15px; backdrop-filter: blur(10px);">
-                <div class="card-header bg-transparent border-secondary">
-                    <h5 class="text-white mb-0 fw-bold"><i class="fas fa-users me-2"></i>Amigos en Común</h5>
-                </div>
-                <div class="card-body">
-                    @foreach (var amigo in Model.AmigosVisual!)
-                    {
-                        <div class="friend-item mb-3 p-3 rounded-3">
-                            <div class="d-flex align-items-center">
-                                <div class="friend-avatar me-3">
-                                    <div class="avatar-circle">
-                                        @amigo.Avatar
-                                    </div>
-                                    <div class="status-indicator @(amigo.Estado == "En Línea" ? "online" : "away")"></div>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="text-white mb-0 fw-bold">@amigo.Nombre</h6>
-                                    <small class="text-white opacity-75">@amigo.Estado</small>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                    <div class="text-center mt-3 pt-3 border-top border-secondary">
-                        <button class="btn btn-outline-primary btn-sm px-4" disabled>
-                            <i class="fas fa-user-friends me-2"></i>Ver Todos los Amigos
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Resumen de Estadísticas -->
-            <div class="card" style="background: rgba(35, 40, 48, 0.95); border: none; border-radius: 15px; backdrop-filter: blur(10px);">
-                <div class="card-header bg-transparent border-secondary">
-                    <h5 class="text-white mb-0 fw-bold"><i class="fas fa-chart-pie me-2"></i>Resumen de Juegos</h5>
-                </div>
-                <div class="card-body">
-                    <div class="stat-summary">
-                        <div class="stat-row mb-3 p-3 rounded-3 bg-dark bg-opacity-25">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="text-white">Total Juegos</span>
-                                <span class="text-white fw-bold">@Model.TotalJuegos</span>
-                            </div>
-                        </div>
-                        <div class="stat-row mb-3 p-3 rounded-3 bg-dark bg-opacity-25">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="text-white">Horas Totales</span>
-                                <span class="text-white fw-bold">-</span>
-                            </div>
-                        </div>
-                        <div class="stat-row mb-3 p-3 rounded-3 bg-dark bg-opacity-25">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="text-white">Juegos Completados</span>
-                                <span class="text-white fw-bold">-</span>
-                            </div>
-                        </div>
-                        <div class="stat-row p-3 rounded-3 bg-dark bg-opacity-25">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="text-white">Logros Desbloqueados</span>
-                                <span class="text-white fw-bold">-</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
-
 @section Styles {
     <style>
+        /* PALETA DE COLORES GAMING */
+        :root {
+            --bg-dark: #070714;
+            --bg-card: #232830;
+            --accent-purple: #8b2ce6;
+            --accent-blue: #2c5be6;
+            --neon-purple: #b042ff;
+            --neon-blue: #428bff;
+            --success: #06d6a0;
+            --text-primary: #ffffff;
+            --text-secondary: #b8b8d0;
+        }
+
+        /* ESTILOS BASE */
+        .profile-container {
+            background: var(--bg-dark);
+            min-height: 100vh;
+            padding: 2rem 0;
+            color: var(--text-primary);
+        }
+
+        /* HEADER DEL PERFIL */
         .profile-header {
-            background: linear-gradient(135deg, rgba(108, 92, 231, 0.15) 0%, rgba(182, 45, 206, 0.15) 100%) !important;
-            border: 1px solid rgba(108, 92, 231, 0.3) !important;
+            background: linear-gradient(135deg, rgba(139, 44, 230, 0.15), rgba(66, 139, 255, 0.15)) !important;
+            border: 1px solid var(--neon-purple) !important;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .profile-header .card-body {
+            padding: 2rem;
         }
 
         .avatar-container {
@@ -282,158 +243,350 @@
         }
 
         .avatar-img {
-            width: 100px;
-            height: 100px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid var(--primary);
-            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+            border: 4px solid var(--neon-purple);
+            box-shadow: 0 0 30px rgba(139, 44, 230, 0.5);
         }
 
         .avatar-placeholder {
-            width: 100px;
-            height: 100px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
-            background: var(--primary-gradient);
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 3px solid var(--primary);
-            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+            border: 4px solid var(--neon-purple);
+            box-shadow: 0 0 30px rgba(139, 44, 230, 0.5);
+            color: var(--text-primary);
         }
 
         .online-status {
             position: absolute;
-            bottom: 8px;
-            right: 8px;
-            width: 16px;
-            height: 16px;
+            bottom: 10px;
+            right: 10px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             background: var(--success);
-            border: 2px solid rgba(35, 40, 48, 0.95);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            border: 3px solid var(--bg-dark);
+            box-shadow: 0 0 15px rgba(6, 214, 160, 0.5);
+        }
+
+        .user-name {
+            color: var(--text-primary);
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-realname {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .status-badge {
+            background: linear-gradient(135deg, var(--success), #118ab2);
+            color: var(--text-primary);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(6, 214, 160, 0.3);
+        }
+
+        .user-bio {
+            padding: 1rem;
+        }
+
+        .bio-text {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin: 0;
+            font-style: italic;
         }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 12px;
         }
 
         .stat-item {
-            padding: 12px 8px;
-            border-radius: 10px;
+            padding: 15px 10px;
+            border-radius: 12px;
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
             transition: all 0.3s ease;
         }
 
         .stat-item:hover {
             background: rgba(255, 255, 255, 0.12);
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            border-color: var(--neon-purple);
         }
 
-        .activity-game-img, .game-thumbnail {
-            width: 60px;
-            height: 60px;
-            border-radius: 10px;
-            object-fit: cover;
-            transition: transform 0.3s ease;
+        .stat-number {
+            color: var(--text-primary);
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+            font-size: 1.5rem;
         }
 
-        .activity-game-img:hover, .game-thumbnail:hover {
-            transform: scale(1.05);
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .friend-avatar {
-            position: relative;
-        }
-
-        .avatar-circle {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: var(--primary-gradient);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 0.9rem;
-            box-shadow: 0 3px 10px rgba(108, 92, 231, 0.3);
-        }
-
-        .status-indicator {
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            border: 2px solid rgba(35, 40, 48, 0.95);
-        }
-
-        .status-indicator.online {
-            background: var(--success);
-            box-shadow: 0 0 8px var(--success);
-        }
-
-        .status-indicator.away {
-            background: var(--warning);
-            box-shadow: 0 0 8px var(--warning);
-        }
-
-        .activity-item, .game-item, .friend-item {
-            transition: all 0.3s ease;
-            border: 1px solid transparent;
-        }
-
-        .activity-item:hover, .game-item:hover, .friend-item:hover {
-            background: rgba(255, 255, 255, 0.08) !important;
-            border-color: rgba(108, 92, 231, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .text-white {
-            color: white !important;
-        }
-
+        /* TARJETAS GENERALES */
         .card {
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: var(--bg-card) !important;
+            border: 1px solid rgba(139, 44, 230, 0.3) !important;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 25px rgba(139, 44, 230, 0.1);
+            transition: all 0.3s ease;
         }
 
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 12px 35px rgba(139, 44, 230, 0.2);
+            border-color: rgba(139, 44, 230, 0.5) !important;
         }
 
-        .border-secondary {
-            border-color: rgba(255, 255, 255, 0.1) !important;
+        .card-header {
+            background: rgba(139, 44, 230, 0.1) !important;
+            border-bottom: 1px solid rgba(139, 44, 230, 0.3) !important;
+            padding: 1.25rem 1.5rem;
         }
 
+        .card-title {
+            color: var(--text-primary);
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .card-title i {
+            color: var(--neon-purple);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* ACTIVIDAD RECIENTE */
+        .activity-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .activity-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--neon-purple);
+            transform: translateY(-2px);
+        }
+
+        .activity-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .activity-game-img {
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid rgba(139, 44, 230, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .activity-game-img:hover {
+            transform: scale(1.05);
+            border-color: var(--neon-purple);
+        }
+
+        .game-title {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .activity-details {
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        .activity-time {
+            color: var(--text-secondary);
+            opacity: 0.7;
+            font-size: 0.8rem;
+        }
+
+        /* INFORMACIÓN DEL USUARIO */
+        .info-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .info-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--neon-purple);
+            transform: translateX(5px);
+        }
+
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0;
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin: 0.25rem 0 0 0;
+            font-size: 0.95rem;
+        }
+
+        /* BIBLIOTECA DE JUEGOS CENTRADA */
+        .library-card-centered {
+            margin-top: 2rem;
+        }
+
+        .games-grid-centered {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            justify-items: center;
+        }
+
+        .game-card-centered {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 200px;
+        }
+
+        .game-card-centered:hover {
+            transform: translateY(-5px);
+            border-color: var(--neon-purple);
+            box-shadow: 0 8px 25px rgba(139, 44, 230, 0.2);
+        }
+
+        .game-cover {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-cover img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .game-card-centered:hover .game-cover img {
+            transform: scale(1.1);
+        }
+
+        .game-overlay {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+        }
+
+        .game-status-centered {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            color: var(--text-primary);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .game-info-centered {
+            padding: 12px;
+        }
+
+        .game-name-centered {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+            font-size: 0.9rem;
+            line-height: 1.3;
+            text-align: center;
+        }
+
+        .game-meta-centered {
+            display: flex;
+            justify-content: center;
+        }
+
+        .play-time-centered {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        /* BOTONES */
         .btn-primary {
-            background: var(--primary-gradient);
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
             border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
             font-weight: 600;
             transition: all 0.3s ease;
+            color: var(--text-primary);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+            box-shadow: 0 8px 20px rgba(139, 44, 230, 0.4);
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+            color: var(--text-primary);
         }
 
-        .btn-outline-primary {
-            border-color: var(--primary);
-            color: var(--primary);
-            font-weight: 600;
+        .btn-view-all {
+            padding: 8px 20px;
+            font-size: 0.875rem;
         }
 
-        .btn-outline-primary:hover {
-            background: var(--primary);
-            color: white;
-            transform: translateY(-2px);
+        /* ESTADOS VACÍOS */
+        .empty-state, .empty-state-centered {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i, .empty-state-centered i {
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state p, .empty-state-centered p {
+            margin-bottom: 1.5rem;
         }
     </style>
 }

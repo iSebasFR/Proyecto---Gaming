@@ -3,298 +3,730 @@
     ViewData["Title"] = "Amigos";
 }
 
-<!-- Navbar Secundaria para Comunidad -->
-<nav class="navbar navbar-expand-lg comunidad-navbar mb-4">
-    <div class="container">
-        <div class="navbar-nav">
-            <a class="nav-link" asp-controller="Comunidad" asp-action="Index">
-                <i class="fas fa-home me-2"></i>Feed
-            </a>
-            <a class="nav-link active" asp-controller="Amigos" asp-action="Index">
-                <i class="fas fa-user-friends me-2"></i>Amigos
-            </a>
-            <a class="nav-link" asp-controller="Grupos" asp-action="Index">
-                <i class="fas fa-users me-2"></i>Grupos
-            </a>
-        </div>
+<!-- Navbar Secundaria para Comunidad - Mismo diseño que la anterior -->
+<nav class="navbar navbar-expand-lg catalog-navbar comunidad-navbar">
+    <div class="container-fluid justify-content-center">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Comunidad" asp-action="Index">
+                    <i class="fas fa-home me-2"></i>Feed
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" asp-controller="Amigos" asp-action="Index">
+                    <i class="fas fa-user-friends me-2"></i>Amigos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Grupos" asp-action="Index">
+                    <i class="fas fa-users me-2"></i>Grupos
+                </a>
+            </li>
+        </ul>
     </div>
 </nav>
 
-<div class="row">
-    <div class="col-md-3">
-        <div class="sidebar-comunidad">
-            <h5 class="mb-3">Navegación</h5>
-            <a class="sidebar-link @(Model.SeccionActiva == "Todos" ? "active" : "")" 
-               asp-action="Index" asp-route-seccion="Todos">
-                <i class="fas fa-users me-2"></i>Todos los Amigos
-            </a>
-            <a class="sidebar-link @(Model.SeccionActiva == "Solicitudes" ? "active" : "")" 
-               asp-action="Index" asp-route-seccion="Solicitudes">
-                <i class="fas fa-user-plus me-2"></i>Solicitudes
-                @if (Model.SolicitudesPendientes.Count > 0)
-                {
-                    <span class="badge bg-primary ms-2">@Model.SolicitudesPendientes.Count</span>
-                }
-            </a>
-            <a class="sidebar-link @(Model.SeccionActiva == "Conocer" ? "active" : "")" 
-               asp-action="Index" asp-route-seccion="Conocer">
-                <i class="fas fa-search me-2"></i>Conocer Nuevos
-            </a>
+<div class="container-fluid amigos-container">
+    <div class="row">
+        <div class="col-md-3">
+            <!-- Sidebar de Navegación -->
+            <div class="card amigos-sidebar">
+                <div class="card-body">
+                    <h5 class="sidebar-title">Gestión de Amigos</h5>
+                    <div class="sidebar-nav">
+                        <a class="sidebar-link @(Model.SeccionActiva == "Todos" ? "active" : "")" 
+                           asp-action="Index" asp-route-seccion="Todos">
+                            <div class="sidebar-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <span class="sidebar-text">Todos los Amigos</span>
+                            <span class="sidebar-badge">@Model.Amigos.Count</span>
+                        </a>
+                        <a class="sidebar-link @(Model.SeccionActiva == "Solicitudes" ? "active" : "")" 
+                           asp-action="Index" asp-route-seccion="Solicitudes">
+                            <div class="sidebar-icon">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <span class="sidebar-text">Solicitudes</span>
+                            @if (Model.SolicitudesPendientes.Count > 0)
+                            {
+                                <span class="sidebar-badge badge-notification">@Model.SolicitudesPendientes.Count</span>
+                            }
+                        </a>
+                        <a class="sidebar-link @(Model.SeccionActiva == "Conocer" ? "active" : "")" 
+                           asp-action="Index" asp-route-seccion="Conocer">
+                            <div class="sidebar-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <span class="sidebar-text">Conocer Nuevos</span>
+                            <span class="sidebar-badge">+</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div class="col-md-9">
-        @if (Model.SeccionActiva == "Todos")
-        {
-            <h3 class="mb-4">Mis Amigos</h3>
-            
-            @if (!Model.Amigos.Any())
-            {
-                <div class="text-center py-5">
-                    <i class="fas fa-users fa-4x text-muted mb-3"></i>
-                    <h4 class="text-muted">Aún no tienes amigos</h4>
-                    <p class="text-muted">Agrega amigos para verlos aquí</p>
-                </div>
-            }
-            else
-            {
-                foreach (var amigo in Model.Amigos)
-                {
-                    var usuarioAmigo = amigo.UsuarioId == ViewBag.UsuarioActualId ? amigo.AmigoUsuario : amigo.Usuario;
-                    
-                    <div class="amigo-card">
-                        <div class="row align-items-center">
-                            <div class="col-auto">
-                                <div class="profile-pic-sm">
-                                    @if (!string.IsNullOrEmpty(usuarioAmigo.FotoPerfil))
-                                    {
-                                        <img src="@usuarioAmigo.FotoPerfil" class="rounded-circle" width="60" height="60" alt="Foto">
-                                    }
-                                    else
-                                    {
-                                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold" style="width: 60px; height: 60px;">
-                                            @{
-                                                // CORREGIDO: Usando bloque de código Razor
-                                                var inicial = !string.IsNullOrEmpty(usuarioAmigo.UserName) ? usuarioAmigo.UserName[0].ToString().ToUpper() : "U";
-                                            }
-                                            @inicial
-                                        </div>
-                                    }
+        <div class="col-md-9">
+            <!-- Contenido Principal -->
+            <div class="card amigos-content">
+                <div class="card-body">
+                    @if (Model.SeccionActiva == "Todos")
+                    {
+                        <div class="section-header">
+                            <h3 class="section-title">Mis Amigos</h3>
+                            <p class="section-subtitle">@Model.Amigos.Count amigos en tu lista</p>
+                        </div>
+                        
+                        @if (!Model.Amigos.Any())
+                        {
+                            <div class="empty-state">
+                                <div class="empty-icon">
+                                    <i class="fas fa-users"></i>
                                 </div>
+                                <h4 class="empty-title">Aún no tienes amigos</h4>
+                                <p class="empty-description">Agrega amigos para verlos aquí y comenzar a conectar</p>
+                                <a asp-action="Index" asp-route-seccion="Conocer" class="btn btn-primary">
+                                    <i class="fas fa-user-plus me-2"></i>Conocer Nuevos Usuarios
+                                </a>
                             </div>
-                            <div class="col">
-                                <h5 class="mb-1">@usuarioAmigo.DisplayName</h5>
-                                <p class="text-white mb-1">@@@usuarioAmigo.UserName</p>
-                                @if (!string.IsNullOrEmpty(usuarioAmigo.Biografia))
+                        }
+                        else
+                        {
+                            <div class="friends-grid">
+                                @foreach (var amigo in Model.Amigos)
                                 {
-                                    <p class="mb-2 text-white">@usuarioAmigo.Biografia</p>
+                                    var usuarioAmigo = amigo.UsuarioId == ViewBag.UsuarioActualId ? amigo.AmigoUsuario : amigo.Usuario;
+                                    
+                                    <div class="friend-card">
+                                        <div class="friend-avatar">
+                                            @if (!string.IsNullOrEmpty(usuarioAmigo.FotoPerfil))
+                                            {
+                                                <img src="@usuarioAmigo.FotoPerfil" class="avatar-img" alt="Foto de perfil">
+                                            }
+                                            else
+                                            {
+                                                <div class="avatar-placeholder">
+                                                    @{
+                                                        var inicial = !string.IsNullOrEmpty(usuarioAmigo.UserName) ? usuarioAmigo.UserName[0].ToString().ToUpper() : "U";
+                                                    }
+                                                    @inicial
+                                                </div>
+                                            }
+                                            <div class="online-status"></div>
+                                        </div>
+                                        <div class="friend-info">
+                                            <h5 class="friend-name">@usuarioAmigo.DisplayName</h5>
+                                            <p class="friend-username">@@@usuarioAmigo.UserName</p>
+                                            @if (!string.IsNullOrEmpty(usuarioAmigo.Biografia))
+                                            {
+                                                <p class="friend-bio">@usuarioAmigo.Biografia</p>
+                                            }
+                                            @if (!string.IsNullOrEmpty(usuarioAmigo.PlataformaPreferida))
+                                            {
+                                                <div class="friend-platform">
+                                                    <i class="fas fa-gamepad"></i>
+                                                    <span>@usuarioAmigo.PlataformaPreferida</span>
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="friend-actions">
+                                            <a asp-controller="Perfil" asp-action="Index" asp-route-userId="@usuarioAmigo.Id" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-eye me-1"></i>Ver Perfil
+                                            </a>
+                                            <button class="btn btn-danger btn-sm" onclick="eliminarAmigo('@usuarioAmigo.Id')">
+                                                <i class="fas fa-user-times me-1"></i>Eliminar
+                                            </button>
+                                        </div>
+                                    </div>
                                 }
                             </div>
-                            <div class="col-auto">
-                                <div class="btn-group">
-                                    <a asp-controller="Perfil" asp-action="Index" asp-route-userId="@usuarioAmigo.Id" class="btn btn-outline-primary btn-sm">
-                                        <i class="fas fa-eye me-1"></i>Ver Perfil
-                                    </a>
-                                    <button class="btn btn-outline-danger btn-sm" onclick="eliminarAmigo('@usuarioAmigo.Id')">
-                                        <i class="fas fa-user-times me-1"></i>Eliminar
-                                    </button>
-                                </div>
-                            </div>
+                        }
+                    }
+                    else if (Model.SeccionActiva == "Solicitudes")
+                    {
+                        <div class="section-header">
+                            <h3 class="section-title">Solicitudes de Amistad</h3>
+                            <p class="section-subtitle">@Model.SolicitudesPendientes.Count solicitudes pendientes</p>
                         </div>
-                    </div>
-                }
-            }
-        }
-        else if (Model.SeccionActiva == "Solicitudes")
-        {
-            <h3 class="mb-4">Solicitudes de Amistad</h3>
-            
-            @if (!Model.SolicitudesPendientes.Any())
-            {
-                <div class="text-center py-5">
-                    <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
-                    <h4 class="text-muted">No tienes solicitudes pendientes</h4>
-                </div>
-            }
-            else
-            {
-                foreach (var solicitud in Model.SolicitudesPendientes)
-                {
-                    <div class="amigo-card">
-                        <div class="row align-items-center">
-                            <div class="col-auto">
-                                <div class="profile-pic-sm">
-                                    @if (!string.IsNullOrEmpty(solicitud.Usuario.FotoPerfil))
-                                    {
-                                        <img src="@solicitud.Usuario.FotoPerfil" class="rounded-circle" width="60" height="60" alt="Foto">
-                                    }
-                                    else
-                                    {
-                                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold" style="width: 60px; height: 60px;">
-                                            @{
-                                                // CORREGIDO: Usando bloque de código Razor
-                                                var inicial = !string.IsNullOrEmpty(solicitud.Usuario.UserName) ? solicitud.Usuario.UserName[0].ToString().ToUpper() : "U";
-                                            }
-                                            @inicial
-                                        </div>
-                                    }
+                        
+                        @if (!Model.SolicitudesPendientes.Any())
+                        {
+                            <div class="empty-state">
+                                <div class="empty-icon">
+                                    <i class="fas fa-inbox"></i>
                                 </div>
+                                <h4 class="empty-title">No tienes solicitudes pendientes</h4>
+                                <p class="empty-description">Cuando recibas solicitudes de amistad, aparecerán aquí</p>
                             </div>
-                            <div class="col">
-                                <h5 class="mb-1">@solicitud.Usuario.DisplayName</h5>
-                                <p class="text-white mb-1">@@@solicitud.Usuario.UserName</p>
-                                <small class="text-white">Enviado el @solicitud.FechaSolicitud.ToString("dd/MM/yyyy")</small>
-                            </div>
-                            <div class="col-auto">
-                                <div class="btn-group">
-                                    <button class="btn btn-success btn-sm" onclick="aceptarSolicitud(@solicitud.Id)">
-                                        <i class="fas fa-check me-1"></i>Aceptar
-                                    </button>
-                                    <button class="btn btn-danger btn-sm" onclick="rechazarSolicitud(@solicitud.Id)">
-                                        <i class="fas fa-times me-1"></i>Rechazar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                }
-            }
-        }
-        else if (Model.SeccionActiva == "Conocer")
-        {
-            <h3 class="mb-4">Conocer Nuevos Usuarios</h3>
-            
-            @if (!Model.UsuariosSugeridos.Any())
-            {
-                <div class="text-center py-5">
-                    <i class="fas fa-search fa-4x text-muted mb-3"></i>
-                    <h4 class="text-muted">No hay usuarios sugeridos</h4>
-                </div>
-            }
-            else
-            {
-                foreach (var usuario in Model.UsuariosSugeridos)
-                {
-                    <div class="amigo-card">
-                        <div class="row align-items-center">
-                            <div class="col-auto">
-                                <div class="profile-pic-sm">
-                                    @if (!string.IsNullOrEmpty(usuario.FotoPerfil))
-                                    {
-                                        <img src="@usuario.FotoPerfil" class="rounded-circle" width="60" height="60" alt="Foto">
-                                    }
-                                    else
-                                    {
-                                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold" style="width: 60px; height: 60px;">
-                                            @{
-                                                // CORREGIDO: Usando bloque de código Razor
-                                                var inicial = !string.IsNullOrEmpty(usuario.UserName) ? usuario.UserName[0].ToString().ToUpper() : "U";
-                                            }
-                                            @inicial
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                            <div class="col">
-                                <h5 class="mb-1">@usuario.DisplayName</h5>
-                                <p class="text-white mb-1">@@@usuario.UserName</p>
-                                @if (!string.IsNullOrEmpty(usuario.Biografia))
+                        }
+                        else
+                        {
+                            <div class="requests-list">
+                                @foreach (var solicitud in Model.SolicitudesPendientes)
                                 {
-                                    <p class="mb-2 text-white">@usuario.Biografia</p>
-                                }
-                                @if (!string.IsNullOrEmpty(usuario.PlataformaPreferida))
-                                {
-                                    <small class="text-white"><i class="fas fa-gamepad me-1"></i>@usuario.PlataformaPreferida</small>
+                                    <div class="request-card">
+                                        <div class="request-avatar">
+                                            @if (!string.IsNullOrEmpty(solicitud.Usuario.FotoPerfil))
+                                            {
+                                                <img src="@solicitud.Usuario.FotoPerfil" class="avatar-img" alt="Foto de perfil">
+                                            }
+                                            else
+                                            {
+                                                <div class="avatar-placeholder">
+                                                    @{
+                                                        var inicial = !string.IsNullOrEmpty(solicitud.Usuario.UserName) ? solicitud.Usuario.UserName[0].ToString().ToUpper() : "U";
+                                                    }
+                                                    @inicial
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="request-info">
+                                            <h5 class="request-name">@solicitud.Usuario.DisplayName</h5>
+                                            <p class="request-username">@@@solicitud.Usuario.UserName</p>
+                                            <div class="request-meta">
+                                                <span class="request-date">
+                                                    <i class="fas fa-clock me-1"></i>
+                                                    Enviado el @solicitud.FechaSolicitud.ToString("dd/MM/yyyy")
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="request-actions">
+                                            <button class="btn btn-success btn-sm" onclick="aceptarSolicitud(@solicitud.Id)">
+                                                <i class="fas fa-check me-1"></i>Aceptar
+                                            </button>
+                                            <button class="btn btn-danger btn-sm" onclick="rechazarSolicitud(@solicitud.Id)">
+                                                <i class="fas fa-times me-1"></i>Rechazar
+                                            </button>
+                                        </div>
+                                    </div>
                                 }
                             </div>
-                            <div class="col-auto">
-                                <div class="btn-group">
-                                    <a asp-controller="Perfil" asp-action="Index" asp-route-userId="@usuario.Id" class="btn btn-outline-primary btn-sm">
-                                        <i class="fas fa-eye me-1"></i>Ver Perfil
-                                    </a>
-                                    <button class="btn btn-primary btn-sm" onclick="enviarSolicitud('@usuario.Id')">
-                                        <i class="fas fa-user-plus me-1"></i>Agregar
-                                    </button>
-                                </div>
-                            </div>
+                        }
+                    }
+                    else if (Model.SeccionActiva == "Conocer")
+                    {
+                        <div class="section-header">
+                            <h3 class="section-title">Conocer Nuevos Usuarios</h3>
+                            <p class="section-subtitle">Descubre y conecta con otros gamers</p>
                         </div>
-                    </div>
-                }
-            }
-        }
+                        
+                        @if (!Model.UsuariosSugeridos.Any())
+                        {
+                            <div class="empty-state">
+                                <div class="empty-icon">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                                <h4 class="empty-title">No hay usuarios sugeridos</h4>
+                                <p class="empty-description">Vuelve más tarde para descubrir nuevos usuarios</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="suggestions-grid">
+                                @foreach (var usuario in Model.UsuariosSugeridos)
+                                {
+                                    <div class="suggestion-card">
+                                        <div class="suggestion-avatar">
+                                            @if (!string.IsNullOrEmpty(usuario.FotoPerfil))
+                                            {
+                                                <img src="@usuario.FotoPerfil" class="avatar-img" alt="Foto de perfil">
+                                            }
+                                            else
+                                            {
+                                                <div class="avatar-placeholder">
+                                                    @{
+                                                        var inicial = !string.IsNullOrEmpty(usuario.UserName) ? usuario.UserName[0].ToString().ToUpper() : "U";
+                                                    }
+                                                    @inicial
+                                                </div>
+                                            }
+                                            <div class="online-status"></div>
+                                        </div>
+                                        <div class="suggestion-info">
+                                            <h5 class="suggestion-name">@usuario.DisplayName</h5>
+                                            <p class="suggestion-username">@@@usuario.UserName</p>
+                                            @if (!string.IsNullOrEmpty(usuario.Biografia))
+                                            {
+                                                <p class="suggestion-bio">@usuario.Biografia</p>
+                                            }
+                                            @if (!string.IsNullOrEmpty(usuario.PlataformaPreferida))
+                                            {
+                                                <div class="suggestion-platform">
+                                                    <i class="fas fa-gamepad"></i>
+                                                    <span>@usuario.PlataformaPreferida</span>
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="suggestion-actions">
+                                            <a asp-controller="Perfil" asp-action="Index" asp-route-userId="@usuario.Id" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-eye me-1"></i>Ver Perfil
+                                            </a>
+                                            <button class="btn btn-primary btn-sm" onclick="enviarSolicitud('@usuario.Id')">
+                                                <i class="fas fa-user-plus me-1"></i>Agregar
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <style>
-    .comunidad-navbar {
-        background: rgba(35, 40, 48, 0.95) !important;
+    /* PALETA DE COLORES GAMING - VALORES FIJOS */
+    :root {
+        --bg-dark: #070714;
+        --bg-primary: #0f0f1f;
+        --card-bg: #151530;
+        --accent-purple: #8b2ce6;
+        --accent-blue: #2c5be6;
+        --neon-purple: #b042ff;
+        --neon-blue: #428bff;
+        --text-primary: #ffffff;
+        --text-secondary: #b8b8d0;
+        --success: #06d6a0;
+        --warning: #ff9e1a;
+        --danger: #dc3545;
+    }
+
+    /* FONDOS BASE */
+    body {
+        background: #070714 !important;
+        color: #ffffff !important;
+    }
+
+    .amigos-container {
+        background: #070714;
+        min-height: 100vh;
+        padding: 2rem 0;
+        color: #ffffff;
+    }
+
+    /* NAVBAR SECUNDARIA */
+    .comunidad-navbar.catalog-navbar {
+        background: linear-gradient(135deg, #8b2ce6, #b042ff) !important;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(139, 44, 230, 0.3);
+        height: 60px;
+        padding: 8px 0;
+        max-width: 500px;
+        margin: 0 auto 2rem auto;
+        border: 1px solid rgba(139, 44, 230, 0.4);
         backdrop-filter: blur(10px);
-        border-bottom: 2px solid var(--primary);
-        padding: 0.8rem 0;
-        margin-top: -1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .comunidad-navbar.catalog-navbar::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, #428bff, #b042ff, #2c5be6);
+    }
+
+    .comunidad-navbar .navbar-nav {
+        gap: 8px;
     }
 
     .comunidad-navbar .nav-link {
-        color: rgba(255, 255, 255, 0.8) !important;
-        font-weight: 600;
-        padding: 0.7rem 1.5rem !important;
-        border-radius: 25px;
-        margin: 0 0.3rem;
+        color: #ffffff !important;
+        font-weight: 700;
+        padding: 12px 24px !important;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+        position: relative;
+        overflow: hidden;
+        border: 2px solid transparent;
+    }
+
+    .comunidad-navbar .nav-link::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .comunidad-navbar .nav-link:hover::before {
+        left: 100%;
+    }
+
+    .comunidad-navbar .nav-link:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+    }
+
+    .comunidad-navbar .nav-link.active {
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid #428bff;
+        box-shadow: 0 0 20px rgba(66, 139, 255, 0.4);
+        font-weight: 800;
+        border-radius: 8px;
+    }
+
+    /* SIDEBAR MEJORADO */
+    .amigos-sidebar {
+        background: #151530 !important;
+        border: 1px solid rgba(139, 44, 230, 0.3) !important;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 25px rgba(139, 44, 230, 0.1);
         transition: all 0.3s ease;
     }
 
-    .comunidad-navbar .nav-link:hover,
-    .comunidad-navbar .nav-link.active {
-        color: white !important;
-        background: var(--primary-gradient);
-        transform: translateY(-2px);
+    .amigos-sidebar:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 35px rgba(139, 44, 230, 0.2);
     }
 
-    .sidebar-comunidad {
-        background: var(--card-bg);
-        border-radius: var(--border-radius);
-        padding: 1.5rem;
-        border: 1px solid rgba(108, 92, 231, 0.2);
+    .sidebar-title {
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
     }
 
     .sidebar-link {
-        display: block;
-        padding: 0.8rem 1rem;
-        color: rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        color: #b8b8d0;
         text-decoration: none;
-        border-radius: 8px;
-        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .sidebar-link::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(139, 44, 230, 0.1), transparent);
+        transition: left 0.5s;
+    }
+
+    .sidebar-link:hover::before {
+        left: 100%;
+    }
+
+    .sidebar-link:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: #b042ff;
+        color: #ffffff;
+        transform: translateX(5px);
+    }
+
+    .sidebar-link.active {
+        background: linear-gradient(135deg, rgba(139, 44, 230, 0.2), rgba(66, 139, 255, 0.2));
+        border-color: #b042ff;
+        color: #ffffff;
+        box-shadow: 0 4px 15px rgba(139, 44, 230, 0.2);
+    }
+
+    .sidebar-icon {
+        width: 20px;
+        margin-right: 12px;
+        color: #b042ff;
+    }
+
+    .sidebar-text {
+        flex: 1;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .sidebar-badge {
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        min-width: 20px;
+        text-align: center;
+    }
+
+    .badge-notification {
+        background: linear-gradient(135deg, #8b2ce6, #2c5be6);
+        box-shadow: 0 2px 8px rgba(139, 44, 230, 0.3);
+    }
+
+    /* CONTENIDO PRINCIPAL */
+    .amigos-content {
+        background: #151530 !important;
+        border: 1px solid rgba(139, 44, 230, 0.3) !important;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 25px rgba(139, 44, 230, 0.1);
         transition: all 0.3s ease;
     }
 
-    .sidebar-link:hover,
-    .sidebar-link.active {
-        background: rgba(108, 92, 231, 0.2);
-        color: var(--primary);
+    .amigos-content:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 35px rgba(139, 44, 230, 0.2);
     }
 
-    .amigo-card {
-        background: var(--card-bg);
-        border-radius: var(--border-radius);
+    .section-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .section-title {
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #ffffff, #b042ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .section-subtitle {
+        color: #b8b8d0;
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    /* TARJETAS DE AMIGOS */
+    .friends-grid,
+    .requests-list,
+    .suggestions-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .friend-card,
+    .request-card,
+    .suggestion-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
         padding: 1.5rem;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .friend-card:hover,
+    .request-card:hover,
+    .suggestion-card:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: #b042ff;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(139, 44, 230, 0.2);
+    }
+
+    /* AVATAR Y ESTADO */
+    .friend-avatar,
+    .request-avatar,
+    .suggestion-avatar {
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .avatar-img {
+        width: 70px;
+        height: 70px;
+        border-radius: 12px;
+        object-fit: cover;
+        border: 2px solid rgba(139, 44, 230, 0.3);
+    }
+
+    .avatar-placeholder {
+        width: 70px;
+        height: 70px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #8b2ce6, #2c5be6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-weight: 800;
+        font-size: 1.5rem;
+        border: 2px solid rgba(139, 44, 230, 0.3);
+    }
+
+    .online-status {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        width: 12px;
+        height: 12px;
+        background: #06d6a0;
+        border: 2px solid #151530;
+        border-radius: 50%;
+        box-shadow: 0 0 8px rgba(6, 214, 160, 0.5);
+    }
+
+    /* INFORMACIÓN DEL USUARIO */
+    .friend-info,
+    .request-info,
+    .suggestion-info {
+        flex: 1;
+    }
+
+    .friend-name,
+    .request-name,
+    .suggestion-name {
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .friend-username,
+    .request-username,
+    .suggestion-username {
+        color: #b8b8d0;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .friend-bio,
+    .suggestion-bio {
+        color: #b8b8d0;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+    }
+
+    .friend-platform,
+    .suggestion-platform {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #b8b8d0;
+        font-size: 0.85rem;
+    }
+
+    .friend-platform i,
+    .suggestion-platform i {
+        color: #b042ff;
+    }
+
+    .request-meta {
+        margin-top: 0.5rem;
+    }
+
+    .request-date {
+        color: #b8b8d0;
+        font-size: 0.85rem;
+    }
+
+    /* ACCIONES */
+    .friend-actions,
+    .request-actions,
+    .suggestion-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    .btn {
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 8px 16px;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #8b2ce6, #2c5be6);
+        color: #ffffff;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #b042ff, #428bff);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(139, 44, 230, 0.4);
+        color: #ffffff;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #06d6a0, #118ab2);
+        color: #ffffff;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: #ffffff;
+    }
+
+    .btn-outline-primary {
+        background: transparent;
+        border: 1px solid #8b2ce6;
+        color: #8b2ce6;
+    }
+
+    .btn-outline-primary:hover {
+        background: #8b2ce6;
+        color: #ffffff;
+    }
+
+    /* ESTADOS VACÍOS */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #b8b8d0;
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.5;
+    }
+
+    .empty-title {
+        color: #b8b8d0;
+        font-weight: 600;
         margin-bottom: 1rem;
-        border: 1px solid rgba(108, 92, 231, 0.2);
-        color: white;
     }
 
-    .amigo-card p,
-    .amigo-card .text-muted,
-    .amigo-card small {
-        color: white !important;
+    .empty-description {
+        margin-bottom: 2rem;
+        font-size: 0.95rem;
     }
 
-    .amigo-card .text-white {
-        color: white !important;
-    }
 </style>
 
 @section Scripts {
     <script>
+        // Los scripts de funcionalidad se mantienen igual
         async function enviarSolicitud(amigoId) {
             try {
                 const response = await fetch('/Amigos/EnviarSolicitud', {

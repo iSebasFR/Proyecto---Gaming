@@ -4,21 +4,21 @@
     ViewData["Title"] = "Catálogo de Juegos";
 }
 
-<!-- Segunda Navbar (Secundaria) -->
-<nav class="navbar navbar-expand-lg mb-4" style="background-color: #B62DCE; border-radius: 25px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); height: 50px; padding: 5px 0; max-width: 650px; margin: 0 auto;">
+<!-- Segunda Navbar Moderna - Catálogo -->
+<nav class="navbar navbar-expand-lg catalog-navbar">
     <div class="container-fluid justify-content-center">
         <ul class="navbar-nav">
             <li class="nav-item">
-                <a class="nav-link text-white fw-bold" asp-action="Pendientes">Pendiente</a>
+                <a class="nav-link" asp-action="Pendientes">Pendiente</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-white fw-bold" asp-action="Jugando">Jugando</a>
+                <a class="nav-link" asp-action="Jugando">Jugando</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-white fw-bold" asp-action="Completados">Completados</a>
+                <a class="nav-link" asp-action="Completados">Completados</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-white fw-bold active" asp-action="Index">Catálogo</a>
+                <a class="nav-link active" asp-action="Index">Catálogo</a>
             </li>
         </ul>
     </div>
@@ -269,39 +269,425 @@ else
 }
 
 @section Styles {
+
     <style>
-        .game-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: none;
+        /* SEGUNDA NAVBAR MODERNA - CATÁLOGO */
+        .catalog-navbar {
+            background: linear-gradient(135deg, var(--accent-purple), var(--neon-purple)) !important;
             border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(139, 44, 230, 0.3);
+            height: 60px;
+            padding: 8px 0;
+            max-width: 700px;
+            margin: 0 auto 2rem auto;
+            border: 1px solid rgba(139, 44, 230, 0.4);
+            backdrop-filter: blur(10px);
+            position: relative;
             overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            color: white;
-        }
-        
-        .game-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-        
-        .game-rating {
-            font-size: 1.1rem;
         }
 
+        .catalog-navbar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--accent-blue));
+            background-size: 200% 100%;
+        }
+
+        .catalog-navbar .navbar-nav {
+            gap: 10px;
+        }
+
+        .catalog-navbar .nav-link {
+            color: var(--text-primary) !important;
+            font-weight: 700;
+            padding: 10px 20px !important;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+        }
+
+        .catalog-navbar .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .catalog-navbar .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .catalog-navbar .nav-link:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .catalog-navbar .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid var(--neon-blue);
+            box-shadow: 0 0 20px rgba(66, 139, 255, 0.4);
+            font-weight: 800;
+        }
+
+        /* CARD DE BÚSQUEDA MEJORADA */
+        .search-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(139, 44, 230, 0.3);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .search-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+        }
+
+        .search-card .form-label {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .search-card .form-control,
+        .search-card .form-select {
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(139, 44, 230, 0.3);
+            border-radius: 10px;
+            color: var(--text-primary);
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .search-card .form-control:focus,
+        .search-card .form-select:focus {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 0 0.25rem rgba(139, 44, 230, 0.25);
+            color: var(--text-primary);
+        }
+
+        /* BOTONES DE ACCIÓN MEJORADOS */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .btn-outline-info {
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+            background: transparent;
+        }
+
+        .btn-outline-info:hover {
+            background: var(--neon-blue);
+            color: var(--bg-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(66, 139, 255, 0.3);
+        }
+
+        .btn-outline-warning {
+            border-color: #ffd166;
+            color: #ffd166;
+            background: transparent;
+        }
+
+        .btn-outline-warning:hover {
+            background: #ffd166;
+            color: var(--bg-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 209, 102, 0.3);
+        }
+
+        .btn-outline-secondary {
+            border-color: var(--text-secondary);
+            color: var(--text-secondary);
+            background: transparent;
+        }
+
+        .btn-outline-secondary:hover {
+            background: var(--text-secondary);
+            color: var(--bg-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-success {
+            border-color: #06d6a0;
+            color: #06d6a0;
+            background: transparent;
+        }
+
+        .btn-outline-success:hover {
+            background: #06d6a0;
+            color: var(--bg-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(6, 214, 160, 0.3);
+        }
+
+        /* DROPDOWN MEJORADO */
+        .dropdown-menu {
+            background: var(--card-bg);
+            border: 1px solid rgba(139, 44, 230, 0.3);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .dropdown-item {
+            color: var(--text-secondary);
+            padding: 0.7rem 1rem;
+            transition: all 0.3s ease;
+            border-radius: 5px;
+            margin: 0.1rem 0.5rem;
+            width: auto;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(139, 44, 230, 0.2);
+            color: var(--text-primary);
+        }
+
+        .dropdown-header {
+            color: var(--neon-purple);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ALERTA DE FILTROS ACTIVOS */
+        .filters-alert {
+            background: rgba(66, 139, 255, 0.1);
+            border: 1px solid rgba(66, 139, 255, 0.3);
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        .filters-alert .badge {
+            font-size: 0.75rem;
+            padding: 0.4rem 0.7rem;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        /* CARDS DE JUEGOS MEJORADAS */
+        .game-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(139, 44, 230, 0.3);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+            position: relative;
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .game-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .game-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(139, 44, 230, 0.2);
+            border-color: rgba(139, 44, 230, 0.6);
+        }
+
+        .game-card .card-img-top {
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .game-card:hover .card-img-top {
+            transform: scale(1.05);
+        }
+
+        .game-card .card-title {
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .game-rating {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .game-rating .fas.fa-star,
+        .game-rating .fas.fa-star-half-alt {
+            text-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
+        }
+
+        /* BOTONES EN CARDS */
         .w-48 {
             width: 48% !important;
         }
 
         .btn-primary {
-            height: 42px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 8px 20px rgba(139, 44, 230, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #06d6a0, #118ab2);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(6, 214, 160, 0.4);
+        }
+
+        .btn-comprar {
+            background: linear-gradient(135deg, var(--neon-purple), #B62DCE);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-comprar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(182, 45, 206, 0.4);
+            color: white;
+        }
+
+        /* BADGES MEJORADOS */
         .badge {
             font-size: 0.7em;
+            padding: 0.4em 0.7em;
+            border-radius: 6px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
+
+        .badge.bg-primary {
+            background: linear-gradient(135deg, var(--accent-purple), var(--neon-purple)) !important;
+        }
+
+        .badge.bg-secondary {
+            background: linear-gradient(135deg, var(--accent-blue), var(--neon-blue)) !important;
+        }
+
+        /* PAGINACIÓN MEJORADA */
+        .pagination .page-link {
+            background: var(--card-bg);
+            border: 1px solid rgba(139, 44, 230, 0.3);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            margin: 0 0.2rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .pagination .page-link:hover {
+            background: rgba(139, 44, 230, 0.2);
+            border-color: var(--accent-purple);
+            color: var(--text-primary);
+            transform: translateY(-2px);
+        }
+
+        .pagination .page-item.active .page-link {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            border-color: var(--accent-purple);
+            color: white;
+            box-shadow: 0 5px 15px rgba(139, 44, 230, 0.3);
+        }
+
+        /* ALERTA SIN RESULTADOS */
+        .alert-info {
+            background: rgba(66, 139, 255, 0.1);
+            border: 1px solid rgba(66, 139, 255, 0.3);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            color: var(--text-primary);
+        }
+
+        
     </style>
 }

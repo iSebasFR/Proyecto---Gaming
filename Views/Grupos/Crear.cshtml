@@ -3,23 +3,6 @@
     ViewData["Title"] = "Crear Nuevo Grupo";
 }
 
-<!-- Navbar Secundaria para Comunidad -->
-<nav class="navbar navbar-expand-lg comunidad-navbar mb-4">
-    <div class="container">
-        <div class="navbar-nav">
-            <a class="nav-link" asp-controller="Comunidad" asp-action="Index">
-                <i class="fas fa-home me-2"></i>Feed
-            </a>
-            <a class="nav-link" asp-controller="Amigos" asp-action="Index">
-                <i class="fas fa-user-friends me-2"></i>Amigos
-            </a>
-            <a class="nav-link active" asp-controller="Grupos" asp-action="Index">
-                <i class="fas fa-users me-2"></i>Grupos
-            </a>
-        </div>
-    </div>
-</nav>
-
 <div class="row justify-content-center">
     <div class="col-md-8">
         <div class="stats-card">
@@ -91,36 +74,403 @@
 </div>
 
 <style>
-    .comunidad-navbar {
-        background: rgba(35, 40, 48, 0.95) !important;
+    /* PALETA DE COLORES GAMING - CONSISTENTE */
+    :root {
+        --bg-dark: #070714;
+        --bg-primary: #0f0f1f;
+        --card-bg: #151530;
+        --accent-purple: #8b2ce6;
+        --accent-blue: #2c5be6;
+        --neon-purple: #b042ff;
+        --neon-blue: #428bff;
+        --text-primary: #ffffff;
+        --text-secondary: #b8b8d0;
+        --navbar-bg: rgba(15, 15, 31, 0.95);
+        --success: #06d6a0;
+        --warning: #ff9e1a;
+        --danger: #dc3545;
+        --border-radius-sm: 8px;
+        --border-radius-md: 12px;
+        --border-radius-lg: 15px;
+    }
+
+    /* CONTENEDOR PRINCIPAL */
+    body {
+        background: var(--bg-dark);
+        color: var(--text-primary);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    /* NAVBAR SECUNDARIA - DISEÑO CUADRANGULAR */
+    .comunidad-navbar.catalog-navbar {
+        background: linear-gradient(135deg, var(--accent-purple), var(--neon-purple)) !important;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(139, 44, 230, 0.3);
+        height: 60px;
+        padding: 8px 0;
+        max-width: 500px;
+        margin: 0 auto 2rem auto;
+        border: 1px solid rgba(139, 44, 230, 0.4);
         backdrop-filter: blur(10px);
-        border-bottom: 2px solid var(--primary);
-        padding: 0.8rem 0;
-        margin-top: -1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .comunidad-navbar.catalog-navbar::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--accent-blue));
+        background-size: 200% 100%;
+    }
+
+    .comunidad-navbar .navbar-nav {
+        gap: 8px;
     }
 
     .comunidad-navbar .nav-link {
-        color: rgba(255, 255, 255, 0.8) !important;
+        color: var(--text-primary) !important;
+        font-weight: 700;
+        padding: 12px 24px !important;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+        position: relative;
+        overflow: hidden;
+        border: 2px solid transparent;
+    }
+
+    .comunidad-navbar .nav-link::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .comunidad-navbar .nav-link:hover::before {
+        left: 100%;
+    }
+
+    .comunidad-navbar .nav-link:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+    }
+
+    .comunidad-navbar .nav-link.active {
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid var(--neon-blue);
+        box-shadow: 0 0 20px rgba(66, 139, 255, 0.4);
+        font-weight: 800;
+    }
+
+    /* TARJETA PRINCIPAL */
+    .stats-card {
+        background: var(--card-bg) !important;
+        border: 1px solid rgba(139, 44, 230, 0.3) !important;
+        border-radius: var(--border-radius-lg);
+        padding: 3rem;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 25px rgba(139, 44, 230, 0.1);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .stats-card:hover {
+        border-color: var(--neon-purple);
+        box-shadow: 0 12px 35px rgba(139, 44, 230, 0.2);
+    }
+
+    .stats-card:hover::before {
+        opacity: 1;
+    }
+
+    /* TÍTULO PRINCIPAL */
+    .stats-card h2 {
+        color: var(--text-primary);
+        font-weight: 800;
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, var(--text-primary), var(--neon-purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-align: center;
+        margin-bottom: 2rem;
+        text-shadow: 0 0 30px rgba(139, 44, 230, 0.5);
+    }
+
+    /* FORMULARIOS MEJORADOS */
+    .form-label {
+        color: var(--text-primary) !important;
         font-weight: 600;
-        padding: 0.7rem 1.5rem !important;
-        border-radius: 25px;
-        margin: 0 0.3rem;
+        margin-bottom: 0.75rem;
+        font-size: 1rem;
+        display: block;
+    }
+
+    .form-control,
+    .form-select {
+        background: var(--bg-primary);
+        border: 1px solid rgba(139, 44, 230, 0.3);
+        border-radius: var(--border-radius-sm);
+        color: var(--text-primary);
+        padding: 0.875rem 1rem;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        background: var(--card-bg);
+        border-color: var(--neon-purple);
+        box-shadow: 0 0 0 2px rgba(139, 44, 230, 0.2);
+        color: var(--text-primary);
+        transform: translateY(-1px);
+    }
+
+    .form-control::placeholder {
+        color: var(--text-secondary);
+        opacity: 0.7;
+    }
+
+    .form-select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23b8b8d0' viewBox='0 0 16 16'%3e%3cpath d='m7.247 11.14-2.5-2.5a.5.5 0 0 1 .353-.854h5a.5.5 0 0 1 .353.854l-2.5 2.5a.5.5 0 0 1-.706 0z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+    }
+
+    /* CHECKBOX MEJORADO */
+    .form-check {
+        display: flex;
+        align-items: center;
+        margin: 2rem 0;
+        padding: 1rem;
+        background: rgba(139, 44, 230, 0.05);
+        border-radius: var(--border-radius-md);
+        border: 1px solid rgba(139, 44, 230, 0.2);
         transition: all 0.3s ease;
     }
 
-    .comunidad-navbar .nav-link:hover,
-    .comunidad-navbar .nav-link.active {
-        color: white !important;
-        background: var(--primary-gradient);
-        transform: translateY(-2px);
+    .form-check:hover {
+        background: rgba(139, 44, 230, 0.1);
+        border-color: rgba(139, 44, 230, 0.3);
     }
 
-    .stats-card {
+    .form-check-input {
+        background: var(--bg-primary);
+        border: 1px solid rgba(139, 44, 230, 0.3);
+        width: 1.2em;
+        height: 1.2em;
+        margin-right: 0.75rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-check-input:checked {
+        background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+        border-color: var(--neon-purple);
+        box-shadow: 0 0 10px rgba(139, 44, 230, 0.4);
+    }
+
+    .form-check-label {
+        color: var(--text-primary) !important;
+        font-weight: 500;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+
+    /* BOTONES MEJORADOS */
+    .btn-primary {
+        background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+        border: none;
+        border-radius: var(--border-radius-sm);
+        color: var(--text-primary);
+        font-weight: 700;
+        padding: 1rem 2.5rem;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(139, 44, 230, 0.5);
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: var(--border-radius-sm);
+        color: var(--text-primary);
+        font-weight: 600;
+        padding: 1rem 2.5rem;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-3px);
+        color: var(--text-primary);
+        box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-lg {
+        padding: 1rem 2.5rem;
+        font-size: 1.1rem;
+    }
+
+    /* ICONOS EN BOTONES */
+    .btn i {
+        margin-right: 0.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    .btn:hover i {
+        transform: scale(1.1);
+    }
+
+    /* GRUPOS DE FORMULARIO */
+    .mb-3 {
+        margin-bottom: 2rem !important;
+    }
+
+    .row {
+        margin-bottom: 1rem;
+    }
+
+    /* VALIDACIÓN */
+    .text-danger {
+        color: var(--danger) !important;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-top: 0.5rem;
+        display: block;
+    }
+
+    .field-validation-valid {
+        display: none;
+    }
+
+    /* INPUT FILE MEJORADO */
+    input[type="file"] {
+        padding: 0.75rem;
+    }
+
+    input[type="file"]::file-selector-button {
+        background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+        border: none;
+        border-radius: var(--border-radius-sm);
+        color: var(--text-primary);
+        padding: 0.5rem 1rem;
+        margin-right: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    input[type="file"]::file-selector-button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 15px rgba(139, 44, 230, 0.3);
+    }
+
+    /* TEXTAREA MEJORADO */
+    textarea.form-control {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    /* CONTENEDOR RESPONSIVE */
+    .justify-content-center {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    /* EFECTOS DE FOCO MEJORADOS */
+    .form-control:focus::placeholder,
+    .form-select:focus::placeholder {
+        opacity: 0.5;
+    }
+
+    /* ESTADOS DE CARGAR ARCHIVOS */
+    .form-control:valid {
+        border-color: rgba(6, 214, 160, 0.3);
+    }
+
+    .form-control:invalid:not(:focus) {
+        border-color: rgba(220, 53, 69, 0.3);
+    }
+
+    /* MEJORAS DE ESPACIADO */
+    .text-center {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(139, 44, 230, 0.2);
+    }
+
+    .ms-2 {
+        margin-left: 1rem !important;
+    }
+
+    /* PLACEHOLDER ESTILIZADO */
+    .form-control::placeholder {
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+
+    /* SELECT OPTIONS */
+    .form-select option {
         background: var(--card-bg);
-        border-radius: var(--border-radius);
-        padding: 2rem;
-        margin-bottom: 2rem;
-        border: 1px solid rgba(108, 92, 231, 0.3);
+        color: var(--text-primary);
+        padding: 0.75rem;
+    }
+
+    .form-select option:hover {
+        background: var(--accent-purple);
     }
 </style>
 
