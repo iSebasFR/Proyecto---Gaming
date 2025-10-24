@@ -12,8 +12,8 @@ using Proyecto_Gaming.Data;
 namespace Proyecto_Gaming.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251020044219_InitialCreateClean")]
-    partial class InitialCreateClean
+    [Migration("20251021043937_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

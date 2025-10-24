@@ -91,7 +91,7 @@
                     <div class="tags-container">
                         @foreach (var platform in Model.Platforms)
                         {
-                            <span class="badge bg-secondary">@platform.Platform.Name</span>
+                            <span class="badge bg-secondary">@platform.Platform?.Name</span>
                         }
                     </div>
                 </div>

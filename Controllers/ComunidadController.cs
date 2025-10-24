@@ -27,7 +27,7 @@ namespace Proyecto_Gaming.Controllers
         // GET: Comunidad/Index - Página principal de comunidad (Feed)
         public async Task<IActionResult> Index()
         {
-            if (!User.Identity.IsAuthenticated)
+            if (!User.Identity?.IsAuthenticated ?? false)
             {
                 TempData["Error"] = "Debes iniciar sesión para acceder a la comunidad.";
                 return RedirectToAction("Login", "Account");

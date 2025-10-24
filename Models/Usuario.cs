@@ -20,6 +20,9 @@ namespace Proyecto_Gaming.Models
         public DateTime FechaRegistro { get; set; } = DateTime.UtcNow;
         public string? Estado { get; set; } = "Activo";
 
+        public string? GoogleId { get; set; }
+        public string? GoogleProfilePicture { get; set; }
+
         // Relación con BibliotecaUsuario
         public ICollection<BibliotecaUsuario>? BibliotecaUsuarios { get; set; }
     }

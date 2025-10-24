@@ -173,7 +173,7 @@
                             }
                             @foreach (var platform in game.Platforms.Take(2))
                             {
-                                <span class="badge bg-secondary me-1">@platform.Platform.Name</span>
+                                <span class="badge bg-secondary me-1">@platform.Platform?.Name</span>
                             }
                         </p>
                         <div class="game-rating mb-2">

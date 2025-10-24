@@ -99,7 +99,7 @@
                                     
                                     <div class="friend-card">
                                         <div class="friend-avatar">
-                                            @if (!string.IsNullOrEmpty(usuarioAmigo.FotoPerfil))
+                                            @if (!string.IsNullOrEmpty(usuarioAmigo?.FotoPerfil))
                                             {
                                                 <img src="@usuarioAmigo.FotoPerfil" class="avatar-img" alt="Foto de perfil">
                                             }
@@ -107,7 +107,7 @@
                                             {
                                                 <div class="avatar-placeholder">
                                                     @{
-                                                        var inicial = !string.IsNullOrEmpty(usuarioAmigo.UserName) ? usuarioAmigo.UserName[0].ToString().ToUpper() : "U";
+                                                        var inicial = !string.IsNullOrEmpty(usuarioAmigo?.UserName) ? usuarioAmigo.UserName[0].ToString().ToUpper() : "U";
                                                     }
                                                     @inicial
                                                 </div>
@@ -115,13 +115,13 @@
                                             <div class="online-status"></div>
                                         </div>
                                         <div class="friend-info">
-                                            <h5 class="friend-name">@usuarioAmigo.DisplayName</h5>
-                                            <p class="friend-username">@@@usuarioAmigo.UserName</p>
-                                            @if (!string.IsNullOrEmpty(usuarioAmigo.Biografia))
+                                            <h5 class="friend-name">@usuarioAmigo?.DisplayName</h5>
+                                            <p class="friend-username">@@@usuarioAmigo?.UserName</p>
+                                            @if (!string.IsNullOrEmpty(usuarioAmigo?.Biografia))
                                             {
                                                 <p class="friend-bio">@usuarioAmigo.Biografia</p>
                                             }
-                                            @if (!string.IsNullOrEmpty(usuarioAmigo.PlataformaPreferida))
+                                            @if (!string.IsNullOrEmpty(usuarioAmigo?.PlataformaPreferida))
                                             {
                                                 <div class="friend-platform">
                                                     <i class="fas fa-gamepad"></i>
@@ -130,10 +130,10 @@
                                             }
                                         </div>
                                         <div class="friend-actions">
-                                            <a asp-controller="Perfil" asp-action="Index" asp-route-userId="@usuarioAmigo.Id" class="btn btn-primary btn-sm">
+                                            <a asp-controller="Perfil" asp-action="Index" asp-route-userId="@usuarioAmigo?.Id" class="btn btn-primary btn-sm">
                                                 <i class="fas fa-eye me-1"></i>Ver Perfil
                                             </a>
-                                            <button class="btn btn-danger btn-sm" onclick="eliminarAmigo('@usuarioAmigo.Id')">
+                                            <button class="btn btn-danger btn-sm" onclick="eliminarAmigo('@usuarioAmigo?.Id')">
                                                 <i class="fas fa-user-times me-1"></i>Eliminar
                                             </button>
                                         </div>
@@ -166,7 +166,7 @@
                                 {
                                     <div class="request-card">
                                         <div class="request-avatar">
-                                            @if (!string.IsNullOrEmpty(solicitud.Usuario.FotoPerfil))
+                                            @if (!string.IsNullOrEmpty(solicitud.Usuario?.FotoPerfil))
                                             {
                                                 <img src="@solicitud.Usuario.FotoPerfil" class="avatar-img" alt="Foto de perfil">
                                             }
@@ -174,15 +174,15 @@
                                             {
                                                 <div class="avatar-placeholder">
                                                     @{
-                                                        var inicial = !string.IsNullOrEmpty(solicitud.Usuario.UserName) ? solicitud.Usuario.UserName[0].ToString().ToUpper() : "U";
+                                                        var inicial = !string.IsNullOrEmpty(solicitud.Usuario?.UserName) ? solicitud.Usuario.UserName[0].ToString().ToUpper() : "U";
                                                     }
                                                     @inicial
                                                 </div>
                                             }
                                         </div>
                                         <div class="request-info">
-                                            <h5 class="request-name">@solicitud.Usuario.DisplayName</h5>
-                                            <p class="request-username">@@@solicitud.Usuario.UserName</p>
+                                            <h5 class="request-name">@solicitud.Usuario?.DisplayName</h5>
+                                            <p class="request-username">@@@solicitud.Usuario?.UserName</p>
                                             <div class="request-meta">
                                                 <span class="request-date">
                                                     <i class="fas fa-clock me-1"></i>

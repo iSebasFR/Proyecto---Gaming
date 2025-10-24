@@ -23,6 +23,8 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
     options.Cookie.Name = "Gaming.Session";
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
 // ✅ MANTENER CACHÉ EN MEMORIA PARA DATOS LOCALES
@@ -42,18 +44,25 @@ builder.Services.AddScoped<IRawgService, RawgService>();
 // ✅ STATISTICS SERVICE
 builder.Services.AddScoped<IStatsService, StatsService>();
 
-// ✅ Email service (FileMode o SMTP según configuración)
-var emailMode = builder.Configuration["Email:Mode"] ?? "File";
-if (emailMode.Equals("Smtp", StringComparison.OrdinalIgnoreCase))
+// ✅ OBTENER CREDENCIALES DE GOOGLE (User Secrets tiene prioridad)
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+
+// ✅ LOGS INFORMATIVOS PARA EL EQUIPO
+Console.WriteLine("🔐 Configuración Google Auth:");
+Console.WriteLine($"   - ClientId: {!string.IsNullOrEmpty(googleClientId)}");
+Console.WriteLine($"   - ClientSecret: {!string.IsNullOrEmpty(googleClientSecret)}");
+
+if (string.IsNullOrEmpty(googleClientId) || string.IsNullOrEmpty(googleClientSecret))
 {
-    builder.Services.AddScoped<IEmailService, SmtpEmailService>();
-}
-else
-{
-    builder.Services.AddScoped<IEmailService, FileEmailService>();
+    Console.WriteLine("⚠️  INSTRUCCIONES PARA EL EQUIPO:");
+    Console.WriteLine("   Ejecutar estos comandos en la raíz del proyecto:");
+    Console.WriteLine("   dotnet user-secrets init");
+    Console.WriteLine("   dotnet user-secrets set \"Authentication:Google:ClientId\" \"TU_CLIENT_ID\"");
+    Console.WriteLine("   dotnet user-secrets set \"Authentication:Google:ClientSecret\" \"TU_CLIENT_SECRET\"");
 }
 
-// ✅ CONFIGURAR IDENTITY CORRECTAMENTE
+// ✅ CONFIGURAR IDENTITY
 builder.Services.AddDefaultIdentity<Usuario>(options => 
 {
     options.SignIn.RequireConfirmedAccount = false;
@@ -65,7 +74,64 @@ builder.Services.AddDefaultIdentity<Usuario>(options =>
     options.User.RequireUniqueEmail = true;
 })
 .AddRoles<IdentityRole>()   
-.AddEntityFrameworkStores<ApplicationDbContext>();
+.AddEntityFrameworkStores<ApplicationDbContext>()
+.AddDefaultTokenProviders();
+
+// ✅ CONFIGURACIÓN DE COOKIES GENERAL
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.LoginPath = "/Identity/Account/Login";
+    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+    options.LogoutPath = "/Identity/Account/Logout";
+});
+
+// ✅ CONFIGURACIÓN DE COOKIES EXTERNAS (para proveedores como Google)
+builder.Services.ConfigureExternalCookie(options =>
+{
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+});
+
+// ✅ CONFIGURAR GOOGLE AUTH SOLO SI HAY CREDENCIALES
+if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
+{
+    builder.Services.AddAuthentication()
+        .AddGoogle(options =>
+        {
+            options.ClientId = googleClientId;
+            options.ClientSecret = googleClientSecret;
+            options.CallbackPath = "/signin-google";
+            options.Scope.Add("profile");
+            options.Scope.Add("email");
+            options.SaveTokens = true;
+            
+            // ✅ CORRELATION COOKIE SE CONFIGURA DENTRO DE GOOGLE OPTIONS
+            options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+            options.CorrelationCookie.SameSite = SameSiteMode.Lax;
+        });
+    
+    Console.WriteLine("✅ Google Authentication configurado correctamente");
+}
+else
+{
+    Console.WriteLine("⏸️  Google Authentication pendiente - Configurar User Secrets");
+}
+
+// ✅ REGISTRAR SERVICIO DE GOOGLE AUTH
+builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
+
+// ✅ Email service (FileMode o SMTP según configuración)
+var emailMode = builder.Configuration["Email:Mode"] ?? "File";
+if (emailMode.Equals("Smtp", StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+}
+else
+{
+    builder.Services.AddScoped<IEmailService, FileEmailService>();
+}
 
 var app = builder.Build();
 
@@ -82,17 +148,17 @@ using (var scope = app.Services.CreateScope())
             try
             {
                 await rawgService.PreloadFirst100GamesAsync();
-                Console.WriteLine("Precarga de juegos completada");
+                Console.WriteLine("🎮 Precarga de juegos completada");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error en precarga: {ex.Message}");
+                Console.WriteLine($"❌ Error en precarga: {ex.Message}");
             }
         });
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"No se pudo iniciar la precarga: {ex.Message}");
+        Console.WriteLine($"❌ No se pudo iniciar la precarga: {ex.Message}");
     }
 }
 
@@ -104,7 +170,10 @@ try
     var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<Usuario>>();
 
     if (!await roleMgr.RoleExistsAsync("Admin"))
+    {
         await roleMgr.CreateAsync(new IdentityRole("Admin"));
+        Console.WriteLine("👑 Rol Admin creado");
+    }
 
     var adminEmail = "admin@gaming.com";
     var admin = await userMgr.FindByEmailAsync(adminEmail);
@@ -122,18 +191,21 @@ try
         if (createResult.Succeeded)
         {
             await userMgr.AddToRoleAsync(admin, "Admin");
-            Console.WriteLine("Usuario admin creado y asignado al rol Admin.");
+            Console.WriteLine("✅ Usuario admin creado y asignado al rol Admin");
         }
         else
         {
-            Console.WriteLine("No se pudo crear el usuario admin: " +
+            Console.WriteLine("❌ No se pudo crear el usuario admin: " +
                 string.Join(" | ", createResult.Errors.Select(e => e.Description)));
         }
     }
     else
     {
         if (!await userMgr.IsInRoleAsync(admin, "Admin"))
+        {
             await userMgr.AddToRoleAsync(admin, "Admin");
+            Console.WriteLine("✅ Rol Admin asignado al usuario existente");
+        }
     }
 }
 catch (Exception ex)
@@ -152,8 +224,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-// ✅ ORDEN CORRECTO DE MIDDLEWARES (SESSION ANTES DE AUTH)
-app.UseSession(); // ← NUEVO: Sesiones antes de autenticación
+// ✅ ORDEN CORRECTO DE MIDDLEWARES
+app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
