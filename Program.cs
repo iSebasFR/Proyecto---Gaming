@@ -9,6 +9,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// ✅ CONFIGURAR SERVICIO DE PAGOS STRIPE CON HTTPCLIENT
+builder.Services.AddHttpClient<IPaymentService, StripePaymentService>();
+
 // ✅ CONFIGURAR REDIS (DISTRIBUTED CACHE)
 builder.Services.AddStackExchangeRedisCache(options =>
 {
@@ -224,8 +227,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-// ✅ ORDEN CORRECTO DE MIDDLEWARES
-app.UseSession();
+// ✅ ORDEN CORRECTO DE MIDDLEWARES (SESSION ANTES DE AUTH)
+app.UseSession(); // ← NUEVO: Sesiones antes de autenticación
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -42,7 +42,7 @@ namespace Proyecto_Gaming.Controllers
             switch (seccion)
             {
                 case "Todos":
-                    // CORREGIDO: Mostrar amigos en ambas direcciones
+                    // CORREGIDO: Mostrar amigos en ambas direcciones PERO sin duplicados
                     var amigosComoUsuario = await _context.Amigos
                         .Include(a => a.AmigoUsuario)
                         .Where(a => a.UsuarioId == usuario.Id && a.Estado == "Aceptado")
@@ -53,8 +53,14 @@ namespace Proyecto_Gaming.Controllers
                         .Where(a => a.AmigoId == usuario.Id && a.Estado == "Aceptado")
                         .ToListAsync();
 
-                    // Combinar ambas listas
-                    viewModel.Amigos = amigosComoUsuario.Concat(amigosComoAmigo).ToList();
+                    // SOLUCIÓN: Combinar ambas listas pero eliminar duplicados por ID de amigo
+                    var todosAmigos = amigosComoUsuario.Concat(amigosComoAmigo).ToList();
+                    
+                    // Eliminar duplicados: si un amigo aparece en ambas listas, tomar solo uno
+                    viewModel.Amigos = todosAmigos
+                        .GroupBy(a => a.UsuarioId == usuario.Id ? a.AmigoId : a.UsuarioId)
+                        .Select(g => g.First())
+                        .ToList();
                     break;
 
                 case "Solicitudes":
@@ -65,8 +71,8 @@ namespace Proyecto_Gaming.Controllers
                     break;
 
                 case "Conocer":
-                    // Usuarios que no son amigos ni tienen solicitudes pendientes
-                    var amigosIds = await _context.Amigos
+                    // CORREGIDO: Cambié el nombre de la variable para evitar conflicto
+                    var amigosIdsConocer = await _context.Amigos
                         .Where(a => (a.UsuarioId == usuario.Id || a.AmigoId == usuario.Id) && a.Estado == "Aceptado")
                         .Select(a => a.UsuarioId == usuario.Id ? a.AmigoId : a.UsuarioId)
                         .Distinct()
@@ -78,10 +84,15 @@ namespace Proyecto_Gaming.Controllers
                         .Distinct()
                         .ToListAsync();
 
+                    // Obtener IDs de usuarios Admin para excluirlos
+                    var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
+                    var adminIds = adminUsers.Select(a => a.Id).ToList();
+
                     viewModel.UsuariosSugeridos = await _context.Users
                         .Where(u => u.Id != usuario.Id && 
-                                   !amigosIds.Contains(u.Id) && 
-                                   !solicitudesPendientesIds.Contains(u.Id))
+                                !amigosIdsConocer.Contains(u.Id) && 
+                                !solicitudesPendientesIds.Contains(u.Id) &&
+                                !adminIds.Contains(u.Id)) // ← EXCLUIR ADMINS
                         .Take(20)
                         .ToListAsync();
                     break;

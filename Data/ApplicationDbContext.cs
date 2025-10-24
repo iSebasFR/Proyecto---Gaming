@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Proyecto_Gaming.Models;
 using Proyecto_Gaming.Models.Comunidad;
+using Proyecto_Gaming.Models.Payment;
 
 namespace Proyecto_Gaming.Data
 {
@@ -22,6 +23,8 @@ namespace Proyecto_Gaming.Data
         public DbSet<ComentarioPublicacion> ComentariosPublicacion { get; set; }
         public DbSet<MultimediaGrupo> MultimediaGrupo { get; set; }
         public DbSet<ComentarioMultimedia> ComentariosMultimedia { get; set; }
+        public DbSet<Transaction> Transactions { get; set; }
+
         
         // NUEVO: DbSet para reacciones de multimedia
         public DbSet<ReaccionMultimedia> ReaccionesMultimedia { get; set; }
@@ -36,10 +39,9 @@ namespace Proyecto_Gaming.Data
                 entity.ToTable("BibliotecaUsuario");
                 entity.HasKey(bu => bu.Id);
                 
-                // ELIMINA esta línea - deja que EF maneje el nombre automáticamente
-                // entity.Property(bu => bu.Id)
-                //     .HasColumnName("id")
-                //     .ValueGeneratedOnAdd();
+                entity.Property(bu => bu.Id)
+                    .HasColumnName("id")
+                    .ValueGeneratedOnAdd();
                     
                 entity.Property(bu => bu.UsuarioId)
                     .HasColumnName("id_usuario")
@@ -67,12 +69,6 @@ namespace Proyecto_Gaming.Data
                 // Índice único para evitar duplicados
                 entity.HasIndex(bu => new { bu.UsuarioId, bu.RawgGameId })
                     .IsUnique();
-
-                // RELACIÓN IMPORTANTE - Agrega esto
-                entity.HasOne(bu => bu.Usuario)
-                    .WithMany()
-                    .HasForeignKey(bu => bu.UsuarioId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             // Configuración existente para Usuario
@@ -493,6 +489,73 @@ namespace Proyecto_Gaming.Data
                 // Índice único para evitar reacciones duplicadas del mismo usuario
                 entity.HasIndex(rm => new { rm.MultimediaId, rm.UsuarioId })
                     .IsUnique();
+            });
+
+
+            // Configuración para Transactions
+            modelBuilder.Entity<Transaction>(entity =>
+            {
+                entity.ToTable("Transactions");
+                entity.HasKey(t => t.Id);
+
+                entity.Property(t => t.Id)
+                    .HasColumnName("id")
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(t => t.UsuarioId)
+                    .HasColumnName("usuario_id")
+                    .IsRequired()
+                    .HasMaxLength(450);
+
+                entity.Property(t => t.GameId)
+                    .HasColumnName("game_id")
+                    .IsRequired();
+
+                entity.Property(t => t.GameTitle)
+                    .HasColumnName("game_title")
+                    .IsRequired()
+                    .HasMaxLength(255);
+
+                entity.Property(t => t.Amount)
+                    .HasColumnName("amount")
+                    .HasColumnType("decimal(18,2)")
+                    .IsRequired();
+
+                entity.Property(t => t.Currency)
+                    .HasColumnName("currency")
+                    .HasMaxLength(10)
+                    .HasDefaultValue("USD");
+
+                entity.Property(t => t.PaymentStatus)
+                    .HasColumnName("payment_status")
+                    .HasMaxLength(20)
+                    .HasDefaultValue("Pending");
+
+                entity.Property(t => t.PaymentProvider)
+                    .HasColumnName("payment_provider")
+                    .HasMaxLength(50)
+                    .HasDefaultValue("Stripe");
+
+                entity.Property(t => t.TransactionId)
+                    .HasColumnName("transaction_id")
+                    .HasMaxLength(100);
+
+                entity.Property(t => t.SessionId)
+                    .HasColumnName("session_id")
+                    .HasMaxLength(100);
+
+                entity.Property(t => t.CreatedAt)
+                    .HasColumnName("created_at")
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(t => t.CompletedAt)
+                    .HasColumnName("completed_at");
+
+                // Relación con Usuario
+                entity.HasOne(t => t.Usuario)
+                    .WithMany()
+                    .HasForeignKey(t => t.UsuarioId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

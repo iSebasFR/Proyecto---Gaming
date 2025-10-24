@@ -224,7 +224,7 @@ namespace Proyecto_Gaming.Controllers
             });
         }
 
-        // AddToLibrary - CON SQL DIRECTO (MANTENIDO)
+        // MODIFICAR SOLO el método AddToLibrary (mantener todo lo demás igual)
         public async Task<IActionResult> AddToLibrary(int id)
         {
             if (!User.Identity?.IsAuthenticated ?? false)
@@ -242,6 +242,16 @@ namespace Proyecto_Gaming.Controllers
 
             try
             {
+                // ✅ VERIFICAR QUE EL USUARIO HA COMPRADO EL JUEGO
+                bool hasPurchased = await _context.Transactions
+                    .AnyAsync(t => t.UsuarioId == usuario.Id && t.GameId == id && t.PaymentStatus == "Completed");
+                
+                if (!hasPurchased)
+                {
+                    TempData["ErrorMessage"] = "Debes comprar el juego antes de añadirlo a tu biblioteca.";
+                    return RedirectToAction("Detalles", "Biblioteca", new { id = id });
+                }
+
                 var gameDetails = await _rawgService.GetGameDetailsAsync(id);
                 
                 if (gameDetails == null)
@@ -288,10 +298,14 @@ namespace Proyecto_Gaming.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
+            Console.WriteLine($"🔍 Cargando pendientes para usuario: {usuario.Id}");
+
             // Usar EF Core para obtener los juegos pendientes (más seguro y menos propenso a errores de mapeo)
             var juegosPendientes = await _context.BibliotecaUsuario
                 .Where(b => b.UsuarioId == usuario.Id && b.Estado.ToLower() == "pendiente")
                 .ToListAsync();
+
+            Console.WriteLine($"📊 Juegos pendientes encontrados: {juegosPendientes.Count}");
 
             return View(juegosPendientes);
         }

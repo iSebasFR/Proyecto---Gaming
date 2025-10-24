@@ -98,9 +98,15 @@
 
                 <!-- Botones de Acción -->
                 <div class="action-buttons">
-                    <a asp-action="AddToLibrary" asp-route-id="@Model.Id" class="btn btn-success">
-                        <i class="fas fa-plus-circle me-2"></i>Añadir a mi biblioteca
-                    </a>
+                    <form asp-controller="Payment" asp-action="Checkout" method="post" class="d-inline">
+                        <input type="hidden" name="gameId" value="@Model.Id" />
+                        <input type="hidden" name="gameTitle" value="@Model.Name" />
+                        <input type="hidden" name="price" value="0" />
+                        
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-shopping-cart me-2"></i>Comprar juego
+                        </button>
+                    </form>
                     <a asp-action="Index" class="btn btn-secondary">
                         <i class="fas fa-arrow-left me-2"></i>Volver al catálogo
                     </a>
