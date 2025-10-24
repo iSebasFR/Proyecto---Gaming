@@ -25,7 +25,6 @@ namespace Proyecto_Gaming.Data
         public DbSet<ComentarioMultimedia> ComentariosMultimedia { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
 
-        
         // NUEVO: DbSet para reacciones de multimedia
         public DbSet<ReaccionMultimedia> ReaccionesMultimedia { get; set; }
         
@@ -64,7 +63,23 @@ namespace Proyecto_Gaming.Data
 
                 entity.Property(bu => bu.GameImage)
                     .HasColumnName("game_image")
+                    .IsRequired()
                     .HasMaxLength(500);
+
+                // NUEVOS CAMPOS desde la BD
+                entity.Property(bu => bu.Resena)
+                    .HasColumnName("Resena")
+                    .IsRequired();
+
+                entity.Property(bu => bu.Calificacion)
+                    .HasColumnName("Calificacion")
+                    .IsRequired();
+
+                entity.Property(bu => bu.FechaCompletado)
+                    .HasColumnName("FechaCompletado");
+
+                entity.Property(bu => bu.FechaResena)
+                    .HasColumnName("FechaResena");
 
                 // Índice único para evitar duplicados
                 entity.HasIndex(bu => new { bu.UsuarioId, bu.RawgGameId })
@@ -108,6 +123,13 @@ namespace Proyecto_Gaming.Data
                 entity.Property(u => u.Estado)
                     .HasColumnName("estado")
                     .HasMaxLength(50);
+
+                // NUEVOS CAMPOS desde la BD
+                entity.Property(u => u.GoogleId)
+                    .HasColumnName("GoogleId");
+
+                entity.Property(u => u.GoogleProfilePicture)
+                    .HasColumnName("GoogleProfilePicture");
             });
 
             // Configuración para Amigos
@@ -491,7 +513,6 @@ namespace Proyecto_Gaming.Data
                     .IsUnique();
             });
 
-
             // Configuración para Transactions
             modelBuilder.Entity<Transaction>(entity =>
             {
@@ -542,6 +563,7 @@ namespace Proyecto_Gaming.Data
 
                 entity.Property(t => t.SessionId)
                     .HasColumnName("session_id")
+                    .IsRequired()
                     .HasMaxLength(100);
 
                 entity.Property(t => t.CreatedAt)
