@@ -22,7 +22,7 @@ namespace Proyecto_Gaming.Controllers
         // GET: Amigos/Index
         public async Task<IActionResult> Index(string seccion = "Todos")
         {
-            if (!User.Identity.IsAuthenticated)
+            if (!User.Identity?.IsAuthenticated ?? false)
             {
                 TempData["Error"] = "Debes iniciar sesión para gestionar amigos.";
                 return RedirectToAction("Login", "Account");
@@ -94,12 +94,20 @@ namespace Proyecto_Gaming.Controllers
         [HttpPost]
         public async Task<IActionResult> EnviarSolicitud([FromBody] SolicitudAmigoRequest request)
         {
-            if (!User.Identity.IsAuthenticated)
+            if (!User.Identity?.IsAuthenticated ?? false)
                 return Json(new { success = false, message = "No autenticado" });
 
             var usuario = await _userManager.GetUserAsync(User);
-            var amigo = await _userManager.FindByIdAsync(request.AmigoId);
+            
+            // CORREGIDO: Verificar que usuario no sea null
+            if (usuario == null)
+                return Json(new { success = false, message = "Usuario no encontrado" });
 
+            // CORREGIDO: Verificar que request.AmigoId no sea null o vacío
+            if (string.IsNullOrEmpty(request.AmigoId))
+                return Json(new { success = false, message = "ID de amigo inválido" });
+
+            var amigo = await _userManager.FindByIdAsync(request.AmigoId);
             if (amigo == null)
                 return Json(new { success = false, message = "Usuario no encontrado" });
 
@@ -134,10 +142,15 @@ namespace Proyecto_Gaming.Controllers
         [HttpPost]
         public async Task<IActionResult> AceptarSolicitud([FromBody] SolicitudAmigoRequest request)
         {
-            if (!User.Identity.IsAuthenticated)
+            if (!User.Identity?.IsAuthenticated ?? false)
                 return Json(new { success = false, message = "No autenticado" });
 
             var usuario = await _userManager.GetUserAsync(User);
+            
+            // CORREGIDO: Verificar que usuario no sea null
+            if (usuario == null)
+                return Json(new { success = false, message = "Usuario no encontrado" });
+
             var solicitud = await _context.Amigos
                 .FirstOrDefaultAsync(a => a.Id == request.SolicitudId && 
                                         a.AmigoId == usuario.Id && 
@@ -170,8 +183,14 @@ namespace Proyecto_Gaming.Controllers
         [HttpPost]
         public async Task<IActionResult> RechazarSolicitud([FromBody] SolicitudAmigoRequest request)
         {
-            if (!User.Identity.IsAuthenticated)
+            if (!User.Identity?.IsAuthenticated ?? false)
                 return Json(new { success = false, message = "No autenticado" });
+
+            var usuario = await _userManager.GetUserAsync(User);
+            
+            // CORREGIDO: Verificar que usuario no sea null (aunque no se use directamente, es buena práctica)
+            if (usuario == null)
+                return Json(new { success = false, message = "Usuario no encontrado" });
 
             var solicitud = await _context.Amigos
                 .FirstOrDefaultAsync(a => a.Id == request.SolicitudId && a.Estado == "Pendiente");
@@ -189,11 +208,15 @@ namespace Proyecto_Gaming.Controllers
         [HttpPost]
         public async Task<IActionResult> EliminarAmigo([FromBody] SolicitudAmigoRequest request)
         {
-            if (!User.Identity.IsAuthenticated)
+            if (!User.Identity?.IsAuthenticated ?? false)
                 return Json(new { success = false, message = "No autenticado" });
 
             var usuario = await _userManager.GetUserAsync(User);
             
+            // CORREGIDO: Verificar que usuario no sea null
+            if (usuario == null)
+                return Json(new { success = false, message = "Usuario no encontrado" });
+
             // CORREGIDO: Buscar por ID de relación o por IDs de usuario
             var relaciones = await _context.Amigos
                 .Where(a => (a.Id == request.AmistadIdInt) || // Buscar por ID de relación
@@ -214,9 +237,9 @@ namespace Proyecto_Gaming.Controllers
     // CORREGIDO: Clase para manejar las solicitudes JSON
     public class SolicitudAmigoRequest
     {
-        public string AmigoId { get; set; }
+        public string? AmigoId { get; set; }
         public int SolicitudId { get; set; }
-        public string AmistadId { get; set; } // Para cuando se pasa como string desde JavaScript
+        public string? AmistadId { get; set; } // Para cuando se pasa como string desde JavaScript
         
         // Propiedad adicional para manejar el ID como entero
         public int AmistadIdInt 

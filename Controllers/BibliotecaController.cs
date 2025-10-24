@@ -31,187 +31,203 @@ namespace Proyecto_Gaming.Controllers
         }
 
         // GET: Biblioteca - CON SESIONES Y TRACKING ML
-public async Task<IActionResult> Index(string search, string genre, string platform, int page = 1)
-{
-    if (!User.Identity.IsAuthenticated)
-    {
-        TempData["Error"] = "Debes iniciar sesión para acceder al catálogo.";
-        return RedirectToAction("Login", "Account");
-    }
-
-    var usuario = await _userManager.GetUserAsync(User);
-
-    // ✅ TRACKING PARA ML - Guardar búsqueda actual
-    if (!string.IsNullOrEmpty(search) || !string.IsNullOrEmpty(genre) || !string.IsNullOrEmpty(platform))
-    {
-        var userSearch = new UserSearch
+        public async Task<IActionResult> Index(string? search, string? genre, string? platform, int page = 1)
         {
-            SearchTerm = search,
-            Genre = genre,
-            Platform = platform,
-            Timestamp = DateTime.UtcNow
-        };
+            if (!User.Identity?.IsAuthenticated ?? false)
+            {
+                TempData["Error"] = "Debes iniciar sesión para acceder al catálogo.";
+                return RedirectToAction("Login", "Account");
+            }
 
-        // Guardar en sesión para ML
-        HttpContext.Session.AddSearchToHistory(userSearch);
+            var usuario = await _userManager.GetUserAsync(User);
+            
+            // CORREGIDO: Verificar que usuario no sea null
+            if (usuario == null)
+            {
+                TempData["Error"] = "No se pudo identificar al usuario.";
+                return RedirectToAction("Login", "Account");
+            }
 
-        // Guardar término de búsqueda reciente
-        if (!string.IsNullOrEmpty(search))
-        {
-            HttpContext.Session.AddRecentSearch(search);
+            // ✅ TRACKING PARA ML - Guardar búsqueda actual
+            if (!string.IsNullOrEmpty(search) || !string.IsNullOrEmpty(genre) || !string.IsNullOrEmpty(platform))
+            {
+                var userSearch = new UserSearch
+                {
+                    SearchTerm = search,
+                    Genre = genre,
+                    Platform = platform,
+                    Timestamp = DateTime.UtcNow
+                };
+
+                // Guardar en sesión para ML
+                HttpContext.Session.AddSearchToHistory(userSearch);
+
+                // Guardar término de búsqueda reciente
+                if (!string.IsNullOrEmpty(search))
+                {
+                    HttpContext.Session.AddRecentSearch(search);
+                }
+
+                // Guardar en Redis para análisis ML
+                await _rawgService.TrackUserSearchAsync(usuario.Id, search??"", genre??"", platform??"");
+            }
+
+            // ✅ GUARDAR FILTROS EN SESIÓN para persistencia
+            if (!string.IsNullOrEmpty(search) || !string.IsNullOrEmpty(genre) || !string.IsNullOrEmpty(platform))
+            {
+                HttpContext.Session.SetString("LastSearch", search ?? "");
+                HttpContext.Session.SetString("LastGenre", genre ?? "");
+                HttpContext.Session.SetString("LastPlatform", platform ?? "");
+                HttpContext.Session.SetInt32("LastPage", page);
+            }
+
+            // ✅ CARGAR PREFERENCIAS DE USUARIO DESDE SESIÓN
+            var userPreferences = HttpContext.Session.GetUserPreferences();
+
+            try
+            {
+                var availableFilters = await _rawgService.GetAvailableFiltersAsync();
+                var gamesResponse = await _rawgService.GetGamesAsync(search, genre, platform, page);
+
+                var viewModel = new GameCatalogViewModel
+                {
+                    Games = gamesResponse.Results ?? new List<Game>(),
+                    Genres = availableFilters.AvailableGenres ?? new List<Genre>(),
+                    Platforms = availableFilters.AvailablePlatforms ?? new List<Platform>(),
+                    Search = search,
+                    SelectedGenre = genre,
+                    SelectedPlatform = platform,
+                    CurrentPage = page,
+                    TotalPages = Math.Min((int)Math.Ceiling((gamesResponse.Count > 0 ? gamesResponse.Count : 1) / 20.0), 5),
+                    HasNextPage = !string.IsNullOrEmpty(gamesResponse.Next) && page < 5,
+                    HasPreviousPage = !string.IsNullOrEmpty(gamesResponse.Previous) && page > 1,
+                    AvailableGenres = (availableFilters.AvailableGenres ?? new List<Genre>())
+                        .Select(g => new SelectListItem 
+                        { 
+                            Value = g.Slug ?? "", 
+                            Text = g.Name ?? "Sin nombre",
+                            Selected = g.Slug == genre
+                        })
+                        .ToList(),
+                    AvailablePlatforms = (availableFilters.AvailablePlatforms ?? new List<Platform>())
+                        .Select(p => new SelectListItem 
+                        { 
+                            Value = p.Id.ToString(), 
+                            Text = p.Name ?? "Sin nombre",
+                            Selected = p.Id.ToString() == platform
+                        })
+                        .ToList(),
+                    // ✅ NUEVO: Datos de sesión para la vista
+                    UserPreferences = userPreferences,
+                    RecentSearches = HttpContext.Session.GetSearchHistory().Take(5).ToList(),
+                    RecentSearchTerms = HttpContext.Session.GetRecentSearches().Take(5).ToList()
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error al cargar los juegos: {ex.Message}";
+                return View(new GameCatalogViewModel { 
+                    Games = new List<Game>(),
+                    AvailableGenres = new List<SelectListItem>(),
+                    AvailablePlatforms = new List<SelectListItem>(),
+                    UserPreferences = userPreferences
+                });
+            }
         }
-
-        // Guardar en Redis para análisis ML
-        await _rawgService.TrackUserSearchAsync(usuario.Id, search, genre, platform);
-    }
-
-    // ✅ GUARDAR FILTROS EN SESIÓN para persistencia
-    if (!string.IsNullOrEmpty(search) || !string.IsNullOrEmpty(genre) || !string.IsNullOrEmpty(platform))
-    {
-        HttpContext.Session.SetString("LastSearch", search ?? "");
-        HttpContext.Session.SetString("LastGenre", genre ?? "");
-        HttpContext.Session.SetString("LastPlatform", platform ?? "");
-        HttpContext.Session.SetInt32("LastPage", page);
-    }
-
-    // ✅ CARGAR PREFERENCIAS DE USUARIO DESDE SESIÓN
-    var userPreferences = HttpContext.Session.GetUserPreferences();
-
-    try
-    {
-        var availableFilters = await _rawgService.GetAvailableFiltersAsync();
-        var gamesResponse = await _rawgService.GetGamesAsync(search, genre, platform, page);
-
-        var viewModel = new GameCatalogViewModel
-        {
-            Games = gamesResponse.Results,
-            Genres = availableFilters.AvailableGenres,
-            Platforms = availableFilters.AvailablePlatforms,
-            Search = search,
-            SelectedGenre = genre,
-            SelectedPlatform = platform,
-            CurrentPage = page,
-            TotalPages = Math.Min((int)Math.Ceiling(gamesResponse.Count / 20.0), 5),
-            HasNextPage = !string.IsNullOrEmpty(gamesResponse.Next) && page < 5,
-            HasPreviousPage = !string.IsNullOrEmpty(gamesResponse.Previous) && page > 1,
-            AvailableGenres = availableFilters.AvailableGenres
-                .Select(g => new SelectListItem 
-                { 
-                    Value = g.Slug, 
-                    Text = g.Name,
-                    Selected = g.Slug == genre
-                })
-                .ToList(),
-            AvailablePlatforms = availableFilters.AvailablePlatforms
-                .Select(p => new SelectListItem 
-                { 
-                    Value = p.Id.ToString(), 
-                    Text = p.Name,
-                    Selected = p.Id.ToString() == platform
-                })
-                .ToList(),
-            // ✅ NUEVO: Datos de sesión para la vista
-            UserPreferences = userPreferences,
-            RecentSearches = HttpContext.Session.GetSearchHistory().Take(5).ToList(),
-            RecentSearchTerms = HttpContext.Session.GetRecentSearches().Take(5).ToList()
-        };
-
-        return View(viewModel);
-    }
-    catch (Exception ex)
-    {
-        TempData["Error"] = $"Error al cargar los juegos: {ex.Message}";
-        return View(new GameCatalogViewModel { 
-            Games = new List<Game>(),
-            AvailableGenres = new List<SelectListItem>(),
-            AvailablePlatforms = new List<SelectListItem>(),
-            UserPreferences = userPreferences
-        });
-    }
-}
 
         // ✅ NUEVO: Restaurar última búsqueda desde sesión
         public async Task<IActionResult> LastSearch()
-    {
-        if (!User.Identity.IsAuthenticated)
         {
-            return RedirectToAction("Login", "Account");
-        }
+            if (!User.Identity?.IsAuthenticated ?? false)
+            {
+                return RedirectToAction("Login", "Account");
+            }
 
             var search = HttpContext.Session.GetString("LastSearch") ?? "";
             var genre = HttpContext.Session.GetString("LastGenre") ?? "";
             var platform = HttpContext.Session.GetString("LastPlatform") ?? "";
             var page = HttpContext.Session.GetInt32("LastPage") ?? 1;
     
-        // ✅ REDIRIGIR al Index con los parámetros, no retornar una vista
-        TempData["Info"] = "Última búsqueda restaurada desde sesión";
-        return RedirectToAction(nameof(Index), new {
-            search,
-            genre = genre, 
-            platform = platform, 
-            page = page 
-        });
-    }
+            // ✅ REDIRIGIR al Index con los parámetros, no retornar una vista
+            TempData["Info"] = "Última búsqueda restaurada desde sesión";
+            return RedirectToAction(nameof(Index), new {
+                search,
+                genre = genre, 
+                platform = platform, 
+                page = page 
+            });
+        }
 
         // ✅ NUEVO: Guardar preferencias de usuario
-       [HttpPost]
+        [HttpPost]
         public IActionResult SavePreferences(UserPreferences preferences)
         {
-        if (User.Identity.IsAuthenticated)
-        {
-            HttpContext.Session.SetUserPreferences(preferences);
-            TempData["Ok"] = "Preferencias guardadas correctamente.";
-         }
+            // CORREGIDO: Verificación de autenticación mejorada
+            if (User.Identity?.IsAuthenticated ?? false)
+            {
+                HttpContext.Session.SetUserPreferences(preferences);
+                TempData["Ok"] = "Preferencias guardadas correctamente.";
+            }
     
-        // ✅ REDIRIGIR al Index
-        return RedirectToAction(nameof(Index));
+            // ✅ REDIRIGIR al Index
+            return RedirectToAction(nameof(Index));
         }
 
         // ✅ NUEVO: Obtener recomendaciones basadas en historial de sesión
-       // ✅ CORREGIDO: Recomendaciones también debe redirigir al Index
-public async Task<IActionResult> Recomendaciones()
-{
-    if (!User.Identity.IsAuthenticated)
-    {
-        TempData["Error"] = "Debes iniciar sesión para ver recomendaciones.";
-        return RedirectToAction("Login", "Account");
-    }
+        public async Task<IActionResult> Recomendaciones()
+        {
+            if (!User.Identity?.IsAuthenticated ?? false)
+            {
+                TempData["Error"] = "Debes iniciar sesión para ver recomendaciones.";
+                return RedirectToAction("Login", "Account");
+            }
 
-    var searchHistory = HttpContext.Session.GetSearchHistory();
+            var usuario = await _userManager.GetUserAsync(User);
+            
+            // CORREGIDO: Verificar que usuario no sea null
+            if (usuario == null)
+            {
+                TempData["Error"] = "No se pudo identificar al usuario.";
+                return RedirectToAction("Login", "Account");
+            }
+
+            var searchHistory = HttpContext.Session.GetSearchHistory();
     
-    if (!searchHistory.Any())
-    {
-        TempData["Info"] = "Realiza algunas búsquedas para obtener recomendaciones personalizadas.";
-        return RedirectToAction(nameof(Index));
-    }
+            if (!searchHistory.Any())
+            {
+                TempData["Info"] = "Realiza algunas búsquedas para obtener recomendaciones personalizadas.";
+                return RedirectToAction(nameof(Index));
+            }
 
-    // ✅ LÓGICA DE RECOMENDACIÓN BASADA EN SESIONES
-    var mostSearchedGenre = searchHistory
-        .Where(s => !string.IsNullOrEmpty(s.Genre))
-        .GroupBy(s => s.Genre)
-        .OrderByDescending(g => g.Count())
-        .Select(g => g.Key)
-        .FirstOrDefault();
+            // ✅ LÓGICA DE RECOMENDACIÓN BASADA EN SESIONES
+            var mostSearchedGenre = searchHistory
+                .Where(s => !string.IsNullOrEmpty(s.Genre))
+                .GroupBy(s => s.Genre)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key)
+                .FirstOrDefault();
 
-    var mostSearchedPlatform = searchHistory
-        .Where(s => !string.IsNullOrEmpty(s.Platform))
-        .GroupBy(s => s.Platform)
-        .OrderByDescending(g => g.Count())
-        .Select(g => g.Key)
-        .FirstOrDefault();
+            var mostSearchedPlatform = searchHistory
+                .Where(s => !string.IsNullOrEmpty(s.Platform))
+                .GroupBy(s => s.Platform)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key)
+                .FirstOrDefault();
 
-    // ✅ REDIRIGIR al Index con los parámetros de recomendación
-    TempData["Ok"] = "Recomendaciones basadas en tu historial de búsquedas";
-    return RedirectToAction(nameof(Index), new { 
-        genre = mostSearchedGenre, 
-        platform = mostSearchedPlatform 
-    });
-}
+            // ✅ REDIRIGIR al Index con los parámetros de recomendación
+            TempData["Ok"] = "Recomendaciones basadas en tu historial de búsquedas";
+            return RedirectToAction(nameof(Index), new { 
+                genre = mostSearchedGenre, 
+                platform = mostSearchedPlatform 
+            });
+        }
 
         // AddToLibrary - CON SQL DIRECTO (MANTENIDO)
         public async Task<IActionResult> AddToLibrary(int id)
         {
-            if (!User.Identity.IsAuthenticated)
+            if (!User.Identity?.IsAuthenticated ?? false)
             {
                 TempData["Error"] = "Debes iniciar sesión para añadir juegos a tu biblioteca.";
                 return RedirectToAction("Login", "Account");
@@ -240,7 +256,7 @@ public async Task<IActionResult> Recomendaciones()
                     UsuarioId = usuario.Id,
                     RawgGameId = id,
                     Estado = "Pendiente",
-                    GameName = gameDetails.Name,
+                    GameName = gameDetails.Name ?? "información desconocida",
                     GameImage = gameDetails.BackgroundImage ?? "https://via.placeholder.com/400x200?text=Imagen+No+Disponible",
                 };
 
@@ -259,7 +275,7 @@ public async Task<IActionResult> Recomendaciones()
         // GET: Biblioteca/Pendientes - CON SQL DIRECTO (MANTENIDO)
         public async Task<IActionResult> Pendientes()
         {
-            if (!User.Identity.IsAuthenticated)
+            if (!User.Identity?.IsAuthenticated ?? false)
             {
                 TempData["Error"] = "Debes iniciar sesión para ver tus juegos pendientes.";
                 return RedirectToAction("Login", "Account");
@@ -291,7 +307,7 @@ public async Task<IActionResult> Recomendaciones()
 
                 return View(gameDetails);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 TempData["Error"] = "Error al cargar los detalles del juego.";
                 return RedirectToAction(nameof(Index));
@@ -305,7 +321,7 @@ public async Task<IActionResult> Recomendaciones()
         // GET: Biblioteca/Jugando - CON SQL DIRECTO
         public async Task<IActionResult> Jugando()
         {
-            if (!User.Identity.IsAuthenticated)
+            if (!User.Identity?.IsAuthenticated ?? false)
             {
                 TempData["Error"] = "Debes iniciar sesión para ver tus juegos en progreso.";
                 return RedirectToAction("Login", "Account");
@@ -329,7 +345,7 @@ public async Task<IActionResult> Recomendaciones()
         // GET: Biblioteca/Completados - CON SQL DIRECTO
         public async Task<IActionResult> Completados()
         {
-            if (!User.Identity.IsAuthenticated)
+            if (!User.Identity?.IsAuthenticated ?? false)
             {
                 TempData["Error"] = "Debes iniciar sesión para ver tus juegos completados.";
                 return RedirectToAction("Login", "Account");
@@ -353,7 +369,7 @@ public async Task<IActionResult> Recomendaciones()
         // MarkAsPlaying - CON SQL DIRECTO
         public async Task<IActionResult> MarkAsPlaying(int id)
         {
-            if (!User.Identity.IsAuthenticated)
+            if (!User.Identity?.IsAuthenticated ?? false)
             {
                 TempData["Error"] = "Debes iniciar sesión.";
                 return RedirectToAction(nameof(Pendientes));
@@ -387,7 +403,7 @@ public async Task<IActionResult> Recomendaciones()
         // MarkAsCompleted - CON SQL DIRECTO
         public async Task<IActionResult> MarkAsCompleted(int id)
         {
-            if (!User.Identity.IsAuthenticated)
+            if (!User.Identity?.IsAuthenticated ?? false)
             {
                 TempData["Error"] = "Debes iniciar sesión.";
                 return RedirectToAction(nameof(Jugando));
@@ -426,7 +442,7 @@ public async Task<IActionResult> Recomendaciones()
         [HttpPost]
         public async Task<IActionResult> AddReview(int id, string resena, int calificacion)
         {
-            if (!User.Identity.IsAuthenticated)
+            if (!User.Identity?.IsAuthenticated ?? false)
             {
                 return Json(new { success = false, message = "Debes iniciar sesión." });
             }
@@ -463,7 +479,7 @@ public async Task<IActionResult> Recomendaciones()
                     return Json(new { success = false, message = "Error al guardar la reseña." });
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return Json(new { success = false, message = "Error al guardar la reseña." });
             }
@@ -472,7 +488,7 @@ public async Task<IActionResult> Recomendaciones()
         // GET: Biblioteca/MiBiblioteca - CON SQL DIRECTO
         public async Task<IActionResult> MiBiblioteca()
         {
-            if (!User.Identity.IsAuthenticated)
+            if (!User.Identity?.IsAuthenticated ?? false)
             {
                 TempData["Error"] = "Debes iniciar sesión para ver tu biblioteca.";
                 return RedirectToAction("Login", "Account");

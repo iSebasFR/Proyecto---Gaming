@@ -26,7 +26,8 @@ namespace Proyecto_Gaming.Controllers
         // GET: Grupos/Index
         public async Task<IActionResult> Index(string vista = "Recomendados")
         {
-            if (!User.Identity.IsAuthenticated)
+            // CORREGIDO: Verificación de autenticación mejorada
+            if (!User.Identity?.IsAuthenticated ?? false)
             {
                 TempData["Error"] = "Debes iniciar sesión para ver grupos.";
                 return RedirectToAction("Login", "Account");
@@ -81,12 +82,11 @@ namespace Proyecto_Gaming.Controllers
             return View(viewModel);
         }
 
-        
-
         // GET: Grupos/Crear
         public IActionResult Crear()
         {
-            if (!User.Identity.IsAuthenticated)
+            // CORREGIDO: Verificación de autenticación mejorada
+            if (!User.Identity?.IsAuthenticated ?? false)
             {
                 TempData["Error"] = "Debes iniciar sesión para crear un grupo.";
                 return RedirectToAction("Login", "Account");
@@ -98,7 +98,8 @@ namespace Proyecto_Gaming.Controllers
         [HttpPost]
         public async Task<IActionResult> Crear(CrearGrupoViewModel model)
         {
-            if (!User.Identity.IsAuthenticated)
+            // CORREGIDO: Verificación de autenticación mejorada
+            if (!User.Identity?.IsAuthenticated ?? false)
             {
                 TempData["Error"] = "Debes iniciar sesión para crear un grupo.";
                 return RedirectToAction("Login", "Account");
@@ -110,10 +111,17 @@ namespace Proyecto_Gaming.Controllers
             }
 
             var usuario = await _userManager.GetUserAsync(User);
+            
+            // CORREGIDO: Verificar que usuario no sea null
+            if (usuario == null)
+            {
+                TempData["Error"] = "No se pudo identificar al usuario.";
+                return View(model);
+            }
 
             // Guardar imágenes si se proporcionaron
-            string fotoGrupoPath = null;
-            string bannerGrupoPath = null;
+            string? fotoGrupoPath = null;
+            string? bannerGrupoPath = null;
 
             if (model.FotoGrupo != null)
             {
@@ -128,9 +136,9 @@ namespace Proyecto_Gaming.Controllers
             // CORREGIDO: Asegurar que el grupo sea público por defecto
             var grupo = new Grupo
             {
-                Nombre = model.Nombre,
-                Descripcion = model.Descripcion,
-                Categoria = model.Categoria,
+                Nombre = model.Nombre ?? "",
+                Descripcion = model.Descripcion ?? "",
+                Categoria = model.Categoria ?? "",
                 CreadorId = usuario.Id,
                 FotoGrupo = fotoGrupoPath,
                 BannerGrupo = bannerGrupoPath,
@@ -161,10 +169,16 @@ namespace Proyecto_Gaming.Controllers
         [HttpPost]
         public async Task<IActionResult> Unirse([FromBody] GrupoRequest request)
         {
-            if (!User.Identity.IsAuthenticated)
+            // CORREGIDO: Verificación de autenticación mejorada
+            if (!User.Identity?.IsAuthenticated ?? false)
                 return Json(new { success = false, message = "No autenticado" });
 
             var usuario = await _userManager.GetUserAsync(User);
+            
+            // CORREGIDO: Verificar que usuario no sea null
+            if (usuario == null)
+                return Json(new { success = false, message = "Usuario no encontrado" });
+
             var grupo = await _context.Grupos.FindAsync(request.GrupoId);
 
             if (grupo == null)
@@ -195,10 +209,15 @@ namespace Proyecto_Gaming.Controllers
         [HttpPost]
         public async Task<IActionResult> Publicar([FromBody] PublicacionRequest request)
         {
-            if (!User.Identity.IsAuthenticated)
+            // CORREGIDO: Verificación de autenticación mejorada
+            if (!User.Identity?.IsAuthenticated ?? false)
                 return Json(new { success = false, message = "No autenticado" });
 
             var usuario = await _userManager.GetUserAsync(User);
+            
+            // CORREGIDO: Verificar que usuario no sea null
+            if (usuario == null)
+                return Json(new { success = false, message = "Usuario no encontrado" });
 
             // Verificar si es miembro del grupo
             var esMiembro = await _context.MiembrosGrupo
@@ -211,7 +230,7 @@ namespace Proyecto_Gaming.Controllers
             {
                 GrupoId = request.GrupoId,
                 UsuarioId = usuario.Id,
-                Contenido = request.Contenido,
+                Contenido = request.Contenido ?? "",
                 FechaPublicacion = DateTime.UtcNow
             };
 
@@ -224,13 +243,22 @@ namespace Proyecto_Gaming.Controllers
         // GET: Grupos/Configuracion/{id}
         public async Task<IActionResult> Configuracion(int id, string seccion = "configuracion")
         {
-            if (!User.Identity.IsAuthenticated)
+            // CORREGIDO: Verificación de autenticación mejorada
+            if (!User.Identity?.IsAuthenticated ?? false)
             {
                 TempData["Error"] = "Debes iniciar sesión.";
                 return RedirectToAction("Login", "Account");
             }
 
             var usuario = await _userManager.GetUserAsync(User);
+            
+            // CORREGIDO: Verificar que usuario no sea null
+            if (usuario == null)
+            {
+                TempData["Error"] = "No se pudo identificar al usuario.";
+                return RedirectToAction("Login", "Account");
+            }
+
             var grupo = await _context.Grupos
                 .Include(g => g.Miembros)
                     .ThenInclude(m => m.Usuario)
@@ -251,14 +279,14 @@ namespace Proyecto_Gaming.Controllers
             var viewModel = new ConfiguracionGrupoViewModel
             {
                 GrupoId = grupo.Id,
-                Nombre = grupo.Nombre,
-                Descripcion = grupo.Descripcion,
-                Categoria = grupo.Categoria,
+                Nombre = grupo.Nombre ?? "",
+                Descripcion = grupo.Descripcion ?? "",
+                Categoria = grupo.Categoria ?? "",
                 EsPublico = grupo.EsPublico,
                 // Solo para visualización
                 FotoGrupoActual = grupo.FotoGrupo,
                 BannerGrupoActual = grupo.BannerGrupo,
-                Miembros = grupo.Miembros.ToList()
+                Miembros = grupo.Miembros?.ToList() ?? new List<MiembroGrupo>()
             };
 
             ViewBag.SeccionActiva = seccion;
@@ -269,10 +297,15 @@ namespace Proyecto_Gaming.Controllers
         [HttpPost]
         public async Task<IActionResult> SalirDelGrupo([FromBody] GrupoRequest request)
         {
-            if (!User.Identity.IsAuthenticated)
+            // CORREGIDO: Verificación de autenticación mejorada
+            if (!User.Identity?.IsAuthenticated ?? false)
                 return Json(new { success = false, message = "No autenticado" });
 
             var usuario = await _userManager.GetUserAsync(User);
+            
+            // CORREGIDO: Verificar que usuario no sea null
+            if (usuario == null)
+                return Json(new { success = false, message = "Usuario no encontrado" });
             
             // Verificar si el usuario es miembro del grupo
             var miembro = await _context.MiembrosGrupo
@@ -305,13 +338,22 @@ namespace Proyecto_Gaming.Controllers
         [HttpPost]
         public async Task<IActionResult> ActualizarConfiguracion(ConfiguracionGrupoViewModel model)
         {
-            if (!User.Identity.IsAuthenticated)
+            // CORREGIDO: Verificación de autenticación mejorada
+            if (!User.Identity?.IsAuthenticated ?? false)
             {
                 TempData["Error"] = "Debes iniciar sesión.";
                 return RedirectToAction("Login", "Account");
             }
 
             var usuario = await _userManager.GetUserAsync(User);
+            
+            // CORREGIDO: Verificar que usuario no sea null
+            if (usuario == null)
+            {
+                TempData["Error"] = "No se pudo identificar al usuario.";
+                return RedirectToAction("Login", "Account");
+            }
+
             var grupo = await _context.Grupos.FindAsync(model.GrupoId);
 
             if (grupo == null) return NotFound();
@@ -346,7 +388,7 @@ namespace Proyecto_Gaming.Controllers
                 {
                     model.FotoGrupoActual = grupoActual.FotoGrupo;
                     model.BannerGrupoActual = grupoActual.BannerGrupo;
-                    model.Miembros = grupoActual.Miembros.ToList();
+                    model.Miembros = grupoActual.Miembros?.ToList() ?? new List<MiembroGrupo>();
                 }
 
                 ViewBag.SeccionActiva = "configuracion";
@@ -356,9 +398,9 @@ namespace Proyecto_Gaming.Controllers
             try
             {
                 // Actualizar datos del grupo
-                grupo.Nombre = model.Nombre;
-                grupo.Descripcion = model.Descripcion;
-                grupo.Categoria = model.Categoria;
+                grupo.Nombre = model.Nombre ?? "";
+                grupo.Descripcion = model.Descripcion ?? "";
+                grupo.Categoria = model.Categoria ?? "";
                 grupo.EsPublico = model.EsPublico;
 
                 // Guardar nuevas imágenes si se proporcionaron
@@ -390,7 +432,7 @@ namespace Proyecto_Gaming.Controllers
                 {
                     model.FotoGrupoActual = grupoActual.FotoGrupo;
                     model.BannerGrupoActual = grupoActual.BannerGrupo;
-                    model.Miembros = grupoActual.Miembros.ToList();
+                    model.Miembros = grupoActual.Miembros?.ToList() ?? new List<MiembroGrupo>();
                 }
 
                 ViewBag.SeccionActiva = "configuracion";
@@ -402,10 +444,15 @@ namespace Proyecto_Gaming.Controllers
         [HttpPost]
         public async Task<IActionResult> SubirMultimedia([FromForm] MultimediaViewModel model)
         {
-            if (!User.Identity.IsAuthenticated)
+            // CORREGIDO: Verificación de autenticación mejorada
+            if (!User.Identity?.IsAuthenticated ?? false)
                 return Json(new { success = false, message = "No autenticado" });
 
             var usuario = await _userManager.GetUserAsync(User);
+            
+            // CORREGIDO: Verificar que usuario no sea null
+            if (usuario == null)
+                return Json(new { success = false, message = "Usuario no encontrado" });
 
             // Verificar si es miembro del grupo
             var esMiembro = await _context.MiembrosGrupo
@@ -426,9 +473,9 @@ namespace Proyecto_Gaming.Controllers
                 {
                     GrupoId = model.GrupoId,
                     UsuarioId = usuario.Id,
-                    UrlArchivo = archivoPath,
+                    UrlArchivo = archivoPath ?? "",
                     TipoArchivo = "imagen",
-                    Descripcion = model.Descripcion,
+                    Descripcion = model.Descripcion ?? "",
                     FechaSubida = DateTime.UtcNow
                 };
 
@@ -447,10 +494,15 @@ namespace Proyecto_Gaming.Controllers
         [HttpPost]
         public async Task<IActionResult> ReaccionarMultimedia([FromBody] ReaccionViewModel model)
         {
-            if (!User.Identity.IsAuthenticated)
+            // CORREGIDO: Verificación de autenticación mejorada
+            if (!User.Identity?.IsAuthenticated ?? false)
                 return Json(new { success = false, message = "No autenticado" });
 
             var usuario = await _userManager.GetUserAsync(User);
+            
+            // CORREGIDO: Verificar que usuario no sea null
+            if (usuario == null)
+                return Json(new { success = false, message = "Usuario no encontrado" });
 
             // Verificar si ya existe una reacción del usuario
             var reaccionExistente = await _context.ReaccionesMultimedia
@@ -485,7 +537,7 @@ namespace Proyecto_Gaming.Controllers
                         case "angry": multimedia.Angry++; break;
                     }
 
-                    reaccionExistente.TipoReaccion = model.TipoReaccion;
+                    reaccionExistente.TipoReaccion = model.TipoReaccion ?? "";
                     reaccionExistente.FechaReaccion = DateTime.UtcNow;
                 }
                 else
@@ -518,7 +570,7 @@ namespace Proyecto_Gaming.Controllers
                 {
                     MultimediaId = model.MultimediaId,
                     UsuarioId = usuario.Id,
-                    TipoReaccion = model.TipoReaccion,
+                    TipoReaccion = model.TipoReaccion ?? "",
                     FechaReaccion = DateTime.UtcNow
                 };
 
@@ -533,10 +585,15 @@ namespace Proyecto_Gaming.Controllers
         [HttpPost]
         public async Task<IActionResult> AgregarComentarioMultimedia([FromBody] ComentarioMultimediaViewModel model)
         {
-            if (!User.Identity.IsAuthenticated)
+            // CORREGIDO: Verificación de autenticación mejorada
+            if (!User.Identity?.IsAuthenticated ?? false)
                 return Json(new { success = false, message = "No autenticado" });
 
             var usuario = await _userManager.GetUserAsync(User);
+            
+            // CORREGIDO: Verificar que usuario no sea null
+            if (usuario == null)
+                return Json(new { success = false, message = "Usuario no encontrado" });
 
             // Verificar si la multimedia existe
             var multimedia = await _context.MultimediaGrupo.FindAsync(model.MultimediaId);
@@ -554,7 +611,7 @@ namespace Proyecto_Gaming.Controllers
             {
                 MultimediaId = model.MultimediaId,
                 UsuarioId = usuario.Id,
-                Contenido = model.Contenido,
+                Contenido = model.Contenido ?? "",
                 FechaComentario = DateTime.UtcNow
             };
 
@@ -568,10 +625,16 @@ namespace Proyecto_Gaming.Controllers
         [HttpPost]
         public async Task<IActionResult> EliminarGrupo([FromBody] GrupoRequest request)
         {
-            if (!User.Identity.IsAuthenticated)
+            // CORREGIDO: Verificación de autenticación mejorada
+            if (!User.Identity?.IsAuthenticated ?? false)
                 return Json(new { success = false, message = "No autenticado" });
 
             var usuario = await _userManager.GetUserAsync(User);
+            
+            // CORREGIDO: Verificar que usuario no sea null
+            if (usuario == null)
+                return Json(new { success = false, message = "Usuario no encontrado" });
+
             var grupo = await _context.Grupos
                 .Include(g => g.Miembros)
                 .FirstOrDefaultAsync(g => g.Id == request.GrupoId);
@@ -614,10 +677,15 @@ namespace Proyecto_Gaming.Controllers
         [HttpPost]
         public async Task<IActionResult> ExpulsarMiembro([FromBody] GestionMiembroRequest request)
         {
-            if (!User.Identity.IsAuthenticated)
+            // CORREGIDO: Verificación de autenticación mejorada
+            if (!User.Identity?.IsAuthenticated ?? false)
                 return Json(new { success = false, message = "No autenticado" });
 
             var usuario = await _userManager.GetUserAsync(User);
+            
+            // CORREGIDO: Verificar que usuario no sea null
+            if (usuario == null)
+                return Json(new { success = false, message = "Usuario no encontrado" });
 
             // Verificar si es administrador
             var esAdministrador = await _context.MiembrosGrupo
@@ -640,7 +708,7 @@ namespace Proyecto_Gaming.Controllers
         }
 
         // Método auxiliar para guardar archivos
-        private async Task<string> GuardarArchivo(IFormFile archivo, string carpeta)
+        private async Task<string?> GuardarArchivo(IFormFile archivo, string carpeta)
         {
             if (archivo == null || archivo.Length == 0)
                 return null;
@@ -660,17 +728,24 @@ namespace Proyecto_Gaming.Controllers
             return $"/uploads/{carpeta}/{fileName}";
         }
 
-
         // GET: Grupos/Detalle/{id}
         public async Task<IActionResult> Detalle(int id, string seccion = "miembros")
         {
-            if (!User.Identity.IsAuthenticated)
+            // CORREGIDO: Verificación de autenticación mejorada
+            if (!User.Identity?.IsAuthenticated ?? false)
             {
                 TempData["Error"] = "Debes iniciar sesión para ver el grupo.";
                 return RedirectToAction("Login", "Account");
             }
 
             var usuario = await _userManager.GetUserAsync(User);
+            
+            // CORREGIDO: Verificar que usuario no sea null
+            if (usuario == null)
+            {
+                TempData["Error"] = "No se pudo identificar al usuario.";
+                return RedirectToAction("Login", "Account");
+            }
             
             // Obtener los grupos del usuario para el sidebar
             var misGruposIds = await _context.MiembrosGrupo
@@ -685,16 +760,16 @@ namespace Proyecto_Gaming.Controllers
 
             var grupo = await _context.Grupos
                 .Include(g => g.Creador)
-                .Include(g => g.Miembros)
+                .Include(g => g.Miembros!)
                     .ThenInclude(m => m.Usuario)
-                .Include(g => g.Publicaciones)
+                .Include(g => g.Publicaciones!)
                     .ThenInclude(p => p.Usuario)
-                .Include(g => g.Multimedia)
+                .Include(g => g.Multimedia!)
                     .ThenInclude(m => m.Usuario)
-                .Include(g => g.Multimedia)
-                    .ThenInclude(m => m.Comentarios)
+                .Include(g => g.Multimedia!)
+                    .ThenInclude(m => m.Comentarios!)
                         .ThenInclude(c => c.Usuario)
-                .Include(g => g.Multimedia)
+                .Include(g => g.Multimedia!)
                     .ThenInclude(m => m.Reacciones) // NUEVO: Incluir reacciones
                 .FirstOrDefaultAsync(g => g.Id == id);
 
@@ -710,14 +785,14 @@ namespace Proyecto_Gaming.Controllers
             {
                 Grupo = grupo,
                 MisGrupos = misGrupos,
-                Miembros = grupo.Miembros.ToList(),
-                Publicaciones = grupo.Publicaciones
+                Miembros = grupo.Miembros?.ToList() ?? new List<MiembroGrupo>(),
+                Publicaciones = grupo.Publicaciones?
                     .OrderByDescending(p => p.FechaPublicacion)
-                    .ToList(),
-                Multimedia = grupo.Multimedia
+                    .ToList() ?? new List<PublicacionGrupo>(),
+                Multimedia = grupo.Multimedia?
                     .OrderByDescending(m => m.FechaSubida)
                     .Take(12)
-                    .ToList(),
+                    .ToList() ?? new List<MultimediaGrupo>(),
                 EsMiembro = esMiembro,
                 EsAdministrador = esAdministrador
             };
@@ -727,11 +802,7 @@ namespace Proyecto_Gaming.Controllers
 
             return View(viewModel);
         }
-
     }
-
-
-    
 
     // Clases para manejar las solicitudes JSON (FUERA de la clase del controlador)
     public class GrupoRequest
@@ -742,12 +813,32 @@ namespace Proyecto_Gaming.Controllers
     public class PublicacionRequest
     {
         public int GrupoId { get; set; }
-        public string Contenido { get; set; }
+        public string Contenido { get; set; } = string.Empty; // CORREGIDO: Inicializado
     }
 
     public class GestionMiembroRequest
     {
         public int GrupoId { get; set; }
-        public string UsuarioId { get; set; }
+        public string UsuarioId { get; set; } = string.Empty; // CORREGIDO: Inicializado
+    }
+
+    // CORREGIDO: Clases adicionales que faltaban
+    public class MultimediaViewModel
+    {
+        public int GrupoId { get; set; }
+        public IFormFile? Archivo { get; set; }
+        public string? Descripcion { get; set; }
+    }
+
+    public class ReaccionViewModel
+    {
+        public int MultimediaId { get; set; }
+        public string? TipoReaccion { get; set; }
+    }
+
+    public class ComentarioMultimediaViewModel
+    {
+        public int MultimediaId { get; set; }
+        public string? Contenido { get; set; }
     }
 }
