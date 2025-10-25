@@ -1,0 +1,53 @@
+services:
+  - type: web
+    name: gaming-web
+    env: docker
+    docker:
+      dockerfile: Dockerfile
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__DefaultConnection
+        fromDatabase:
+          name: gaming-db
+          property: connectionString
+      
+      # ✅ APIs EXISTENTES
+      - key: RAWG__ApiKey
+        sync: false
+      - key: Authentication__Google__ClientId
+        sync: false
+      - key: Authentication__Google__ClientSecret
+        sync: false
+      - key: Stripe__PublishableKey
+        sync: false
+      - key: Stripe__SecretKey
+        sync: false
+      - key: Stripe__WebhookSecret
+        sync: false
+      
+      # ✅ CONFIGURACIÓN DE EMAIL
+      - key: Email__DefaultFromEmail
+        sync: false
+      - key: SmtpSettings__User
+        sync: false
+      - key: SmtpSettings__Password
+        sync: false
+      
+      # ✅ REDIS
+      - key: ConnectionStrings__Redis
+        sync: false
+      
+      - key: BaseUrl
+        sync: false
+    buildCommand: ""
+    startCommand: "dotnet Proyecto - Gaming.dll"
+    healthCheckPath: /Health
+
+  # Base de datos PostgreSQL
+  - type: pgsql
+    name: Gaming
+    ipAllowList: []
+    plan: free
+    databaseName: gaming
+    user: iSebasFR

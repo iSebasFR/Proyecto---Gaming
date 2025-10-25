@@ -7,18 +7,64 @@ using Microsoft.Extensions.Caching.Distributed;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ✅ CONFIGURACIÓN ESPECÍFICA PARA RENDER/PRODUCCIÓN
+if (builder.Environment.IsProduction())
+{
+    // Configuración optimizada para producción
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    
+    // Redis solo si está configurado y no es localhost
+    var redisConnection = builder.Configuration.GetConnectionString("Redis");
+    if (!string.IsNullOrEmpty(redisConnection) && !redisConnection.Contains("localhost"))
+    {
+        builder.Services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = redisConnection;
+            options.InstanceName = "Gaming_";
+        });
+        Console.WriteLine("✅ Redis configurado para producción");
+    }
+    else
+    {
+        builder.Services.AddDistributedMemoryCache();
+        Console.WriteLine("⚠️ Redis no disponible - usando memoria distribuida");
+    }
+}
+else
+{
+    // Configuración desarrollo
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    
+    var redisConnection = builder.Configuration.GetConnectionString("Redis");
+    if (!string.IsNullOrEmpty(redisConnection))
+    {
+        builder.Services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = redisConnection;
+            options.InstanceName = "Gaming_";
+        });
+    }
+    else
+    {
+        builder.Services.AddDistributedMemoryCache();
+    }
+}
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
 // ✅ CONFIGURAR SERVICIO DE PAGOS STRIPE CON HTTPCLIENT
 builder.Services.AddHttpClient<IPaymentService, StripePaymentService>();
 
-// ✅ CONFIGURAR REDIS (DISTRIBUTED CACHE)
-builder.Services.AddStackExchangeRedisCache(options =>
-{
-    options.Configuration = builder.Configuration.GetConnectionString("Redis");
-    options.InstanceName = "Gaming_";
-});
+// ❌ ELIMINAR ESTO - YA ESTÁ CONFIGURADO ARRIBA
+// builder.Services.AddStackExchangeRedisCache(options =>
+// {
+//     options.Configuration = builder.Configuration.GetConnectionString("Redis");
+//     options.InstanceName = "Gaming_";
+// });
+
 builder.Services.AddScoped<ILogService, LogService>();
 
 // ✅ SERVICIO DE MANTENIMIENTO AUTOMÁTICO
@@ -38,9 +84,10 @@ builder.Services.AddSession(options =>
 // ✅ MANTENER CACHÉ EN MEMORIA PARA DATOS LOCALES
 builder.Services.AddMemoryCache();
 
+// ❌ ELIMINAR ESTO - YA ESTÁ CONFIGURADO ARRIBA
 // Configurar PostgreSQL
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+// builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // ✅ CONFIGURAR RAWG SERVICE
 builder.Services.AddHttpClient<IRawgService, RawgService>(client =>
@@ -53,7 +100,6 @@ builder.Services.AddHttpClient<IRawgService, RawgService>(client =>
 // ✅ STATISTICS SERVICE
 builder.Services.AddScoped<IStatsService, StatsService>();
 builder.Services.AddScoped<IAdminLogService, AdminLogService>();
-
 
 // ✅ OBTENER CREDENCIALES DE GOOGLE (User Secrets tiene prioridad)
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
@@ -173,13 +219,13 @@ app.Lifetime.ApplicationStarted.Register(() =>
         {
             using var scope = app.Services.CreateScope();
             var rawgService = scope.ServiceProvider.GetRequiredService<IRawgService>();
-            var redisCache = scope.ServiceProvider.GetRequiredService<IDistributedCache>();
+            var cache = scope.ServiceProvider.GetRequiredService<IDistributedCache>();
             
             // 1. Limpiar caché corrupto al iniciar
-            await ClearCorruptedCacheOnStartup(redisCache);
+            await ClearCorruptedCacheOnStartup(cache);
             
             // 2. Precargar datos esenciales
-            await PreloadEssentialData(rawgService, redisCache);
+            await PreloadEssentialData(rawgService, cache);
             
             Console.WriteLine("✅ Sistema de caché automático inicializado");
         }
@@ -191,14 +237,14 @@ app.Lifetime.ApplicationStarted.Register(() =>
 });
 
 // MÉTODOS DE INICIALIZACIÓN AUTOMÁTICA
-async Task ClearCorruptedCacheOnStartup(IDistributedCache redisCache)
+async Task ClearCorruptedCacheOnStartup(IDistributedCache cache)
 {
     try
     {
         // Limpiar solo las claves que sabemos que se corrompen
         for (int i = 1; i <= 5; i++)
         {
-            await redisCache.RemoveAsync($"Games____{i}");
+            await cache.RemoveAsync($"Games____{i}");
         }
         Console.WriteLine("🧹 Caché corrupto limpiado al iniciar");
     }
@@ -208,7 +254,7 @@ async Task ClearCorruptedCacheOnStartup(IDistributedCache redisCache)
     }
 }
 
-async Task PreloadEssentialData(IRawgService rawgService, IDistributedCache redisCache)
+async Task PreloadEssentialData(IRawgService rawgService, IDistributedCache cache)
 {
     try
     {
