@@ -12,10 +12,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Text.Json; // ✅ AGREGAR ESTE
-using System.Text.Json.Serialization; // ✅ AGREGAR ESTE
+using System.Text.Json; 
+using System.Text.Json.Serialization; 
 using Microsoft.Extensions.Caching.Distributed; 
-
+using Proyecto_Gaming.ML.Services; 
 namespace Proyecto_Gaming.Controllers
 {
     public class BibliotecaController : Controller
@@ -25,15 +25,19 @@ namespace Proyecto_Gaming.Controllers
         private readonly IRawgService _rawgService;
         private readonly IGamePriceService _priceService;
 
+       private readonly IBibliotecaMLService _mlService;
+
         public BibliotecaController(ApplicationDbContext context, 
-                                  UserManager<Usuario> userManager,
-                                  IRawgService rawgService, 
-                                  IGamePriceService priceService)
+                                UserManager<Usuario> userManager,
+                                IRawgService rawgService, 
+                                IGamePriceService priceService,
+                                Proyecto_Gaming.ML.Services.IBibliotecaMLService mlService) 
         {
             _context = context;
             _userManager = userManager;
             _rawgService = rawgService;
             _priceService = priceService;
+            _mlService = mlService; 
         }
 
         // GET: Biblioteca - CON SESIONES Y TRACKING ML
@@ -382,12 +386,12 @@ public async Task<IActionResult> ClearCache()
             return RedirectToAction(nameof(Index));
         }
 
-        // ✅ NUEVO: Obtener recomendaciones basadas en historial de sesión
+       // ✅ NUEVO MÉTODO MEJORADO CON ML
         public async Task<IActionResult> Recomendaciones()
         {
             if (!User.Identity?.IsAuthenticated ?? false)
             {
-                TempData["Error"] = "Debes iniciar sesión para ver recomendaciones.";
+                TempData["Error"] = "Debes iniciar sesión para ver recomendaciones personalizadas.";
                 return RedirectToAction("Login", "Account");
             }
 
@@ -399,8 +403,71 @@ public async Task<IActionResult> ClearCache()
                 return RedirectToAction("Login", "Account");
             }
 
+            try
+            {
+                Console.WriteLine($"🎯 Iniciando sistema ML para {usuario.UserName}...");
+                
+                // ✅ OBTENER RECOMENDACIONES DEL SERVICIO ML
+                var recommendedGames = await _mlService.GetPersonalizedRecommendationsAsync(usuario.Id);
+                
+                if (!recommendedGames.Any())
+                {
+                    TempData["Info"] = "Agrega más juegos a tu biblioteca para obtener recomendaciones personalizadas.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Obtener datos del usuario para mostrar en la vista
+                var userLibraryCount = await _mlService.GetUserLibraryCountAsync(usuario.Id);
+                var userTopGenre = await _mlService.GetUserTopGenreAsync(usuario.Id);
+
+                // Obtener precios para las recomendaciones
+                var gamesWithPrices = new List<Game>();
+                var prices = new Dictionary<int, decimal?>();
+
+                if (recommendedGames.Any())
+                {
+                    (gamesWithPrices, prices) = await GetGamesWithPricesAsync(recommendedGames.Take(15).ToList());
+                }
+
+                // ✅ CREAR VIEWMODEL CON INFORMACIÓN ML
+                var viewModel = new GameCatalogViewModel
+                {
+                    Games = gamesWithPrices,
+                    GamePrices = prices,
+                    Search = "🎯 Recomendaciones ML Personalizadas",
+                    CurrentPage = 1,
+                    TotalPages = 1,
+                    UserPreferences = HttpContext.Session.GetUserPreferences(),
+                    RecentSearches = HttpContext.Session.GetSearchHistory()
+                };
+
+                // ✅ AGREGAR DATOS ML AL VIEWDATA PARA LA VISTA
+                ViewData["IsMLRecommendation"] = true;
+                ViewData["UserLibraryCount"] = userLibraryCount;
+                ViewData["UserTopGenre"] = userTopGenre;
+                ViewData["RecommendationCount"] = recommendedGames.Count;
+
+                // ✅ TRACKING DE USO DE RECOMENDACIONES
+                await _mlService.TrackUserInteractionAsync(usuario.Id, 0, "view_ml_recommendations");
+
+                TempData["Ok"] = $"¡{recommendedGames.Count} recomendaciones basadas en tu biblioteca personal!";
+                return View("Index", viewModel);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error en recomendaciones ML: {ex.Message}");
+                
+                // ✅ FALLBACK A MÉTODO ORIGINAL SI EL ML FALLA
+                TempData["Info"] = "Usando recomendaciones básicas por fallo temporal en ML";
+                return await FallbackToBasicRecommendations();
+            }
+        }
+
+        // ✅ MÉTODO FALLBACK (tu método original)
+        private async Task<IActionResult> FallbackToBasicRecommendations()
+        {
             var searchHistory = HttpContext.Session.GetSearchHistory();
-    
+
             if (!searchHistory.Any())
             {
                 TempData["Info"] = "Realiza algunas búsquedas para obtener recomendaciones personalizadas.";
@@ -421,7 +488,6 @@ public async Task<IActionResult> ClearCache()
                 .Select(g => g.Key)
                 .FirstOrDefault();
 
-            TempData["Ok"] = "Recomendaciones basadas en tu historial de búsquedas";
             return RedirectToAction(nameof(Index), new { 
                 genre = mostSearchedGenre, 
                 platform = mostSearchedPlatform 
@@ -515,13 +581,24 @@ public async Task<IActionResult> ClearCache()
             return View(juegosPendientes);
         }
 
-        public async Task<IActionResult> Detalles(int id)
+       public async Task<IActionResult> Detalles(int id)
         {
             try
             {
+                // ✅ TRACKING DE VISUALIZACIÓN DE JUEGO (agregar al inicio del método)
+                if (User.Identity?.IsAuthenticated ?? false)
+                {
+                    var usuario = await _userManager.GetUserAsync(User);
+                    await _mlService.TrackUserInteractionAsync(usuario.Id, id, "view_game_details");
+                }
+
                 var gameDetails = await _rawgService.GetGameExtendedDetailsAsync(id);
                 if (gameDetails?.Id == 0)
                     return NotFound();
+
+                // ✅ OBTENER JUEGOS SIMILARES CON ML
+                var similarGames = await _mlService.GetSimilarGamesAsync(id);
+                ViewData["SimilarGames"] = similarGames;
 
                 var price = await _priceService.GetGamePriceAsync(gameDetails.Name ?? "");
                 var deals = await _priceService.GetGameDealsAsync(gameDetails.Name ?? "");
@@ -540,7 +617,6 @@ public async Task<IActionResult> ClearCache()
                 return RedirectToAction(nameof(Index));
             }
         }
-
         public async Task<IActionResult> Jugando()
         {
             if (!User.Identity?.IsAuthenticated ?? false)

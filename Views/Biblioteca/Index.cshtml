@@ -23,7 +23,37 @@
         </ul>
     </div>
 </nav>
-
+<!-- ✅ SECCIÓN ML - SOLO para recomendaciones ML -->
+@if (ViewData["IsMLRecommendation"] as bool? == true)
+{
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-dark border-warning" style="border: 2px solid #ffd166; border-radius: 15px;">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4 class="text-warning mb-2" style="color: #ffd166 !important;">
+                                <i class="fas fa-robot me-2"></i>Recomendaciones Inteligentes
+                            </h4>
+                            <p class="text-light mb-0">
+                                Basado en tu biblioteca de 
+                                <span class="badge bg-primary">@ViewData["UserLibraryCount"] juegos</span>
+                                y tu género favorito 
+                                <span class="badge bg-success">@ViewData["UserTopGenre"]</span>
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="text-success">
+                                <i class="fas fa-brain fa-2x me-2"></i>
+                                <span class="h5" style="color: #06d6a0 !important;">@ViewData["RecommendationCount"] recomendaciones</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 <!-- ✅ BÚSQUEDA POR NOMBRE Y BOTONES DE SESIÓN MEJORADOS -->
 <div class="row mb-4">
     <div class="col-12">
@@ -708,6 +738,25 @@ else
             --text-primary: #ffffff;
             --text-secondary: #b8b8d0;
             --navbar-bg: rgba(15, 15, 31, 0.95);
+        }
+                .card.border-warning {
+            background: linear-gradient(135deg, #1a1a2e, #16213e) !important;
+            box-shadow: 0 8px 25px rgba(255, 209, 102, 0.2);
+        }
+        
+        .text-warning {
+            color: #ffd166 !important;
+        }
+        
+        /* Animación sutil para la card ML */
+        @@keyframes subtleGlow {
+            0% { box-shadow: 0 8px 25px rgba(255, 209, 102, 0.2); }
+            50% { box-shadow: 0 8px 30px rgba(255, 209, 102, 0.3); }
+            100% { box-shadow: 0 8px 25px rgba(255, 209, 102, 0.2); }
+        }
+        
+        .card.border-warning {
+            animation: subtleGlow 3s ease-in-out infinite;
         }
     </style>
 }

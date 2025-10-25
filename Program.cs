@@ -7,6 +7,10 @@ using Microsoft.Extensions.Caching.Distributed;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ✅ AGREGAR ESTA LÍNEA (DbContext)
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    
 // ✅ CREACIÓN AUTOMÁTICA DE BASE DE DATOS EN PRODUCCIÓN
 if (builder.Environment.IsProduction())
 {
@@ -23,6 +27,7 @@ if (builder.Environment.IsProduction())
         Console.WriteLine($"❌ Error creando base de datos: {ex.Message}");
     }
 }
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -52,6 +57,7 @@ builder.Services.AddSession(options =>
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.Lax;
 });
+
 
 // ✅ MANTENER CACHÉ EN MEMORIA PARA DATOS LOCALES
 builder.Services.AddMemoryCache();
@@ -122,6 +128,7 @@ builder.Services.ConfigureExternalCookie(options =>
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.Lax;
 });
+builder.Services.AddScoped<Proyecto_Gaming.ML.Services.IBibliotecaMLService, Proyecto_Gaming.ML.Services.BibliotecaMLService>();
 
 // ✅ CONFIGURAR GOOGLE AUTH SOLO SI HAY CREDENCIALES
 if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
