@@ -1,0 +1,22 @@
+/* Tarjetas estadísticas */
+.stat-card {
+  border: 0;
+  color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+}
+.stat-card .stat-title {
+  font-size: .9rem;
+  opacity: .9;
+}
+.stat-card .stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Gradientes */
+.bg-grad-green { background: linear-gradient(135deg, #1cc88a, #17a673); }
+.bg-grad-blue  { background: linear-gradient(135deg, #4e73df, #224abe); }
+.bg-grad-orange{ background: linear-gradient(135deg, #f6c23e, #f4b619); }
+.bg-grad-red   { background: linear-gradient(135deg, #e74a3b, #be3226); }

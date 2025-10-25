@@ -27,6 +27,12 @@ namespace Proyecto_Gaming.Data
 
         // NUEVO: DbSet para reacciones de multimedia
         public DbSet<ReaccionMultimedia> ReaccionesMultimedia { get; set; }
+
+
+        public DbSet<AdminLog> AdminLogs { get; set; }
+        public DbSet<Evento> Eventos { get; set; }
+
+
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
