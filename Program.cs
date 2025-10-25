@@ -58,7 +58,6 @@ builder.Services.AddSession(options =>
     options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
-
 // ✅ MANTENER CACHÉ EN MEMORIA PARA DATOS LOCALES
 builder.Services.AddMemoryCache();
 
@@ -74,6 +73,8 @@ builder.Services.AddHttpClient<IRawgService, RawgService>(client =>
     client.Timeout = TimeSpan.FromSeconds(30);
     client.DefaultRequestHeaders.Add("User-Agent", "GamingApp/1.0");
 });
+// ✅ REGISTRAR SERVICIO DE BIBLIOTECA ML
+builder.Services.AddScoped<Proyecto_Gaming.ML.Services.IBibliotecaMLService, Proyecto_Gaming.ML.Services.BibliotecaMLService>();
 
 // ✅ STATISTICS SERVICE
 builder.Services.AddScoped<IStatsService, StatsService>();
@@ -128,7 +129,7 @@ builder.Services.ConfigureExternalCookie(options =>
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.Lax;
 });
-builder.Services.AddScoped<Proyecto_Gaming.ML.Services.IBibliotecaMLService, Proyecto_Gaming.ML.Services.BibliotecaMLService>();
+
 
 // ✅ CONFIGURAR GOOGLE AUTH SOLO SI HAY CREDENCIALES
 if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
