@@ -18,6 +18,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration.GetConnectionString("Redis");
     options.InstanceName = "Gaming_";
 });
+builder.Services.AddScoped<ILogService, LogService>();
 
 // ✅ CONFIGURAR SESIONES DISTRIBUIDAS
 builder.Services.AddSession(options =>
@@ -46,6 +47,8 @@ builder.Services.AddScoped<IRawgService, RawgService>();
 
 // ✅ STATISTICS SERVICE
 builder.Services.AddScoped<IStatsService, StatsService>();
+builder.Services.AddScoped<IAdminLogService, AdminLogService>();
+
 
 // ✅ OBTENER CREDENCIALES DE GOOGLE (User Secrets tiene prioridad)
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
