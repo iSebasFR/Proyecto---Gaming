@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Proyecto_Gaming.Data;
 using Proyecto_Gaming.Models;
 using Proyecto_Gaming.Services;
+using Microsoft.Extensions.Caching.Distributed;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,9 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.InstanceName = "Gaming_";
 });
 builder.Services.AddScoped<ILogService, LogService>();
+
+// ✅ SERVICIO DE MANTENIMIENTO AUTOMÁTICO
+builder.Services.AddHostedService<CacheMaintenanceService>();
 
 // ✅ CONFIGURAR SESIONES DISTRIBUIDAS
 builder.Services.AddSession(options =>
@@ -41,9 +45,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // ✅ CONFIGURAR RAWG SERVICE
 builder.Services.AddHttpClient<IRawgService, RawgService>(client =>
 {
+    client.BaseAddress = new Uri("https://api.rawg.io/api/");
     client.Timeout = TimeSpan.FromSeconds(30);
+    client.DefaultRequestHeaders.Add("User-Agent", "GamingApp/1.0");
 });
-builder.Services.AddScoped<IRawgService, RawgService>();
 
 // ✅ STATISTICS SERVICE
 builder.Services.AddScoped<IStatsService, StatsService>();
@@ -139,32 +144,76 @@ else
     builder.Services.AddScoped<IEmailService, FileEmailService>();
 }
 
+// ✅ Servicio de precios de juegos
+builder.Services.AddHttpClient<IGamePriceService, CheapSharkPriceService>();
+builder.Services.AddScoped<IGamePriceService, CheapSharkPriceService>();
+
 var app = builder.Build();
 
-// ✅ PRECARGAR DATOS AL INICIAR (OPCIONAL)
-using (var scope = app.Services.CreateScope())
+// ✅ INICIALIZACIÓN AUTOMÁTICA AL INICIAR (REEMPLAZA LA PRECARGA DUPLICADA)
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    Console.WriteLine("🚀 Inicializando sistema de caché automático...");
+    
+    // Ejecutar en segundo plano sin bloquear
+    _ = Task.Run(async () =>
+    {
+        try
+        {
+            using var scope = app.Services.CreateScope();
+            var rawgService = scope.ServiceProvider.GetRequiredService<IRawgService>();
+            var redisCache = scope.ServiceProvider.GetRequiredService<IDistributedCache>();
+            
+            // 1. Limpiar caché corrupto al iniciar
+            await ClearCorruptedCacheOnStartup(redisCache);
+            
+            // 2. Precargar datos esenciales
+            await PreloadEssentialData(rawgService, redisCache);
+            
+            Console.WriteLine("✅ Sistema de caché automático inicializado");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"⚠️ Error en inicialización automática: {ex.Message}");
+        }
+    });
+});
+
+// MÉTODOS DE INICIALIZACIÓN AUTOMÁTICA
+async Task ClearCorruptedCacheOnStartup(IDistributedCache redisCache)
 {
     try
     {
-        var rawgService = scope.ServiceProvider.GetRequiredService<IRawgService>();
-
-        // Ejecutar en segundo plano sin esperar
-        _ = Task.Run(async () =>
+        // Limpiar solo las claves que sabemos que se corrompen
+        for (int i = 1; i <= 5; i++)
         {
-            try
-            {
-                await rawgService.PreloadFirst100GamesAsync();
-                Console.WriteLine("🎮 Precarga de juegos completada");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Error en precarga: {ex.Message}");
-            }
-        });
+            await redisCache.RemoveAsync($"Games____{i}");
+        }
+        Console.WriteLine("🧹 Caché corrupto limpiado al iniciar");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"❌ No se pudo iniciar la precarga: {ex.Message}");
+        Console.WriteLine($"⚠️ No se pudo limpiar caché al iniciar: {ex.Message}");
+    }
+}
+
+async Task PreloadEssentialData(IRawgService rawgService, IDistributedCache redisCache)
+{
+    try
+    {
+        Console.WriteLine("📦 Precargando datos esenciales...");
+        
+        // Precargar solo página 1 y filtros (más rápido y confiable)
+        var page1Task = rawgService.GetGamesAsync("", "", "", 1);
+        var filtersTask = rawgService.GetAvailableFiltersAsync();
+        
+        await Task.WhenAll(page1Task, filtersTask);
+        
+        Console.WriteLine($"✅ Precarga automática - Juegos: {page1Task.Result.Results?.Count ?? 0}, Filtros: {filtersTask.Result.AvailableGenres?.Count ?? 0}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"⚠️ Precarga automática falló: {ex.Message}");
     }
 }
 
@@ -231,7 +280,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 // ✅ ORDEN CORRECTO DE MIDDLEWARES (SESSION ANTES DE AUTH)
-app.UseSession(); // ← NUEVO: Sesiones antes de autenticación
+app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 

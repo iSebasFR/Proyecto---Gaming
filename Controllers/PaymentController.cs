@@ -21,55 +21,59 @@ namespace Proyecto_Gaming.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<Usuario> _userManager;
         private readonly IRawgService _rawgService;
+         private readonly IGamePriceService _priceService;
 
         public PaymentController(
             IPaymentService paymentService, 
             ILogger<PaymentController> logger,
             ApplicationDbContext context,
             UserManager<Usuario> userManager,
-            IRawgService rawgService)
+            IRawgService rawgService,
+            IGamePriceService priceService)
         {
             _paymentService = paymentService;
             _logger = logger;
             _context = context;
             _userManager = userManager;
             _rawgService = rawgService;
+            _priceService = priceService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Checkout(int gameId, decimal price, string gameTitle)
+[HttpPost]
+public async Task<IActionResult> Checkout(int gameId, decimal price, string gameTitle)
+{
+    try
+    {
+        Console.WriteLine($"💰 CHECKOUT INICIADO - GameId: {gameId}, Price: {price}, Title: {gameTitle}");
+        
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
         {
-            try
-            {
-                Console.WriteLine($"🎯 CHECKOUT INICIADO - GameId: {gameId}, Price: {price}, Title: {gameTitle}");
-                
-                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                
-                if (string.IsNullOrEmpty(userId))
-                {
-                    TempData["ErrorMessage"] = "Debes iniciar sesión para realizar una compra";
-                    return RedirectToAction("Login", "Account");
-                }
-
-                // ✅ PRECIO DINÁMICO BASADO EN EL JUEGO
-                var actualPrice = await GetDynamicPriceAsync(gameId, gameTitle, price);
-                Console.WriteLine($"💰 Precio calculado para '{gameTitle}': {actualPrice}");
-
-                var successUrl = Url.Action("Success", "Payment", null, Request.Scheme);
-                var cancelUrl = Url.Action("Cancel", "Payment", null, Request.Scheme);
-
-                var checkoutUrl = await _paymentService.CreateCheckoutSessionAsync(
-                    gameId, userId, actualPrice, gameTitle, successUrl, cancelUrl);
-
-                return Redirect(checkoutUrl);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al iniciar checkout");
-                TempData["ErrorMessage"] = "Error al procesar la compra. Inténtalo de nuevo.";
-                return RedirectToAction("Index", "Biblioteca");
-            }
+            TempData["ErrorMessage"] = "Debes iniciar sesión para realizar una compra";
+            return RedirectToAction("Login", "Account");
         }
+
+        // ✅ USAR EL PRECIO QUE VIENE DEL FORMULARIO (de CheapShark)
+        // En lugar de calcular precio dinámico, usar el que ya tenemos
+        var actualPrice = price;
+        
+        Console.WriteLine($"💰 Usando precio de CheapShark: {actualPrice}");
+
+        var successUrl = Url.Action("Success", "Payment", null, Request.Scheme);
+        var cancelUrl = Url.Action("Cancel", "Payment", null, Request.Scheme);
+        
+        var checkoutUrl = await _paymentService.CreateCheckoutSessionAsync(
+            gameId, userId, actualPrice, gameTitle, successUrl, cancelUrl);
+            
+        return Redirect(checkoutUrl);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error al iniciar checkout");
+        TempData["ErrorMessage"] = "Error al procesar la compra. Inténtalo de nuevo.";
+        return RedirectToAction("Index", "Biblioteca");
+    }
+}
 
         // ✅ MÉTODO PARA PRECIOS DINÁMICOS MEJORADO
         private async Task<decimal> GetDynamicPriceAsync(int gameId, string gameTitle, decimal requestedPrice)
