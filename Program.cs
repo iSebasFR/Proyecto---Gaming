@@ -7,20 +7,20 @@ using Microsoft.Extensions.Caching.Distributed;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ MIGRACIONES AUTOMÁTICAS EN PRODUCCIÓN
+// ✅ CREACIÓN AUTOMÁTICA DE BASE DE DATOS EN PRODUCCIÓN
 if (builder.Environment.IsProduction())
 {
     try
     {
         using var scope = builder.Services.BuildServiceProvider().CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        Console.WriteLine("🔧 Ejecutando migraciones automáticas...");
-        dbContext.Database.Migrate();
-        Console.WriteLine("✅ Migraciones ejecutadas correctamente");
+        Console.WriteLine("🔧 Creando base de datos y tablas automáticamente...");
+        await dbContext.Database.EnsureCreatedAsync();
+        Console.WriteLine("✅ Base de datos y tablas creadas correctamente");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"❌ Error en migraciones automáticas: {ex.Message}");
+        Console.WriteLine($"❌ Error creando base de datos: {ex.Message}");
     }
 }
 
