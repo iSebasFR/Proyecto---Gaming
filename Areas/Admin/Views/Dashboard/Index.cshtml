@@ -1,6 +1,11 @@
 @model Proyecto_Gaming.Areas.Admin.Controllers.AdminDashboardVm
 @{
     ViewData["Title"] = "Panel de Administración";
+
+    // Cálculos derivados que NO requieren cambiar tu VM
+    var total = Model.TotalUsers;
+    var lockoutPercent = total == 0 ? 0 : Math.Round((double)Model.LockedUsers * 100 / total, 1);
+    var adminPercent   = total == 0 ? 0 : Math.Round((double)Model.AdminUsers   * 100 / total, 1);
 }
 
 <h2 class="mb-4">Panel de Administración</h2>
@@ -52,6 +57,68 @@
     </div>
 </div>
 
+<!-- 🔥 NUEVAS MÉTRICAS (derivadas, sin tocar la VM) -->
+<div class="row g-3 mt-1">
+    <!-- % de bloqueados -->
+    <div class="col-md-3">
+        <div class="card metric-card border-0 metric-card--orange">
+            <div class="card-body text-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="h5 mb-0">@lockoutPercent%</div>
+                        <small class="opacity-75">% de bloqueados</small>
+                    </div>
+                    <i class="fas fa-user-lock fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- % de admins -->
+    <div class="col-md-3">
+        <div class="card metric-card border-0 metric-card--blue">
+            <div class="card-body text-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="h5 mb-0">@adminPercent%</div>
+                        <small class="opacity-75">% de administradores</small>
+                    </div>
+                    <i class="fas fa-user-shield fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjetas libres por si luego añadimos más KPIs -->
+    <div class="col-md-3">
+        <div class="card metric-card border-0">
+            <div class="card-body text-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="h6 mb-0 opacity-75">KPI disponible</div>
+                        <small class="opacity-75">Añade más métricas aquí</small>
+                    </div>
+                    <i class="fas fa-chart-line fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card metric-card border-0 metric-card--purple">
+            <div class="card-body text-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="h6 mb-0 opacity-75">KPI disponible</div>
+                        <small class="opacity-75">Espacio reservado</small>
+                    </div>
+                    <i class="fas fa-layer-group fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <hr class="my-4 text-secondary" />
 
 <!-- 🔥 Actividad reciente -->
@@ -67,16 +134,27 @@
 </div>
 
 <style>
-    /* Asegura buen contraste en tema oscuro */
-    #activity-log {
-        color: #e6e6e6;
+    /* ====== Estilos métricas (tema oscuro) ====== */
+    .metric-card {
+        background: linear-gradient(135deg, #1d2630 0%, #111821 100%);
+        box-shadow: 0 8px 18px rgba(0,0,0,.35);
+        border-radius: .75rem;
     }
-    #activity-log .text-muted {
-        color: #b8b8b8 !important;
+    .metric-card--blue {
+        background: linear-gradient(135deg, #233a54 0%, #162433 100%);
     }
-    .card-header.bg-transparent h5 {
-        color: #e6e6e6;
+    .metric-card--orange {
+        background: linear-gradient(135deg, #3f2a1a 0%, #2b1c12 100%);
     }
+    .metric-card--purple {
+        background: linear-gradient(135deg, #2f2143 0%, #21162f 100%);
+    }
+    .opacity-75 { opacity: .75; }
+
+    /* ====== Estilos actividad reciente ====== */
+    #activity-log { color: #e6e6e6; }
+    #activity-log .text-muted { color: #b8b8b8 !important; }
+    .card-header.bg-transparent h5 { color: #e6e6e6; }
     .border-info {
         --bs-border-opacity: 1;
         border-left: 3px solid rgba(13, 202, 240, var(--bs-border-opacity)) !important;
@@ -100,15 +178,16 @@
         }
 
         logs.forEach(l => {
-            const icon = l.action.toLowerCase().includes("usuario") ? "🧍" :
-                         l.action.toLowerCase().includes("bloqueado") ? "🔒" :
-                         l.action.toLowerCase().includes("admin") ? "👑" : "⚙️";
+            const icon = l.action.toLowerCase().includes("usuario") ? "🧍"
+                       : l.action.toLowerCase().includes("bloqueado") ? "🔒"
+                       : l.action.toLowerCase().includes("admin") ? "👑"
+                       : "⚙️";
 
             const html = `
                 <div class="border-start border-info ps-3 mb-3">
                     <div>${icon} <strong>${l.action}</strong></div>
                     <small class="text-muted">
-                        ${new Date(l.timestamp).toLocaleString()} 
+                        ${new Date(l.timestamp).toLocaleString()}
                         — ${l.performedBy || "Sistema"}
                         ${l.targetUser ? " ( " + l.targetUser + " )" : ""}
                     </small>

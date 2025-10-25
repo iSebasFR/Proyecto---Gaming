@@ -30,6 +30,8 @@ namespace Proyecto_Gaming.Data
 
 
         public DbSet<AdminLog> AdminLogs { get; set; }
+        public DbSet<Evento> Eventos { get; set; }
+
 
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
