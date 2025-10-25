@@ -7,9 +7,13 @@ using Microsoft.Extensions.Caching.Distributed;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ✅ AGREGAR ESTA LÍNEA (DbContext)
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 // ✅ CONFIGURACIÓN ESPECÍFICA PARA RENDER/PRODUCCIÓN
 if (builder.Environment.IsProduction())
 {
+    
     // Configuración optimizada para producción
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
