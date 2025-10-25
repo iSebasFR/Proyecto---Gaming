@@ -195,21 +195,30 @@
                             <span class="ms-1">@game.Rating.ToString("0.0")</span>
                         </div>
 
-                        <!-- BOTONES MEJORADOS - MÁS DELGADOS Y SIN EMOTICONOS -->
+                        <!-- ✅ BOTONES MEJORADOS - PRECIO DENTRO DEL BOTÓN -->
                         <div class="d-flex justify-content-between gap-2">
                             <a asp-action="Detalles" asp-route-id="@game.Id" class="btn btn-outline-primary btn-sm flex-fill">
                                 <i class="fas fa-info-circle me-1"></i>Detalles
                             </a>
                             
-                            <form asp-controller="Payment" asp-action="Checkout" method="post" class="flex-fill">
-                                <input type="hidden" name="gameId" value="@game.Id" />
-                                <input type="hidden" name="gameTitle" value="@game.Name" />
-                                <input type="hidden" name="price" value="0" />
-                                
-                                <button type="submit" class="btn btn-success btn-sm w-100">
-                                    <i class="fas fa-shopping-cart me-1"></i>Comprar
-                                </button>
-                            </form>
+                            @if (Model.GamePrices.ContainsKey(game.Id) && Model.GamePrices[game.Id].HasValue)
+                            {
+                                <form asp-controller="Payment" asp-action="Checkout" method="post" class="flex-fill">
+                                    <input type="hidden" name="gameId" value="@game.Id" />
+                                    <input type="hidden" name="gameTitle" value="@game.Name" />
+                                    <input type="hidden" name="price" value="@Model.GamePrices[game.Id]" />
+                                    
+                                    <button type="submit" class="btn btn-success btn-sm w-100">
+                                        <i class="fas fa-shopping-cart me-1"></i>Comprar - $@Model.GamePrices[game.Id]?.ToString("0.00")
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <a asp-action="Detalles" asp-route-id="@game.Id" class="btn btn-secondary btn-sm flex-fill">
+                                    <i class="fas fa-dollar-sign me-1"></i>Ver Precio
+                                </a>
+                            }
                         </div>
                     </div>
                 </div>
@@ -278,7 +287,6 @@ else
 }
 
 @section Styles {
-
     <style>
         /* SEGUNDA NAVBAR MODERNA - CATÁLOGO */
         .catalog-navbar {
@@ -613,6 +621,23 @@ else
         .btn-success:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(6, 214, 160, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 0.5rem 0.75rem;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+            color: white;
         }
 
         .flex-fill {
