@@ -1,21 +1,130 @@
 @model Proyecto_Gaming.Models.Rawg.Game
 
 @{
-    ViewData["Title"] = "Detalles del Juego";
+    ViewData[index: "Title"] = "Detalles del Juego";
 }
 
 <div class="game-details-container">
     <div class="row">
-        <!-- Imagen del Juego -->
-        <div class="col-md-4">
-            <img src="@Model.BackgroundImage" class="game-image img-fluid" alt="@Model.Name">
+        <!-- SECCIÓN IZQUIERDA - IMÁGENES Y MEDIA -->
+        <div class="col-md-6">
+            <!-- CARRUSEL DE IMÁGENES -->
+            <div class="image-carousel-section mb-4">
+                <div id="gameCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        @{
+                            var allImages = new List<string>();
+                            if (!string.IsNullOrEmpty(Model.BackgroundImage))
+                            {
+                                allImages.Add(Model.BackgroundImage);
+                            }
+                            if (Model.ShortScreenshots != null)
+                            {
+                                allImages.AddRange(Model.ShortScreenshots.Select(s => s.Image ?? "").Where(img => !string.IsNullOrEmpty(img)));
+                            }
+                            
+                            for (int i = 0; i < allImages.Count; i++)
+                            {
+                                <div class="carousel-item @(i == 0 ? "active" : "")">
+                                    <img src="@allImages[i]" class="d-block w-100 carousel-image" alt="Screenshot @(i+1)">
+                                </div>
+                            }
+                        }
+                    </div>
+                    
+                    @if (allImages.Count > 1)
+                    {
+                        <button class="carousel-control-prev" type="button" data-bs-target="#gameCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Anterior</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#gameCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Siguiente</span>
+                        </button>
+                    }
+                </div>
+
+                <!-- MINIATURAS -->
+                @if (allImages.Count > 1)
+                {
+                    <div class="carousel-thumbnails mt-3">
+                        @for (int i = 0; i < allImages.Count; i++)
+                        {
+                            <img src="@allImages[i]" class="thumbnail-img @(i == 0 ? "active" : "")" 
+                                 data-bs-target="#gameCarousel" data-bs-slide-to="@i" alt="Thumb @(i+1)">
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- SECCIÓN DE TRÁILERS -->
+            @if (Model.Trailers != null && Model.Trailers.Any(t => !string.IsNullOrEmpty(t.Preview)))
+            {
+                <div class="trailer-section">
+                    <h4 class="section-title">🎬 Tráilers</h4>
+                    <div class="trailer-container">
+                        @foreach (var trailer in Model.Trailers.Take(2).Where(t => !string.IsNullOrEmpty(t.Preview)))
+                        {
+                            <div class="trailer-item mb-3">
+                                <h6 class="trailer-title">@(trailer.Name ?? "Tráiler")</h6>
+                                <div class="video-wrapper">
+                                    <video controls class="w-100 trailer-video" poster="@Model.BackgroundImage">
+                                        <source src="@trailer.Preview" type="video/mp4">
+                                        Tu navegador no soporta el elemento video.
+                                    </video>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
         </div>
-        
+
         <!-- Información del Juego -->
-        <div class="col-md-8">
+        <div class="col-md-6">
             <div class="game-info">
-                <h1 class="game-title">@Model.Name</h1>
+                <!-- PRECIO PRINCIPAL (usaremos ViewData para esto) -->
+                <div class="price-main-section mb-4 p-3">
+                    @if (ViewData["CurrentPrice"] != null)
+                    {
+                        <div class="main-price display-4 text-success fw-bold mb-1">
+                            $@ViewData["CurrentPrice"]
+                        </div>
+                        <div class="price-source text-muted small">
+                            💰 Mejor precio en <strong>@ViewData["BestStore"]</strong>
+                        </div>
+                        @if (ViewData["IsOnSale"] as bool? == true)
+                        {
+                            <div class="sale-badge badge bg-danger mt-2">
+                                🔥 EN OFERTA
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="price-unavailable text-warning">
+                            ⏳ Precio no disponible
+                        </div>
+                    }
+                </div>
                 
+                <h1 class="game-title">@Model.Name</h1>
+
+                <!-- Descripción del Juego -->
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <div class="description-section mb-4">
+                        <div class="game-detail-label">
+                            <i class="fas fa-file-alt"></i>
+                            <span>DESCRIPCIÓN</span>
+                        </div>
+                        <div class="game-description mt-2">
+                            @Html.Raw(Model.Description)
+                        </div>
+                    </div>
+                }
+
                 <!-- Información Básica -->
                 <div class="game-detail-item">
                     <div class="game-detail-label">
@@ -95,16 +204,49 @@
                         }
                     </div>
                 </div>
+                
+                <!-- OFERTAS EN TIENDAS -->
+                @if (ViewData["StoreOffers"] != null)
+                {
+                    <div class="store-offers-section mt-4">
+                        <div class="game-detail-label">
+                            <i class="fas fa-store"></i>
+                            <span>OFERTAS EN TIENDAS</span>
+                        </div>
+                        <div class="store-offers mt-2">
+                            @foreach (var offer in (List<Proyecto_Gaming.ViewModels.StoreOffer>)ViewData["StoreOffers"])
+                            {
+                                <div class="store-offer-card @(offer.IsOnSale ? "on-sale" : "")">
+                                    <div class="store-info">
+                                        <span class="store-name">@offer.StoreName</span>
+                                        <div class="offer-prices">
+                                            <span class="current-price">$@offer.Price.ToString("0.00")</span>
+                                            @if (offer.IsOnSale)
+                                            {
+                                                <span class="original-price">$@offer.RetailPrice.ToString("0.00")</span>
+                                                <span class="savings-badge">-@offer.Savings%</span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <a href="@offer.DealUrl" target="_blank" class="store-link btn btn-outline-primary btn-sm">
+                                        Ver
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
 
-                <!-- Botones de Acción -->
+                <!-- BOTONES DE ACCIÓN -->
                 <div class="action-buttons">
                     <form asp-controller="Payment" asp-action="Checkout" method="post" class="d-inline">
                         <input type="hidden" name="gameId" value="@Model.Id" />
                         <input type="hidden" name="gameTitle" value="@Model.Name" />
-                        <input type="hidden" name="price" value="0" />
+                        <input type="hidden" name="price" value="@(ViewData["CurrentPrice"] ?? "39.99")" />
                         
                         <button type="submit" class="btn btn-success">
-                            <i class="fas fa-shopping-cart me-2"></i>Comprar juego
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            Comprar @(ViewData["CurrentPrice"] != null ? $" - ${ViewData["CurrentPrice"]}" : "")
                         </button>
                     </form>
                     <a asp-action="Index" class="btn btn-secondary">
@@ -116,6 +258,7 @@
     </div>
 </div>
 
+<!-- Mantener el mismo CSS que ya tienes -->
 <style>
     /* PALETA DE COLORES GAMING */
     :root {
@@ -400,5 +543,219 @@
         gap: 0.5rem;
         margin-top: 0.5rem;
     }
+      /* CARRUSEL DE IMÁGENES */
+    .carousel-image {
+        height: 300px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 2px solid rgba(139, 44, 230, 0.3);
+    }
+
+    .carousel-thumbnails {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 5px 0;
+    }
+
+    .thumbnail-img {
+        width: 70px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 6px;
+        cursor: pointer;
+        opacity: 0.6;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .thumbnail-img.active,
+    .thumbnail-img:hover {
+        opacity: 1;
+        border-color: var(--neon-blue);
+        transform: scale(1.05);
+    }
+
+    /* SECCIÓN DE PRECIO PRINCIPAL */
+    .price-main-section {
+        background: rgba(40, 167, 69, 0.1);
+        border-radius: 12px;
+        border: 2px solid rgba(40, 167, 69, 0.3);
+        text-align: center;
+    }
+
+    .main-price {
+        text-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+    }
+
+    .sale-badge {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        animation: pulse 2s infinite;
+    }
+
+    /* SECCIÓN DE DESCRIPCIÓN */
+    .game-description {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        max-height: 200px;
+        overflow-y: auto;
+        padding: 0.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        border-left: 3px solid var(--neon-purple);
+    }
+
+    /* SECCIÓN DE TRÁILERS */
+    .trailer-section {
+        margin-top: 1.5rem;
+    }
+
+    .section-title {
+        color: var(--neon-blue);
+        font-weight: 700;
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+    }
+
+    .trailer-title {
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .video-wrapper {
+        position: relative;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 2px solid rgba(66, 139, 255, 0.3);
+    }
+
+    .trailer-video {
+        border-radius: 8px;
+        background: #000;
+    }
+
+    /* OFERTAS EN TIENDAS */
+    .store-offers {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .store-offer-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.8rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .store-offer-card:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateX(5px);
+    }
+
+    .store-offer-card.on-sale {
+        border-color: rgba(255, 193, 7, 0.3);
+        background: rgba(255, 193, 7, 0.05);
+    }
+
+    .store-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .store-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+
+    .offer-prices {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .current-price {
+        color: var(--neon-blue);
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .original-price {
+        text-decoration: line-through;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+    }
+
+    .savings-badge {
+        background: #dc3545;
+        color: white;
+        padding: 0.1rem 0.4rem;
+        border-radius: 10px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .store-link {
+        font-size: 0.8rem;
+        padding: 0.3rem 0.8rem;
+    }
+
+    /* ANIMACIONES */
+    @@keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.7; }
+        100% { opacity: 1; }
+    }
+
+    /* SCROLLBAR PERSONALIZADO */
+    .game-description::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .game-description::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+    }
+
+    .game-description::-webkit-scrollbar-thumb {
+        background: var(--neon-purple);
+        border-radius: 3px;
+    }
     
 </style>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Miniaturas del carrusel
+            document.querySelectorAll('.thumbnail-img').forEach((thumb, index) => {
+                thumb.addEventListener('click', function() {
+                    document.querySelectorAll('.thumbnail-img').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Control de videos
+            document.querySelectorAll('.trailer-video').forEach(video => {
+                video.addEventListener('mouseenter', function() {
+                    this.play().catch(e => console.log('Auto-play prevented:', e));
+                });
+                
+                video.addEventListener('mouseleave', function() {
+                    this.pause();
+                });
+
+                // Evitar auto-play con sonido
+                video.volume = 0;
+            });
+        });
+    </script>
+}
