@@ -144,9 +144,20 @@ else
     builder.Services.AddScoped<IEmailService, FileEmailService>();
 }
 
-// ✅ Servicio de precios de juegos
-builder.Services.AddHttpClient<IGamePriceService, CheapSharkPriceService>();
-builder.Services.AddScoped<IGamePriceService, CheapSharkPriceService>();
+// ✅ CONFIGURAR HTTPCLIENT PARA CHEAPSHARK OPTIMIZADO
+builder.Services.AddHttpClient<IGamePriceService, CheapSharkPriceService>(client =>
+{
+    client.BaseAddress = new Uri("https://www.cheapshark.com/api/1.0/");
+    client.Timeout = TimeSpan.FromSeconds(15);
+    client.DefaultRequestHeaders.Add("User-Agent", "GamingApp/1.0");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
+
+// ✅ LIMITAR CONCURRENCIA
+builder.Services.Configure<HttpClientHandler>(options =>
+{
+    options.MaxConnectionsPerServer = 10;
+});
 
 var app = builder.Build();
 

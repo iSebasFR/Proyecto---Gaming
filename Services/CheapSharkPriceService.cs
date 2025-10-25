@@ -17,14 +17,20 @@ namespace Proyecto_Gaming.Services
         private readonly HttpClient _httpClient;
         private readonly IDistributedCache _cache;
         private readonly ILogger<CheapSharkPriceService> _logger;
+        
+         // ✅ CONFIGURACIÓN DE LÍMITES
+        private readonly TimeSpan _cacheDuration = TimeSpan.FromHours(4);
+        private readonly TimeSpan _requestTimeout = TimeSpan.FromSeconds(10);
+
 
         public CheapSharkPriceService(HttpClient httpClient, IDistributedCache cache, ILogger<CheapSharkPriceService> logger)
         {
             _httpClient = httpClient;
             _cache = cache;
             _logger = logger;
-            _httpClient.BaseAddress = new Uri("https://www.cheapshark.com/api/1.0/");
-            _httpClient.Timeout = TimeSpan.FromSeconds(15);
+             _httpClient.BaseAddress = new Uri("https://www.cheapshark.com/api/1.0/");
+            _httpClient.Timeout = _requestTimeout;
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "GamingApp/1.0");
         }
 
         public async Task<decimal?> GetGamePriceAsync(string gameName)
@@ -33,47 +39,51 @@ namespace Proyecto_Gaming.Services
                 return null;
 
             var cacheKey = $"price_{gameName.ToLower().Replace(" ", "_")}";
-            var cachedPrice = await _cache.GetStringAsync(cacheKey);
             
-            if (!string.IsNullOrEmpty(cachedPrice) && decimal.TryParse(cachedPrice, out var price))
-            {
-                return price;
-            }
-
             try
             {
-                // ✅ BUSCAR JUEGO EN CHEAPSHARK
-                var response = await _httpClient.GetAsync($"games?title={Uri.EscapeDataString(gameName)}&limit=1");
+                // ✅ CACHE PRIMERO
+                var cachedPrice = await _cache.GetStringAsync(cacheKey);
+                if (!string.IsNullOrEmpty(cachedPrice) && decimal.TryParse(cachedPrice, out var price))
+                {
+                    return price;
+                }
+
+                // ✅ LIMPIAR NOMBRE PARA MEJOR BÚSQUEDA
+                var cleanName = CleanGameName(gameName);
+                
+                // ✅ BUSCAR EN CHEAPSHARK CON TIMEOUT
+                using var cts = new CancellationTokenSource(_requestTimeout);
+                var response = await _httpClient.GetAsync($"games?title={Uri.EscapeDataString(cleanName)}&limit=1", cts.Token);
                 
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     var games = JsonSerializer.Deserialize<List<CheapSharkGame>>(content);
-
-                    if (games != null && games.Any())
+                    
+                    var game = games?.FirstOrDefault();
+                    if (game != null)
                     {
-                        var game = games.First();
-                        
-                        // ✅ OBTENER EL MEJOR PRECIO ACTUAL
+                        // ✅ OBTENER MEJOR PRECIO
                         var bestPrice = await GetBestCurrentPrice(game.CheapestDealID);
-
                         if (bestPrice.HasValue)
                         {
-                            // Cache por 4 horas (los precios cambian frecuentemente)
-                            var cacheOptions = new DistributedCacheEntryOptions
-                            {
-                                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(4)
-                            };
-                            await _cache.SetStringAsync(cacheKey, bestPrice.Value.ToString(), cacheOptions);
+                            // ✅ GUARDAR EN CACHE
+                            await _cache.SetStringAsync(cacheKey, bestPrice.Value.ToString(), 
+                                new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = _cacheDuration });
                             
                             return bestPrice.Value;
                         }
                     }
                 }
             }
+            catch (OperationCanceledException)
+            {
+                _logger.LogWarning("Timeout obteniendo precio para {GameName}", gameName);
+            }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Error al obtener precio para {GameName}", gameName);
+                _logger.LogWarning(ex, "Error obteniendo precio para {GameName}", gameName);
             }
 
             return null;
@@ -82,59 +92,61 @@ namespace Proyecto_Gaming.Services
         public async Task<Dictionary<string, decimal?>> GetBulkPricesAsync(List<string> gameNames)
         {
             var prices = new Dictionary<string, decimal?>();
-            var tasks = new List<Task>();
-
-            foreach (var gameName in gameNames)
+            
+            // ✅ LIMITAR A 50 JUEGOS MÁXIMO
+            var limitedNames = gameNames.Take(50).ToList();
+            
+            var tasks = limitedNames.Select(async gameName =>
             {
-                tasks.Add(Task.Run(async () =>
-                {
-                    var price = await GetGamePriceAsync(gameName);
-                    prices[gameName] = price;
-                }));
-            }
+                var price = await GetGamePriceAsync(gameName);
+                prices[gameName] = price;
+            });
 
             await Task.WhenAll(tasks);
             return prices;
         }
 
-        public async Task<List<StoreOffer>> GetGameDealsAsync(string gameName)
+            public async Task<List<StoreOffer>> GetGameDealsAsync(string gameName)
+    {
+        try
         {
-            try
+            // ✅ LIMITAR RESULTADOS
+            var cleanName = CleanGameName(gameName);
+            var response = await _httpClient.GetAsync($"games?title={Uri.EscapeDataString(cleanName)}&limit=3");
+            
+            if (response.IsSuccessStatusCode)
             {
-                var response = await _httpClient.GetAsync($"games?title={Uri.EscapeDataString(gameName)}&limit=5");
+                var content = await response.Content.ReadAsStringAsync();
+                var games = JsonSerializer.Deserialize<List<CheapSharkGame>>(content);
+                var deals = new List<StoreOffer>();
                 
-                if (response.IsSuccessStatusCode)
+                foreach (var game in games ?? new List<CheapSharkGame>())
                 {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var games = JsonSerializer.Deserialize<List<CheapSharkGame>>(content);
-
-                    var deals = new List<StoreOffer>();
-                    
-                    foreach (var game in games ?? new List<CheapSharkGame>())
+                    // ✅ LIMITAR OFERTAS POR JUEGO
+                    foreach (var deal in game.Deals?.Take(3) ?? new List<DealInfo>())
                     {
-                        foreach (var deal in game.Deals ?? new List<DealInfo>())
+                        var storeName = await GetStoreName(deal.StoreID);
+                        deals.Add(new StoreOffer
                         {
-                            deals.Add(new StoreOffer
-                            {
-                                StoreName = await GetStoreName(deal.StoreID),
-                                Price = decimal.Parse(deal.Price),
-                                RetailPrice = decimal.Parse(deal.RetailPrice),
-                                Savings = deal.Savings,
-                                DealUrl = $"https://www.cheapshark.com/redirect?dealID={deal.DealID}"
-                            });
-                        }
+                            StoreName = storeName,
+                            Price = decimal.Parse(deal.Price),
+                            RetailPrice = decimal.Parse(deal.RetailPrice),
+                            Savings = deal.Savings,
+                            DealUrl = $"https://www.cheapshark.com/redirect?dealID={deal.DealID}"
+                        });
                     }
-
-                    return deals.OrderBy(d => d.Price).ToList();
                 }
+                
+                return deals.OrderBy(d => d.Price).Take(5).ToList(); // ✅ MÁXIMO 5 OFERTAS
             }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Error al obtener ofertas para {GameName}", gameName);
-            }
-
-            return new List<StoreOffer>();
         }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Error obteniendo ofertas para {GameName}", gameName);
+        }
+
+        return new List<StoreOffer>();
+    }
 
         private async Task<decimal?> GetBestCurrentPrice(string cheapestDealId)
         {
@@ -145,7 +157,7 @@ namespace Proyecto_Gaming.Services
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     var deal = JsonSerializer.Deserialize<CheapSharkDeal>(content);
-                    
+
                     if (deal != null && decimal.TryParse(deal.GameInfo.SalePrice, out var price))
                     {
                         return price;
@@ -159,6 +171,26 @@ namespace Proyecto_Gaming.Services
 
             return null;
         }
+
+            // ✅ MÉTODO PARA LIMPIAR NOMBRES DE JUEGOS
+    private string CleanGameName(string gameName)
+    {
+        if (string.IsNullOrEmpty(gameName)) return "";
+        
+        // Remover ediciones especiales, años, etc. para mejor búsqueda
+        var clean = gameName
+            .Replace("®", "")
+            .Replace("™", "")
+            .Replace(":", "")
+            .Replace("-", " ")
+            .Replace("'", "");
+            
+        // Limitar longitud para API
+        return clean.Length > 50 ? clean.Substring(0, 50) : clean;
+    }
+
+        
+
 
         private async Task<string> GetStoreName(string storeId)
         {

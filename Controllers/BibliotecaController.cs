@@ -39,9 +39,18 @@ namespace Proyecto_Gaming.Controllers
         // GET: Biblioteca - CON SESIONES Y TRACKING ML
         public async Task<IActionResult> Index(string? search, string? genre, string? platform, int page = 1)
         {
-            // ✅ DIAGNÓSTICO COMPLETO
-            Console.WriteLine("=== 🚀 DIAGNÓSTICO BIBLIOTECA CONTROLLER ===");
-            Console.WriteLine($"📊 Parámetros recibidos - Search: '{search}', Genre: '{genre}', Platform: '{platform}', Page: {page}");
+            // ✅ CONFIGURACIÓN DE LÍMITES OPTIMIZADA
+            const int MAX_PAGES = 5;
+            const int PAGE_SIZE = 20;
+            const int MAX_GAMES_FOR_PRICES = 30; // ✅ REDUCIDO A 30 PARA MÁS RENDIMIENTO
+
+            // Validar página máxima
+            if (page > MAX_PAGES)
+            {
+                page = MAX_PAGES;
+                TempData["Info"] = $"Se ha limitado la búsqueda a {MAX_PAGES} páginas para mejor rendimiento.";
+            }
+
             
             if (!User.Identity?.IsAuthenticated ?? false)
             {
@@ -90,72 +99,52 @@ namespace Proyecto_Gaming.Controllers
                 var availableFilters = await _rawgService.GetAvailableFiltersAsync();
                 Console.WriteLine($"✅ Filtros cargados - Géneros: {availableFilters?.AvailableGenres?.Count ?? 0}, Plataformas: {availableFilters?.AvailablePlatforms?.Count ?? 0}");
 
-                // ✅ DEBUG ESPECÍFICO PARA LA LLAMADA PRINCIPAL
                 Console.WriteLine($"🔍 ANTES de llamar a RAWG API - Page: {page}");
-                Console.WriteLine($"🔍 Parámetros enviados - Search: '{search}', Genre: '{genre}', Platform: '{platform}'");
                 
                 var gameResponse = await _rawgService.GetGamesAsync(search, genre, platform, page);
                 
-                // ✅ DEBUG DETALLADO DE LA RESPUESTA
-                Console.WriteLine($"📦 RESPUESTA CRUDA - Count: {gameResponse?.Count}, HasResults: {gameResponse?.Results?.Any()}");
-                Console.WriteLine($"📦 Next: {gameResponse?.Next ?? "NULL"}, Previous: {gameResponse?.Previous ?? "NULL"}");
+                // ✅ FILTRAR JUEGOS: SOLO LOS QUE TIENEN DATOS COMPLETOS
+                var filteredGames = FilterCompleteGames(gameResponse?.Results);
                 
-                if (gameResponse?.Results != null)
-                {
-                    Console.WriteLine($"🎮 Juegos en respuesta: {gameResponse.Results.Count}");
-                    if (gameResponse.Results.Any())
-                    {
-                        Console.WriteLine("📋 Primeros 3 juegos:");
-                        foreach (var game in gameResponse.Results.Take(3))
-                        {
-                            Console.WriteLine($"   - {game.Name} (ID: {game.Id}, Rating: {game.Rating})");
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("❌ Lista de juegos VACÍA pero existe");
-                        // ✅ DEBUG ADICIONAL: Verificar qué está pasando
-                        Console.WriteLine("🔍 Verificando respuesta completa...");
-                        Console.WriteLine($"🔍 Count: {gameResponse.Count}, Next: {gameResponse.Next}, Previous: {gameResponse.Previous}");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("❌ gameResponse o Results es NULL");
-                }
+                Console.WriteLine($"🎮 Juegos obtenidos: {gameResponse?.Results?.Count ?? 0}");
+                Console.WriteLine($"✅ Juegos con datos completos: {filteredGames.Count}");
 
-                // ✅ OBTENER PRECIOS
-                Console.WriteLine("🔄 Obteniendo precios de CheapShark...");
-                var prices = new Dictionary<int, decimal?>();
-                if (gameResponse?.Results != null && gameResponse.Results.Any())
-                {
-                    foreach (var game in gameResponse.Results)
-                    {
-                        if (!string.IsNullOrEmpty(game.Name))
-                        {
-                            var price = await _priceService.GetGamePriceAsync(game.Name);
-                            prices[game.Id] = price;
-                            if (price.HasValue)
-                            {
-                                Console.WriteLine($"   💰 Precio para {game.Name}: ${price.Value}");
-                            }
-                        }
-                    }
-                }
-                Console.WriteLine($"✅ Precios obtenidos: {prices.Count} juegos con precio");
+            // ✅ OBTENER PRECIOS Y FILTRAR JUEGOS SIN PRECIO
+            Console.WriteLine("🔄 Obteniendo precios y filtrando juegos...");
+            var gamesWithPrices = new List<Game>();
+            var prices = new Dictionary<int, decimal?>();
 
-                // ✅ CREAR VIEWMODEL
+            if (filteredGames.Any())
+            {
+                // ✅ USAR EL NUEVO MÉTODO QUE FILTRA AUTOMÁTICAMENTE
+                var gamesForPricing = filteredGames.Take(MAX_GAMES_FOR_PRICES).ToList();
+                Console.WriteLine($"💰 Buscando precios para {gamesForPricing.Count} juegos...");
+                
+                (gamesWithPrices, prices) = await GetGamesWithPricesAsync(gamesForPricing);
+                
+                Console.WriteLine($"✅ Encontrados {gamesWithPrices.Count} juegos con precio disponible");
+            }
+            else
+            {
+                Console.WriteLine("⚠️ No hay juegos válidos para obtener precios");
+            }
+
+                // ✅ CALCULAR PÁGINAS CON LÍMITE
+                var totalResults = gameResponse?.Count ?? 0;
+                var limitedTotalPages = Math.Min((int)Math.Ceiling(totalResults / (double)PAGE_SIZE), MAX_PAGES);
+
+                // ✅ CREAR VIEWMODEL SOLO CON JUEGOS QUE TIENEN PRECIO
                 var viewModel = new GameCatalogViewModel
                 {
-                    Games = gameResponse?.Results ?? new List<Game>(),
+                    Games = gamesWithPrices, // ✅ SOLO JUEGOS CON PRECIO DISPONIBLE
                     Genres = availableFilters?.AvailableGenres ?? new List<Genre>(),
                     Platforms = availableFilters?.AvailablePlatforms ?? new List<Platform>(),
                     Search = search,
                     SelectedGenre = genre,
                     SelectedPlatform = platform,
                     CurrentPage = page,
-                    TotalPages = Math.Min((int)Math.Ceiling((gameResponse?.Count > 0 ? gameResponse.Count : 1) / 20.0), 5),
-                    HasNextPage = !string.IsNullOrEmpty(gameResponse?.Next) && page < 5,
+                    TotalPages = limitedTotalPages,
+                    HasNextPage = !string.IsNullOrEmpty(gameResponse?.Next) && page < MAX_PAGES,
                     HasPreviousPage = !string.IsNullOrEmpty(gameResponse?.Previous) && page > 1,
                     AvailableGenres = (availableFilters?.AvailableGenres ?? new List<Genre>())
                         .Select(g => new SelectListItem 
@@ -178,7 +167,27 @@ namespace Proyecto_Gaming.Controllers
                     GamePrices = prices
                 };
 
-                Console.WriteLine($"✅ ViewModel creado exitosamente - Juegos: {viewModel.Games.Count}, Precios: {viewModel.GamePrices.Count}");
+                // ✅ INFORMACIÓN DE OPTIMIZACIÓN
+                if (filteredGames.Count < (gameResponse?.Results?.Count ?? 0))
+                {
+                    var filteredOut = (gameResponse?.Results?.Count ?? 0) - filteredGames.Count;
+                    TempData["Info"] = $"Mostrando {filteredGames.Count} juegos completos. Se omitieron {filteredOut} juegos incompletos.";
+                }
+               // ✅ INFORMACIÓN SOBRE PRECIOS
+                if (gamesWithPrices.Count < filteredGames.Count)
+                {
+                    var withoutPrice = filteredGames.Count - gamesWithPrices.Count;
+                    if (TempData["Info"] != null)
+                    {
+                        TempData["Info"] += $" | {withoutPrice} sin precio";
+                    }
+                    else
+                    {
+                        TempData["Info"] = $"Mostrando {gamesWithPrices.Count} juegos con precio. {withoutPrice} juegos sin precio omitidos.";
+                    }
+                } 
+
+                Console.WriteLine($"✅ ViewModel creado - Juegos: {viewModel.Games.Count}, Precios: {viewModel.GamePrices.Count}");
                 Console.WriteLine("=== ✅ DIAGNÓSTICO COMPLETADO ===");
 
                 return View(viewModel);
@@ -187,7 +196,6 @@ namespace Proyecto_Gaming.Controllers
             {
                 Console.WriteLine($"💥 ERROR CRÍTICO: {ex.Message}");
                 Console.WriteLine($"💥 StackTrace: {ex.StackTrace}");
-                
                 TempData["Error"] = $"Error al cargar los juegos: {ex.Message}";
                 
                 return View(new GameCatalogViewModel { 
@@ -196,220 +204,112 @@ namespace Proyecto_Gaming.Controllers
                     AvailablePlatforms = new List<SelectListItem>(),
                     UserPreferences = userPreferences,
                     RecentSearches = new List<UserSearch>(),
-                    RecentSearchTerms = new List<string>()
+                    RecentSearchTerms = new List<string>(),
+                    TotalPages = MAX_PAGES
                 });
             }
         }
 
-        // ✅ TESTS DE DIAGNÓSTICO
-        public async Task<IActionResult> TestRawgConnection()
+        // ✅ MÉTODO PARA FILTRAR JUEGOS COMPLETOS
+        private List<Game> FilterCompleteGames(List<Game>? games)
         {
+            if (games == null) return new List<Game>();
+
+            var completeGames = games.Where(game =>
+                !string.IsNullOrEmpty(game.Name) &&           // ✅ Tiene nombre
+                !string.IsNullOrEmpty(game.BackgroundImage) && // ✅ Tiene imagen
+                game.Rating > 0 &&                           // ✅ Tiene rating
+                (game.Genres?.Any() == true) &&              // ✅ Tiene géneros
+                (game.Platforms?.Any() == true) &&           // ✅ Tiene plataformas
+                !string.IsNullOrEmpty(game.Released) &&      // ✅ Tiene fecha de lanzamiento
+                DateTime.TryParse(game.Released, out _)      // ✅ Fecha válida
+            ).ToList();
+
+            Console.WriteLine($"🔍 Filtrado: {games.Count} → {completeGames.Count} juegos completos");
+            return completeGames;
+        }
+
+        // ✅ REEMPLAZAR EL MÉTODO EXISTENTE con este NUEVO MÉTODO MEJORADO
+        private async Task<(List<Game> gamesWithPrices, Dictionary<int, decimal?> prices)> GetGamesWithPricesAsync(List<Game> games)
+        {
+            var gamesWithPrices = new List<Game>();
+            var prices = new Dictionary<int, decimal?>();
+            
+            if (!games.Any())
+            {
+                Console.WriteLine("⚠️ No hay juegos para obtener precios");
+                return (gamesWithPrices, prices);
+            }
+
             try
             {
-                Console.WriteLine("🧪 ========== TEST RAWG CONNECTION ==========");
+                var semaphore = new SemaphoreSlim(2, 2); // ✅ REDUCIDO A 2 llamadas simultáneas
+                var tasks = new List<Task>();
+                var processedCount = 0;
+                var totalGames = games.Count;
                 
-                // Test 1: Llamada directa igual que en Index
-                Console.WriteLine("🧪 Test 1: Llamada sin parámetros (como Index)");
-                var testResponse1 = await _rawgService.GetGamesAsync("", "", "", 1);
-                Console.WriteLine($"🧪 Test 1 - Count: {testResponse1.Count}, Games: {testResponse1.Results?.Count}");
-                
-                // Test 2: Con parámetros null
-                Console.WriteLine("🧪 Test 2: Llamada con parámetros null");
-                var testResponse2 = await _rawgService.GetGamesAsync(null, null, null, 1);
-                Console.WriteLine($"🧪 Test 2 - Count: {testResponse2.Count}, Games: {testResponse2.Results?.Count}");
-                
-                // Test 3: Con búsqueda popular
-                Console.WriteLine("🧪 Test 3: Con búsqueda 'the'");
-                var testResponse3 = await _rawgService.GetGamesAsync("the", null, null, 1);
-                Console.WriteLine($"🧪 Test 3 - Count: {testResponse3.Count}, Games: {testResponse3.Results?.Count}");
-                
-                // Test 4: Verificar primeros juegos
-                if (testResponse3.Results?.Any() == true)
+                foreach (var game in games)
                 {
-                    Console.WriteLine("🧪 Primeros 3 juegos del Test 3:");
-                    foreach (var game in testResponse3.Results.Take(3))
+                    await semaphore.WaitAsync();
+                    
+                    tasks.Add(Task.Run(async () =>
                     {
-                        Console.WriteLine($"🧪   - {game.Name} (ID: {game.Id})");
-                    }
+                        try
+                        {
+                            // ✅ MÁS PAUSA ENTRE LLAMADAS (200ms)
+                            if (processedCount > 0)
+                            {
+                                await Task.Delay(200);
+                            }
+
+                            var price = await _priceService.GetGamePriceAsync(game.Name ?? "");
+                            
+                            lock (prices)
+                            {
+                                processedCount++;
+                                prices[game.Id] = price;
+                                
+                                // ✅ SOLO AGREGAR A LA LISTA SI TIENE PRECIO
+                                if (price.HasValue)
+                                {
+                                    gamesWithPrices.Add(game);
+                                    Console.WriteLine($"   💰 [{processedCount}/{totalGames}] {game.Name}: ${price.Value}");
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"   ❌ [{processedCount}/{totalGames}] {game.Name}: Precio no disponible");
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            lock (prices)
+                            {
+                                processedCount++;
+                                Console.WriteLine($"   ⚠️ [{processedCount}/{totalGames}] Error en {game.Name}: {ex.Message}");
+                            }
+                        }
+                        finally
+                        {
+                            semaphore.Release();
+                        }
+                    }));
                 }
 
-                return Content($"🧪 Tests completados. Revisa los logs del servidor.<br>" +
-                              $"Test 1: {testResponse1.Count} juegos, {testResponse1.Results?.Count} resultados<br>" +
-                              $"Test 2: {testResponse2.Count} juegos, {testResponse2.Results?.Count} resultados<br>" +
-                              $"Test 3: {testResponse3.Count} juegos, {testResponse3.Results?.Count} resultados");
+                Console.WriteLine($"🕐 Esperando {tasks.Count} tareas de precios...");
+                await Task.WhenAll(tasks);
+                Console.WriteLine($"✅ Tareas completadas: {gamesWithPrices.Count} juegos con precio de {totalGames} total");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Test Error: {ex.Message}");
-                Console.WriteLine($"❌ StackTrace: {ex.StackTrace}");
-                return Content($"❌ ERROR: {ex.Message}");
+                Console.WriteLine($"❌ Error en obtención de precios: {ex.Message}");
             }
+
+            return (gamesWithPrices, prices);
         }
 
-        // ✅ TEST DE FILTROS
-        public async Task<IActionResult> TestFilters()
-        {
-            try
-            {
-                Console.WriteLine("🧪 ========== TEST FILTERS ==========");
-                
-                var filters = await _rawgService.GetAvailableFiltersAsync();
-                Console.WriteLine($"🧪 Filtros - Géneros: {filters?.AvailableGenres?.Count}, Plataformas: {filters?.AvailablePlatforms?.Count}");
-                
-                if (filters?.AvailableGenres?.Any() == true)
-                {
-                    Console.WriteLine("🧪 Primeros 5 géneros:");
-                    foreach (var genre in filters.AvailableGenres.Take(5))
-                    {
-                        Console.WriteLine($"🧪   - {genre.Name} (ID: {genre.Id}, Slug: {genre.Slug})");
-                    }
-                }
-                
-                if (filters?.AvailablePlatforms?.Any() == true)
-                {
-                    Console.WriteLine("🧪 Primeras 5 plataformas:");
-                    foreach (var platform in filters.AvailablePlatforms.Take(5))
-                    {
-                        Console.WriteLine($"🧪   - {platform.Name} (ID: {platform.Id}, Slug: {platform.Slug})");
-                    }
-                }
 
-                return Content($"🧪 Test Filtros completado.<br>" +
-                              $"Géneros: {filters?.AvailableGenres?.Count}<br>" +
-                              $"Plataformas: {filters?.AvailablePlatforms?.Count}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Test Filters Error: {ex.Message}");
-                return Content($"❌ ERROR: {ex.Message}");
-            }
-        }
-
-        // ✅ TEST COMPLETO DEL FLUJO
-        public async Task<IActionResult> TestCompleteFlow()
-        {
-            try
-            {
-                Console.WriteLine("🧪 ========== TEST COMPLETE FLOW ==========");
-
-                if (!User.Identity?.IsAuthenticated ?? false)
-                {
-                    return Content("❌ No autenticado");
-                }
-
-                var usuario = await _userManager.GetUserAsync(User);
-                Console.WriteLine($"🧪 Usuario: {usuario?.UserName}");
-
-                // Simular el flujo completo del Index
-                var search = "";
-                var genre = "";
-                var platform = "";
-                var page = 1;
-
-                Console.WriteLine("🧪 1. Obteniendo filtros...");
-                var filters = await _rawgService.GetAvailableFiltersAsync();
-                Console.WriteLine($"🧪    Filtros: {filters?.AvailableGenres?.Count} géneros, {filters?.AvailablePlatforms?.Count} plataformas");
-
-                Console.WriteLine("🧪 2. Obteniendo juegos...");
-                var games = await _rawgService.GetGamesAsync(search, genre, platform, page);
-                Console.WriteLine($"🧪    Juegos: {games.Count} total, {games.Results?.Count} en página");
-
-                Console.WriteLine("🧪 3. Obteniendo precios...");
-                var prices = new Dictionary<int, decimal?>();
-                if (games.Results?.Any() == true)
-                {
-                    foreach (var game in games.Results.Take(3))
-                    {
-                        var price = await _priceService.GetGamePriceAsync(game.Name);
-                        prices[game.Id] = price;
-                        Console.WriteLine($"🧪    Precio {game.Name}: {price?.ToString("C") ?? "N/A"}");
-                    }
-                }
-
-                Console.WriteLine("🧪 4. Creando ViewModel...");
-                var viewModel = new GameCatalogViewModel
-                {
-                    Games = games.Results ?? new List<Game>(),
-                    AvailableGenres = filters?.AvailableGenres?.Select(g => new SelectListItem
-                    {
-                        Value = g.Slug ?? g.Id.ToString(),
-                        Text = g.Name ?? "Desconocido"
-                    }).ToList() ?? new List<SelectListItem>(),
-                    AvailablePlatforms = filters?.AvailablePlatforms?.Select(p => new SelectListItem
-                    {
-                        Value = p.Id.ToString(),
-                        Text = p.Name ?? "Desconocido"
-                    }).ToList() ?? new List<SelectListItem>(),
-                    GamePrices = prices
-                };
-
-                Console.WriteLine($"🧪    ViewModel: {viewModel.Games.Count} juegos, {viewModel.GamePrices.Count} precios");
-
-                return Content($"🧪 Test Complete Flow EXITOSO<br>" +
-                              $"Juegos: {viewModel.Games.Count}<br>" +
-                              $"Precios: {viewModel.GamePrices.Count}<br>" +
-                              $"Géneros: {viewModel.AvailableGenres.Count}<br>" +
-                              $"Plataformas: {viewModel.AvailablePlatforms.Count}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Test Complete Flow Error: {ex.Message}");
-                Console.WriteLine($"❌ StackTrace: {ex.StackTrace}");
-                return Content($"❌ ERROR: {ex.Message}");
-            }
-        }
-        public async Task<IActionResult> TestDeserialization()
-        {
-            try
-            {
-                Console.WriteLine("🧪 ========== TEST DESERIALIZATION ==========");
-
-                // Test directo con HttpClient
-                using var httpClient = new HttpClient();
-                var url = "https://api.rawg.io/api/games?key=90d320b222334660826f587ddb91e577&page=1&page_size=3&ordering=-rating";
-
-                Console.WriteLine($"🧪 URL: {url}");
-                var response = await httpClient.GetAsync(url);
-                var content = await response.Content.ReadAsStringAsync();
-
-                Console.WriteLine($"🧪 Response Status: {response.StatusCode}");
-                Console.WriteLine($"🧪 Content Length: {content.Length}");
-                Console.WriteLine($"🧪 First 300 chars: {content.Substring(0, Math.Min(300, content.Length))}...");
-
-                // ✅ ESPECIFICAR EL NAMESPACE COMPLETO
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                };
-
-                // ✅ USAR: Proyecto_Gaming.Models.Rawg.GameResponse
-                var gameResponse = JsonSerializer.Deserialize<Proyecto_Gaming.Models.Rawg.GameResponse>(content, options);
-
-                Console.WriteLine($"🧪 Deserialization - Count: {gameResponse?.Count}, Results: {gameResponse?.Results?.Count}");
-
-                if (gameResponse?.Results?.Any() == true)
-                {
-                    Console.WriteLine("🧪 Primeros juegos deserializados:");
-                    foreach (var game in gameResponse.Results.Take(3))
-                    {
-                        Console.WriteLine($"🧪   - {game.Name} (ID: {game.Id}, Rating: {game.Rating})");
-                        Console.WriteLine($"🧪     Genres: {game.Genres?.Count}, Platforms: {game.Platforms?.Count}");
-                    }
-                }
-
-                return Content($"🧪 Test Deserialization<br>" +
-                            $"Status: {response.StatusCode}<br>" +
-                            $"Count: {gameResponse?.Count}<br>" +
-                            $"Results: {gameResponse?.Results?.Count}<br>" +
-                            $"Content Length: {content.Length}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Test Deserialization Error: {ex.Message}");
-                Console.WriteLine($"❌ StackTrace: {ex.StackTrace}");
-                return Content($"❌ ERROR: {ex.Message}");
-            }
-        }
+    
        // ✅ LIMPIAR CACHÉ DE REDIS
 public async Task<IActionResult> ClearCache()
 {
