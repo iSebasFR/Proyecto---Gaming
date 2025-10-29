@@ -14,17 +14,46 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // ✅ CREACIÓN AUTOMÁTICA DE BASE DE DATOS EN PRODUCCIÓN
 if (builder.Environment.IsProduction())
 {
-    try
+    
+    // Configuración optimizada para producción
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    
+    // Redis solo si está configurado y no es localhost
+    var redisConnection = builder.Configuration.GetConnectionString("Redis");
+    if (!string.IsNullOrEmpty(redisConnection) && !redisConnection.Contains("localhost"))
     {
-        using var scope = builder.Services.BuildServiceProvider().CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        Console.WriteLine("🔧 Creando base de datos y tablas automáticamente...");
-        await dbContext.Database.EnsureCreatedAsync();
-        Console.WriteLine("✅ Base de datos y tablas creadas correctamente");
+        builder.Services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = redisConnection;
+            options.InstanceName = "Gaming_";
+        });
+        Console.WriteLine("✅ Redis configurado para producción");
     }
-    catch (Exception ex)
+    else
     {
-        Console.WriteLine($"❌ Error creando base de datos: {ex.Message}");
+        builder.Services.AddDistributedMemoryCache();
+        Console.WriteLine("⚠️ Redis no disponible - usando memoria distribuida");
+    }
+}
+else
+{
+    // Configuración desarrollo
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    
+    var redisConnection = builder.Configuration.GetConnectionString("Redis");
+    if (!string.IsNullOrEmpty(redisConnection))
+    {
+        builder.Services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = redisConnection;
+            options.InstanceName = "Gaming_";
+        });
+    }
+    else
+    {
+        builder.Services.AddDistributedMemoryCache();
     }
 }
 
