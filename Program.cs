@@ -10,7 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 // ✅ AGREGAR ESTA LÍNEA (DbContext)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-// ✅ CONFIGURACIÓN ESPECÍFICA PARA RENDER/PRODUCCIÓN
+    
+// ✅ CREACIÓN AUTOMÁTICA DE BASE DE DATOS EN PRODUCCIÓN
 if (builder.Environment.IsProduction())
 {
     
@@ -56,6 +57,7 @@ else
     }
 }
 
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -100,6 +102,8 @@ builder.Services.AddHttpClient<IRawgService, RawgService>(client =>
     client.Timeout = TimeSpan.FromSeconds(30);
     client.DefaultRequestHeaders.Add("User-Agent", "GamingApp/1.0");
 });
+// ✅ REGISTRAR SERVICIO DE BIBLIOTECA ML
+builder.Services.AddScoped<Proyecto_Gaming.ML.Services.IBibliotecaMLService, Proyecto_Gaming.ML.Services.BibliotecaMLService>();
 
 // ✅ STATISTICS SERVICE
 builder.Services.AddScoped<IStatsService, StatsService>();
@@ -154,6 +158,7 @@ builder.Services.ConfigureExternalCookie(options =>
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.Lax;
 });
+
 
 // ✅ CONFIGURAR GOOGLE AUTH SOLO SI HAY CREDENCIALES
 if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
