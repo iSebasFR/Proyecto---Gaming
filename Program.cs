@@ -7,6 +7,10 @@ using Microsoft.Extensions.Caching.Distributed;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ✅ AGREGAR ESTA LÍNEA (DbContext)
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    
 // ✅ CREACIÓN AUTOMÁTICA DE BASE DE DATOS EN PRODUCCIÓN
 if (builder.Environment.IsProduction())
 {
@@ -23,6 +27,7 @@ if (builder.Environment.IsProduction())
         Console.WriteLine($"❌ Error creando base de datos: {ex.Message}");
     }
 }
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -72,6 +77,7 @@ builder.Services.AddHttpClient<IRawgService, RawgService>(client =>
 // ✅ STATISTICS SERVICE
 builder.Services.AddScoped<IStatsService, StatsService>();
 builder.Services.AddScoped<IAdminLogService, AdminLogService>();
+builder.Services.AddScoped<IAuditService, AuditService>();
 
 // ✅ OBTENER CREDENCIALES DE GOOGLE (User Secrets tiene prioridad)
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
@@ -316,6 +322,11 @@ app.UseAuthorization();
 // ✅ MAPEOS NECESARIOS PARA IDENTITY
 app.MapControllers();
 app.MapRazorPages();
+
+// 🔁 Redirección de Admin (área antigua) → AdminV2 (área nueva)
+app.MapGet("/Admin", () => Results.Redirect("/AdminV2/Users", false));
+app.MapGet("/Admin/{**catchAll}", () => Results.Redirect("/AdminV2/Users", false));
+
 
 // ✅ Ruta para las ÁREAS
 app.MapControllerRoute(

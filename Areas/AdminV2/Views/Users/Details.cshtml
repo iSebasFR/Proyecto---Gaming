@@ -1,0 +1,11 @@
+@model Proyecto_Gaming.Areas.AdminV2.ViewModels.UserProfileViewModel
+
+<h2 class="text-white mb-3">Perfil de usuario</h2>
+
+<div class="card bg-dark text-white p-3">
+  <div><strong>Nombre:</strong> @Model.Name</div>
+  <div><strong>Email:</strong> @Model.Email</div>
+  <div><strong>Miembro desde:</strong> @Model.RegisteredDate.ToString("dd/MM/yyyy")</div>
+</div>
+
+<a asp-action="Index" class="btn btn-secondary mt-3">Volver</a>

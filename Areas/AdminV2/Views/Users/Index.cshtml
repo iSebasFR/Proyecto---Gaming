@@ -1,0 +1,53 @@
+@model IEnumerable<Proyecto_Gaming.Areas.AdminV2.ViewModels.UserListViewModel>
+@{
+    ViewData["Title"] = "Gestión de Usuarios";
+}
+
+<div class="container-fluid">
+    <h1 class="text-white mb-4">Gestión de Usuarios</h1>
+
+    <div class="card bg-dark border-0 shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-dark table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th style="width:220px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model)
+                        {
+                            <tr>
+                                <td>@(user.Name ?? "(sin nombre)")</td>
+                                <td>@(user.Email ?? "(sin email)")</td>
+                                <td>@(user.Role ?? "Usuario")</td>
+                                <td>
+                                    <span class="badge @(user.IsActive ? "bg-success" : "bg-danger")">
+                                        @(user.IsActive ? "Activo" : "Bloqueado")
+                                    </span>
+                                </td>
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@user.Id"
+                                       class="btn btn-info btn-sm me-2">Ver Perfil</a>
+
+                                    <form asp-action="ToggleLock" asp-route-id="@user.Id"
+                                          method="post" class="d-inline">
+                                        <button type="submit"
+                                                class="btn @(user.IsActive ? "btn-warning" : "btn-success") btn-sm">
+                                            @(user.IsActive ? "Bloquear" : "Desbloquear")
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
