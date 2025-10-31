@@ -32,6 +32,7 @@
                             }
                             <span class="status-badge">En línea</span>
                         </div>
+
                         <div class="col-md-5">
                             <div class="user-bio">
                                 <p class="bio-text">
@@ -39,6 +40,7 @@
                                 </p>
                             </div>
                         </div>
+
                         <div class="col-md-4">
                             <div class="stats-grid">
                                 <div class="stat-item">
@@ -59,7 +61,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div><!-- row -->
                 </div>
             </div>
 
@@ -121,13 +123,16 @@
                                 <small class="info-label">Miembro desde</small>
                                 <p class="info-value">@Model.Usuario.FechaRegistro.ToString("dd/MM/yyyy")</p>
                             </div>
-                            @if (Model.Usuario.FechaNacimiento != DateTime.MinValue)
+
+                            @* Fecha de nacimiento: compatible con DateTime y DateTime? *@
+                            @if (Model.Usuario.FechaNacimiento is DateTime fNac && fNac != DateTime.MinValue)
                             {
                                 <div class="info-item">
                                     <small class="info-label">Fecha de nacimiento</small>
-                                    <p class="info-value">@Model.Usuario.FechaNacimiento.ToString("dd/MM/yyyy")</p>
+                                    <p class="info-value">@fNac.ToString("dd/MM/yyyy")</p>
                                 </div>
                             }
+
                             @if (!string.IsNullOrEmpty(Model.Usuario.Pais))
                             {
                                 <div class="info-item">
@@ -135,11 +140,12 @@
                                     <p class="info-value">@Model.Usuario.Pais</p>
                                 </div>
                             }
+
                             @if (!string.IsNullOrEmpty(Model.Usuario.PlataformaPreferida))
                             {
                                 <div class="info-item">
                                     <small class="info-label">Plataformas preferidas</small>
-                                    <p class="info-value">@Model.Usuario.PlataformaPreferida.Replace(",", ", ")</p>
+                                    <p class="info-value">@((Model.Usuario.PlataformaPreferida?.Replace(",", ", ")) ?? "-")</p>
                                 </div>
                             }
                         </div>
@@ -198,9 +204,10 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
+
+        </div><!-- /col -->
+    </div><!-- /row -->
+</div><!-- /container -->
 
 @section Styles {
     <style>
@@ -296,9 +303,7 @@
             box-shadow: 0 4px 15px rgba(6, 214, 160, 0.3);
         }
 
-        .user-bio {
-            padding: 1rem;
-        }
+        .user-bio { padding: 1rem; }
 
         .bio-text {
             color: var(--text-primary);
@@ -371,13 +376,9 @@
             margin: 0;
         }
 
-        .card-title i {
-            color: var(--neon-purple);
-        }
+        .card-title i { color: var(--neon-purple); }
 
-        .card-body {
-            padding: 1.5rem;
-        }
+        .card-body { padding: 1.5rem; }
 
         /* ACTIVIDAD RECIENTE */
         .activity-item {
@@ -395,9 +396,7 @@
             transform: translateY(-2px);
         }
 
-        .activity-item:last-child {
-            margin-bottom: 0;
-        }
+        .activity-item:last-child { margin-bottom: 0; }
 
         .activity-game-img {
             width: 70px;
@@ -413,23 +412,11 @@
             border-color: var(--neon-purple);
         }
 
-        .game-title {
-            color: var(--text-primary);
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
+        .game-title { color: var(--text-primary); font-weight: 600; margin-bottom: 0.5rem; }
 
-        .activity-details {
-            color: var(--text-secondary);
-            margin-bottom: 0.25rem;
-            font-size: 0.9rem;
-        }
+        .activity-details { color: var(--text-secondary); margin-bottom: 0.25rem; font-size: 0.9rem; }
 
-        .activity-time {
-            color: var(--text-secondary);
-            opacity: 0.7;
-            font-size: 0.8rem;
-        }
+        .activity-time { color: var(--text-secondary); opacity: 0.7; font-size: 0.8rem; }
 
         /* INFORMACIÓN DEL USUARIO */
         .info-item {
@@ -447,29 +434,14 @@
             transform: translateX(5px);
         }
 
-        .info-item:last-child {
-            margin-bottom: 0;
-        }
+        .info-item:last-child { margin-bottom: 0; }
 
-        .info-label {
-            color: var(--text-secondary);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin: 0;
-        }
+        .info-label { color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; margin: 0; }
 
-        .info-value {
-            color: var(--text-primary);
-            font-weight: 600;
-            margin: 0.25rem 0 0 0;
-            font-size: 0.95rem;
-        }
+        .info-value { color: var(--text-primary); font-weight: 600; margin: 0.25rem 0 0 0; font-size: 0.95rem; }
 
         /* BIBLIOTECA DE JUEGOS CENTRADA */
-        .library-card-centered {
-            margin-top: 2rem;
-        }
+        .library-card-centered { margin-top: 2rem; }
 
         .games-grid-centered {
             display: grid;
@@ -494,10 +466,7 @@
             box-shadow: 0 8px 25px rgba(139, 44, 230, 0.2);
         }
 
-        .game-cover {
-            position: relative;
-            overflow: hidden;
-        }
+        .game-cover { position: relative; overflow: hidden; }
 
         .game-cover img {
             width: 100%;
@@ -506,15 +475,9 @@
             transition: transform 0.3s ease;
         }
 
-        .game-card-centered:hover .game-cover img {
-            transform: scale(1.1);
-        }
+        .game-card-centered:hover .game-cover img { transform: scale(1.1); }
 
-        .game-overlay {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-        }
+        .game-overlay { position: absolute; top: 8px; right: 8px; }
 
         .game-status-centered {
             background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
@@ -527,9 +490,7 @@
             letter-spacing: 0.5px;
         }
 
-        .game-info-centered {
-            padding: 12px;
-        }
+        .game-info-centered { padding: 12px; }
 
         .game-name-centered {
             color: var(--text-primary);
@@ -540,15 +501,9 @@
             text-align: center;
         }
 
-        .game-meta-centered {
-            display: flex;
-            justify-content: center;
-        }
+        .game-meta-centered { display: flex; justify-content: center; }
 
-        .play-time-centered {
-            color: var(--text-secondary);
-            font-size: 0.8rem;
-        }
+        .play-time-centered { color: var(--text-secondary); font-size: 0.8rem; }
 
         /* BOTONES */
         .btn-primary {
@@ -568,25 +523,11 @@
             color: var(--text-primary);
         }
 
-        .btn-view-all {
-            padding: 8px 20px;
-            font-size: 0.875rem;
-        }
+        .btn-view-all { padding: 8px 20px; font-size: 0.875rem; }
 
         /* ESTADOS VACÍOS */
-        .empty-state, .empty-state-centered {
-            text-align: center;
-            padding: 3rem 2rem;
-            color: var(--text-secondary);
-        }
-
-        .empty-state i, .empty-state-centered i {
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-
-        .empty-state p, .empty-state-centered p {
-            margin-bottom: 1.5rem;
-        }
+        .empty-state, .empty-state-centered { text-align: center; padding: 3rem 2rem; color: var(--text-secondary); }
+        .empty-state i, .empty-state-centered i { margin-bottom: 1rem; opacity: 0.5; }
+        .empty-state p, .empty-state-centered p { margin-bottom: 1.5rem; }
     </style>
 }

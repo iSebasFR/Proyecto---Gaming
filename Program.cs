@@ -58,6 +58,7 @@ else
 }
 
 
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -108,6 +109,7 @@ builder.Services.AddScoped<Proyecto_Gaming.ML.Services.IBibliotecaMLService, Pro
 // ✅ STATISTICS SERVICE
 builder.Services.AddScoped<IStatsService, StatsService>();
 builder.Services.AddScoped<IAdminLogService, AdminLogService>();
+builder.Services.AddScoped<IAuditService, AuditService>();
 
 // ✅ OBTENER CREDENCIALES DE GOOGLE (User Secrets tiene prioridad)
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
@@ -353,6 +355,11 @@ app.UseAuthorization();
 // ✅ MAPEOS NECESARIOS PARA IDENTITY
 app.MapControllers();
 app.MapRazorPages();
+
+// 🔁 Redirección de Admin (área antigua) → AdminV2 (área nueva)
+app.MapGet("/Admin", () => Results.Redirect("/AdminV2/Users", false));
+app.MapGet("/Admin/{**catchAll}", () => Results.Redirect("/AdminV2/Users", false));
+
 
 // ✅ Ruta para las ÁREAS
 app.MapControllerRoute(
