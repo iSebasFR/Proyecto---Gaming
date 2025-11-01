@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Proyecto_Gaming.Models;
 using Proyecto_Gaming.Models.Comunidad;
 using Proyecto_Gaming.Models.Payment;
+using Proyecto_Gaming.Models.Surveys; // 👈 necesario para Medal/Survey/...
+
 
 namespace Proyecto_Gaming.Data
 {
@@ -32,6 +34,14 @@ namespace Proyecto_Gaming.Data
         public DbSet<AdminLog> AdminLogs { get; set; }
         public DbSet<Evento> Eventos { get; set; }
 
+        // DbSets
+        public DbSet<Medal> Medals { get; set; }
+        public DbSet<Survey> Surveys { get; set; }
+        public DbSet<SurveyQuestion> SurveyQuestions { get; set; }
+        public DbSet<SurveyOption> SurveyOptions { get; set; }
+
+
+        
 public DbSet<ContactMessage> ContactMessages { get; set; } = default!;
 
         
@@ -39,6 +49,65 @@ public DbSet<ContactMessage> ContactMessages { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // ----- Surveys / Medals -----
+modelBuilder.Entity<Medal>(e =>
+{
+    e.ToTable("Medals");
+    e.HasKey(m => m.Id);
+    e.Property(m => m.Name).HasColumnName("Name").IsRequired().HasMaxLength(80);
+    e.Property(m => m.Icon).HasColumnName("Icon").HasMaxLength(120);
+    e.Property(m => m.Points).HasColumnName("Points");
+});
+
+modelBuilder.Entity<Survey>(e =>
+{
+    e.ToTable("Surveys");
+    e.HasKey(s => s.Id);
+
+    e.Property(s => s.Title).HasColumnName("Title").IsRequired().HasMaxLength(160);
+    e.Property(s => s.Description).HasColumnName("Description");
+
+    e.Property(s => s.StartDateUtc).HasColumnName("StartDateUtc");
+    e.Property(s => s.EndDateUtc).HasColumnName("EndDateUtc");
+
+    e.Property(s => s.MedalId).HasColumnName("MedalId");
+    e.HasOne(s => s.Medal)
+        .WithMany(m => m.Surveys)
+        .HasForeignKey(s => s.MedalId)
+        .OnDelete(DeleteBehavior.SetNull);
+});
+
+modelBuilder.Entity<SurveyQuestion>(e =>
+{
+    e.ToTable("SurveyQuestions");
+    e.HasKey(q => q.Id);
+
+    e.Property(q => q.Text).HasColumnName("Text").IsRequired().HasMaxLength(500);
+    e.Property(q => q.Type).HasColumnName("Type");
+    e.Property(q => q.Order).HasColumnName("Order");
+
+    e.Property(q => q.SurveyId).HasColumnName("SurveyId");
+    e.HasOne(q => q.Survey)
+        .WithMany(s => s.Questions)
+        .HasForeignKey(q => q.SurveyId)
+        .OnDelete(DeleteBehavior.Cascade);
+});
+
+modelBuilder.Entity<SurveyOption>(e =>
+{
+    e.ToTable("SurveyOptions");
+    e.HasKey(o => o.Id);
+
+    e.Property(o => o.Text).HasColumnName("Text").IsRequired().HasMaxLength(200);
+    e.Property(o => o.Order).HasColumnName("Order");
+
+    e.Property(o => o.SurveyQuestionId).HasColumnName("SurveyQuestionId");
+    e.HasOne(o => o.Question)
+        .WithMany(q => q.Options)
+        .HasForeignKey(o => o.SurveyQuestionId)
+        .OnDelete(DeleteBehavior.Cascade);
+});
+
             base.OnModelCreating(modelBuilder);
 
             // Configuración existente para BibliotecaUsuario
