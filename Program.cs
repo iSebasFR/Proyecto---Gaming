@@ -100,6 +100,10 @@ builder.Services.AddScoped<AdminV2Stats.IStatsService, AdminV2Stats.StatsService
 builder.Services.AddScoped<IAdminLogService, AdminLogService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 
+builder.Services.AddScoped<ISentimentService, SimpleSentimentService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
+
+
 // ✅ OBTENER CREDENCIALES DE GOOGLE (User Secrets tiene prioridad)
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
 var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
@@ -334,9 +338,15 @@ app.MapGet("/Admin", () => Results.Redirect("/AdminV2/Users", false));
 app.MapGet("/Admin/{**catchAll}", () => Results.Redirect("/AdminV2/Users", false));
 
 // ✅ Ruta para las ÁREAS
+// ✅ Ruta para ÁREAS (AdminV2 incluida)
 app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+
+// ✅ Ruta adicional para controlar cualquier controlador dentro de un área
+app.MapControllerRoute(
+    name: "areas2",
+    pattern: "{area:exists}/{controller}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
     name: "default",

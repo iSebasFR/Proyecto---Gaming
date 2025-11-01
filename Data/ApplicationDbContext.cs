@@ -32,8 +32,11 @@ namespace Proyecto_Gaming.Data
         public DbSet<AdminLog> AdminLogs { get; set; }
         public DbSet<Evento> Eventos { get; set; }
 
+public DbSet<ContactMessage> ContactMessages { get; set; } = default!;
 
         
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -43,11 +46,11 @@ namespace Proyecto_Gaming.Data
             {
                 entity.ToTable("BibliotecaUsuario");
                 entity.HasKey(bu => bu.Id);
-                
+
                 entity.Property(bu => bu.Id)
                     .HasColumnName("id")
                     .ValueGeneratedOnAdd();
-                    
+
                 entity.Property(bu => bu.UsuarioId)
                     .HasColumnName("id_usuario")
                     .IsRequired()
@@ -519,72 +522,90 @@ namespace Proyecto_Gaming.Data
                     .IsUnique();
             });
 
-            // Configuración para Transactions
-            modelBuilder.Entity<Transaction>(entity =>
-            {
-                entity.ToTable("Transactions");
-                entity.HasKey(t => t.Id);
+// Configuración para Transactions
+modelBuilder.Entity<Transaction>(entity =>
+{
+    entity.ToTable("Transactions");
+    entity.HasKey(t => t.Id);
 
-                entity.Property(t => t.Id)
-                    .HasColumnName("id")
-                    .ValueGeneratedOnAdd();
+    entity.Property(t => t.Id)
+        .HasColumnName("id")
+        .ValueGeneratedOnAdd();
 
-                entity.Property(t => t.UsuarioId)
-                    .HasColumnName("usuario_id")
-                    .IsRequired()
-                    .HasMaxLength(450);
+    entity.Property(t => t.UsuarioId)
+        .HasColumnName("usuario_id")
+        .IsRequired()
+        .HasMaxLength(450);
 
-                entity.Property(t => t.GameId)
-                    .HasColumnName("game_id")
-                    .IsRequired();
+    entity.Property(t => t.GameId)
+        .HasColumnName("game_id")
+        .IsRequired();
 
-                entity.Property(t => t.GameTitle)
-                    .HasColumnName("game_title")
-                    .IsRequired()
-                    .HasMaxLength(255);
+    entity.Property(t => t.GameTitle)
+        .HasColumnName("game_title")
+        .IsRequired()
+        .HasMaxLength(255);
 
-                entity.Property(t => t.Amount)
-                    .HasColumnName("amount")
-                    .HasColumnType("decimal(18,2)")
-                    .IsRequired();
+    entity.Property(t => t.Amount)
+        .HasColumnName("amount")
+        .HasColumnType("decimal(18,2)")
+        .IsRequired();
 
-                entity.Property(t => t.Currency)
-                    .HasColumnName("currency")
-                    .HasMaxLength(10)
-                    .HasDefaultValue("USD");
+    entity.Property(t => t.Currency)
+        .HasColumnName("currency")
+        .HasMaxLength(10)
+        .HasDefaultValue("USD");
 
-                entity.Property(t => t.PaymentStatus)
-                    .HasColumnName("payment_status")
-                    .HasMaxLength(20)
-                    .HasDefaultValue("Pending");
+    entity.Property(t => t.PaymentStatus)
+        .HasColumnName("payment_status")
+        .HasMaxLength(20)
+        .HasDefaultValue("Pending");
 
-                entity.Property(t => t.PaymentProvider)
-                    .HasColumnName("payment_provider")
-                    .HasMaxLength(50)
-                    .HasDefaultValue("Stripe");
+    entity.Property(t => t.PaymentProvider)
+        .HasColumnName("payment_provider")
+        .HasMaxLength(50)
+        .HasDefaultValue("Stripe");
 
-                entity.Property(t => t.TransactionId)
-                    .HasColumnName("transaction_id")
-                    .HasMaxLength(100);
+    entity.Property(t => t.TransactionId)
+        .HasColumnName("transaction_id")
+        .HasMaxLength(100);
 
-                entity.Property(t => t.SessionId)
-                    .HasColumnName("session_id")
-                    .IsRequired()
-                    .HasMaxLength(100);
+    entity.Property(t => t.SessionId)
+        .HasColumnName("session_id")
+        .IsRequired()
+        .HasMaxLength(100);
 
-                entity.Property(t => t.CreatedAt)
-                    .HasColumnName("created_at")
-                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+    entity.Property(t => t.CreatedAt)
+        .HasColumnName("created_at")
+        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-                entity.Property(t => t.CompletedAt)
-                    .HasColumnName("completed_at");
+    entity.Property(t => t.CompletedAt)
+        .HasColumnName("completed_at");
 
-                // Relación con Usuario
-                entity.HasOne(t => t.Usuario)
-                    .WithMany()
-                    .HasForeignKey(t => t.UsuarioId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
-        }
-    }
-}
+    // Relación con Usuario
+    entity.HasOne(t => t.Usuario)
+        .WithMany()
+        .HasForeignKey(t => t.UsuarioId)
+        .OnDelete(DeleteBehavior.Cascade);
+}); // 👈 Cierra correctamente el bloque de Transactions
+// Configuración para ContactMessage (reseñas/contacto)
+modelBuilder.Entity<ContactMessage>(entity =>
+{
+    // ⚠️ Respeta mayúsculas: EF generará SQL con comillas
+    entity.ToTable("ContactMessages");
+    entity.HasKey(c => c.Id);
+
+    entity.Property(c => c.Id)            .HasColumnName("Id");
+    entity.Property(c => c.Name)          .HasColumnName("Name").HasMaxLength(120);
+    entity.Property(c => c.Email)         .HasColumnName("Email").HasMaxLength(160);
+    entity.Property(c => c.Message)       .HasColumnName("Message").IsRequired();
+    entity.Property(c => c.CreatedAtUtc)  .HasColumnName("CreatedAtUtc");
+    entity.Property(c => c.Sentiment)     .HasColumnName("Sentiment");        // string? (positive/negative/neutral)
+    entity.Property(c => c.SentimentScore).HasColumnName("SentimentScore");   // float?
+});
+
+}      // <-- cierra OnModelCreating
+
+}      // <-- cierra la clase ApplicationDbContext
+
+}      // <-- cierra el namespace Proyecto_Gaming.Data
