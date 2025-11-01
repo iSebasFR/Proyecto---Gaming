@@ -4,17 +4,18 @@ using Proyecto_Gaming.Data;
 using Proyecto_Gaming.Models;
 using Proyecto_Gaming.Services;
 using Microsoft.Extensions.Caching.Distributed;
+// 🔧 Alias para distinguir el servicio de AdminV2
+using AdminV2Stats = Proyecto_Gaming.Areas.AdminV2.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ✅ AGREGAR ESTA LÍNEA (DbContext)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-    
+
 // ✅ CREACIÓN AUTOMÁTICA DE BASE DE DATOS EN PRODUCCIÓN
 if (builder.Environment.IsProduction())
 {
-    
     // Configuración optimizada para producción
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -57,20 +58,11 @@ else
     }
 }
 
-
-
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
 // ✅ CONFIGURAR SERVICIO DE PAGOS STRIPE CON HTTPCLIENT
 builder.Services.AddHttpClient<IPaymentService, StripePaymentService>();
-
-// ❌ ELIMINAR ESTO - YA ESTÁ CONFIGURADO ARRIBA
-// builder.Services.AddStackExchangeRedisCache(options =>
-// {
-//     options.Configuration = builder.Configuration.GetConnectionString("Redis");
-//     options.InstanceName = "Gaming_";
-// });
 
 builder.Services.AddScoped<ILogService, LogService>();
 
@@ -91,11 +83,6 @@ builder.Services.AddSession(options =>
 // ✅ MANTENER CACHÉ EN MEMORIA PARA DATOS LOCALES
 builder.Services.AddMemoryCache();
 
-// ❌ ELIMINAR ESTO - YA ESTÁ CONFIGURADO ARRIBA
-// Configurar PostgreSQL
-// builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 // ✅ CONFIGURAR RAWG SERVICE
 builder.Services.AddHttpClient<IRawgService, RawgService>(client =>
 {
@@ -103,11 +90,13 @@ builder.Services.AddHttpClient<IRawgService, RawgService>(client =>
     client.Timeout = TimeSpan.FromSeconds(30);
     client.DefaultRequestHeaders.Add("User-Agent", "GamingApp/1.0");
 });
+
 // ✅ REGISTRAR SERVICIO DE BIBLIOTECA ML
 builder.Services.AddScoped<Proyecto_Gaming.ML.Services.IBibliotecaMLService, Proyecto_Gaming.ML.Services.BibliotecaMLService>();
 
-// ✅ STATISTICS SERVICE
-builder.Services.AddScoped<IStatsService, StatsService>();
+// ✅ STATISTICS SERVICE (AdminV2) — usa el alias para evitar ambigüedad
+builder.Services.AddScoped<AdminV2Stats.IStatsService, AdminV2Stats.StatsService>();
+
 builder.Services.AddScoped<IAdminLogService, AdminLogService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 
@@ -123,7 +112,6 @@ Console.WriteLine($"   - ClientSecret: {!string.IsNullOrEmpty(googleClientSecret
 if (string.IsNullOrEmpty(googleClientId) || string.IsNullOrEmpty(googleClientSecret))
 {
     Console.WriteLine("⚠️  INSTRUCCIONES PARA EL EQUIPO:");
-    Console.WriteLine("   Ejecutar estos comandos en la raíz del proyecto:");
     Console.WriteLine("   dotnet user-secrets init");
     Console.WriteLine("   dotnet user-secrets set \"Authentication:Google:ClientId\" \"TU_CLIENT_ID\"");
     Console.WriteLine("   dotnet user-secrets set \"Authentication:Google:ClientSecret\" \"TU_CLIENT_SECRET\"");
@@ -161,7 +149,6 @@ builder.Services.ConfigureExternalCookie(options =>
     options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
-
 // ✅ CONFIGURAR GOOGLE AUTH SOLO SI HAY CREDENCIALES
 if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
 {
@@ -174,8 +161,6 @@ if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientS
             options.Scope.Add("profile");
             options.Scope.Add("email");
             options.SaveTokens = true;
-            
-            // ✅ CORRELATION COOKIE SE CONFIGURA DENTRO DE GOOGLE OPTIONS
             options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
             options.CorrelationCookie.SameSite = SameSiteMode.Lax;
         });
@@ -218,12 +203,11 @@ builder.Services.Configure<HttpClientHandler>(options =>
 
 var app = builder.Build();
 
-// ✅ INICIALIZACIÓN AUTOMÁTICA AL INICIAR (REEMPLAZA LA PRECARGA DUPLICADA)
+// ✅ INICIALIZACIÓN AUTOMÁTICA AL INICIAR
 app.Lifetime.ApplicationStarted.Register(() =>
 {
     Console.WriteLine("🚀 Inicializando sistema de caché automático...");
     
-    // Ejecutar en segundo plano sin bloquear
     _ = Task.Run(async () =>
     {
         try
@@ -232,10 +216,7 @@ app.Lifetime.ApplicationStarted.Register(() =>
             var rawgService = scope.ServiceProvider.GetRequiredService<IRawgService>();
             var cache = scope.ServiceProvider.GetRequiredService<IDistributedCache>();
             
-            // 1. Limpiar caché corrupto al iniciar
             await ClearCorruptedCacheOnStartup(cache);
-            
-            // 2. Precargar datos esenciales
             await PreloadEssentialData(rawgService, cache);
             
             Console.WriteLine("✅ Sistema de caché automático inicializado");
@@ -252,11 +233,7 @@ async Task ClearCorruptedCacheOnStartup(IDistributedCache cache)
 {
     try
     {
-        // Limpiar solo las claves que sabemos que se corrompen
-        for (int i = 1; i <= 5; i++)
-        {
-            await cache.RemoveAsync($"Games____{i}");
-        }
+        for (int i = 1; i <= 5; i++) await cache.RemoveAsync($"Games____{i}");
         Console.WriteLine("🧹 Caché corrupto limpiado al iniciar");
     }
     catch (Exception ex)
@@ -270,13 +247,9 @@ async Task PreloadEssentialData(IRawgService rawgService, IDistributedCache cach
     try
     {
         Console.WriteLine("📦 Precargando datos esenciales...");
-        
-        // Precargar solo página 1 y filtros (más rápido y confiable)
         var page1Task = rawgService.GetGamesAsync("", "", "", 1);
         var filtersTask = rawgService.GetAvailableFiltersAsync();
-        
         await Task.WhenAll(page1Task, filtersTask);
-        
         Console.WriteLine($"✅ Precarga automática - Juegos: {page1Task.Result.Results?.Count ?? 0}, Filtros: {filtersTask.Result.AvailableGenres?.Count ?? 0}");
     }
     catch (Exception ex)
@@ -359,7 +332,6 @@ app.MapRazorPages();
 // 🔁 Redirección de Admin (área antigua) → AdminV2 (área nueva)
 app.MapGet("/Admin", () => Results.Redirect("/AdminV2/Users", false));
 app.MapGet("/Admin/{**catchAll}", () => Results.Redirect("/AdminV2/Users", false));
-
 
 // ✅ Ruta para las ÁREAS
 app.MapControllerRoute(

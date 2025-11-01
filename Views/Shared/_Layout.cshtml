@@ -359,49 +359,64 @@
                     <span class="navbar-toggler-icon text-white"><i class="fas fa-bars"></i></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarContent">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <!-- Opción Inicio - Siempre visible para todos -->
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")" 
-                               asp-area="" asp-controller="Home" asp-action="Index">
-                                <i class="fas fa-home me-2"></i>Inicio
-                            </a>
-                        </li>
+<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <!-- Opción Inicio - Siempre visible para todos -->
+    <li class="nav-item">
+        <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")" 
+           asp-area="" asp-controller="Home" asp-action="Index">
+            <i class="fas fa-home me-2"></i>Inicio
+        </a>
+    </li>
 
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <!-- SI ES ADMIN: Solo muestra Inicio y Administración -->
-                            <li class="nav-item">
-                                <a class="nav-link @(ViewContext.RouteData.Values["area"]?.ToString() == "Admin" ? "active" : "")" 
-                                   asp-area="AdminV2" asp-controller="Users" asp-action="Index">
-                                    <i class="fas fa-tools me-2"></i>Administración
-                                </a>
-                            </li>
-                        }
-                        else if (User.Identity.IsAuthenticated)
-                        {
-                            <!-- SI ES USUARIO NORMAL (logueado pero NO admin): Muestra todas las opciones -->
-                            <li class="nav-item">
-                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Biblioteca" ? "active" : "")" 
-                                   asp-area="" asp-controller="Biblioteca" asp-action="Index">
-                                    <i class="fas fa-book me-2"></i>Biblioteca
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Comunidad" ? "active" : "")" 
-                                   asp-area="" asp-controller="Comunidad" asp-action="Index">
-                                    <i class="fas fa-users me-2"></i>Comunidad
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Estadisticas" ? "active" : "")" 
-                                   asp-area="" asp-controller="Estadisticas" asp-action="Index">
-                                    <i class="fas fa-chart-line me-2"></i>Estadísticas
-                                </a>
-                            </li>
-                        }
-                        <!-- Si no está logueado, no muestra ninguna opción adicional -->
-                    </ul>
+    @if (User.IsInRole("Admin"))
+    {
+        <!-- ✅ Área correcta: AdminV2 -->
+        <li class="nav-item">
+            <a class="nav-link @(
+                    ViewContext.RouteData.Values["area"]?.ToString() == "AdminV2" &&
+                    ViewContext.RouteData.Values["controller"]?.ToString() == "Users" ? "active" : ""
+                )"
+               asp-area="AdminV2" asp-controller="Users" asp-action="Index">
+                <i class="fas fa-users-cog me-2"></i>Gestión de Usuarios
+            </a>
+        </li>
+
+        <!-- ✅ Nuevo enlace a Informes y Estadísticas -->
+        <li class="nav-item">
+            <a class="nav-link @(
+                    ViewContext.RouteData.Values["area"]?.ToString() == "AdminV2" &&
+                    ViewContext.RouteData.Values["controller"]?.ToString() == "Stats" ? "active" : ""
+                )"
+               asp-area="AdminV2" asp-controller="Stats" asp-action="Index">
+                <i class="fas fa-chart-bar me-2"></i>Informes y Estadísticas
+            </a>
+        </li>
+    }
+    else if (User.Identity.IsAuthenticated)
+    {
+        <!-- Usuario normal (logueado NO admin): tu menú público -->
+        <li class="nav-item">
+            <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Biblioteca" ? "active" : "")" 
+               asp-area="" asp-controller="Biblioteca" asp-action="Index">
+                <i class="fas fa-book me-2"></i>Biblioteca
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Comunidad" ? "active" : "")" 
+               asp-area="" asp-controller="Comunidad" asp-action="Index">
+                <i class="fas fa-users me-2"></i>Comunidad
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Estadisticas" ? "active" : "")" 
+               asp-area="" asp-controller="Estadisticas" asp-action="Index">
+                <i class="fas fa-chart-line me-2"></i>Estadísticas
+            </a>
+        </li>
+    }
+    <!-- Si no está logueado, no muestra ninguna opción adicional -->
+</ul>
+
 
                     <!-- Verificación de autenticación con Identity -->
                     @if (User.Identity.IsAuthenticated)

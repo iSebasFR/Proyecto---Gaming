@@ -1,0 +1,174 @@
+@model Proyecto_Gaming.Areas.AdminV2.ViewModels.StatsViewModel
+@{
+    ViewData["Title"] = "Informes y Estadísticas";
+    var usersJson = System.Text.Json.JsonSerializer.Serialize(Model.UsersByGroup);
+    var gamesJson = System.Text.Json.JsonSerializer.Serialize(Model.TopGames);
+}
+
+<section class="container py-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 m-0">@ViewData["Title"]</h1>
+  </div>
+
+  <!-- Filtros (GET, sin APIs) -->
+  <form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+      <label class="form-label mb-1">Desde</label>
+      <input type="date" name="from" class="form-control"
+             value="@Model.From.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="col-auto">
+      <label class="form-label mb-1">Hasta</label>
+      <input type="date" name="to" class="form-control"
+             value="@Model.To.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="col-auto align-self-end">
+      <button class="btn btn-primary" type="submit">Actualizar</button>
+    </div>
+  </form>
+
+  <div id="stats-root"
+       data-users='@Html.Raw(usersJson)'
+       data-games='@Html.Raw(gamesJson)'>
+  </div>
+
+  <div class="row g-3">
+    <!-- Usuarios por grupo/rol -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Usuarios por grupo/rol</h5>
+            <small class="text-muted">@Model.From:dd/MM/yyyy — @Model.To:dd/MM/yyyy</small>
+          </div>
+          <div class="mt-3" style="height:320px">
+            <canvas id="chartUsers"></canvas>
+          </div>
+          <div class="mt-3">
+            <div class="table-responsive">
+              <table class="table table-sm table-striped align-middle mb-0">
+                <thead>
+                  <tr><th>Grupo/Rol</th><th class="text-end">Usuarios</th></tr>
+                </thead>
+                <tbody>
+                @if (Model.UsersByGroup?.Count > 0)
+                {
+                  foreach (var r in Model.UsersByGroup)
+                  {
+                    <tr>
+                      <td>@r.GroupName</td>
+                      <td class="text-end">@r.Count</td>
+                    </tr>
+                  }
+                }
+                else
+                {
+                  <tr><td colspan="2" class="text-muted">Sin datos.</td></tr>
+                }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Juegos más comprados -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Juegos más comprados (Top 10)</h5>
+            <small class="text-muted">@Model.From:dd/MM/yyyy — @Model.To:dd/MM/yyyy</small>
+          </div>
+          <div class="mt-3" style="height:320px">
+            <canvas id="chartGames"></canvas>
+          </div>
+          <div class="mt-3">
+            <div class="table-responsive">
+              <table class="table table-sm table-striped align-middle mb-0">
+                <thead>
+                  <tr><th>Juego</th><th class="text-end">Compras</th></tr>
+                </thead>
+                <tbody>
+                @if (Model.TopGames?.Count > 0)
+                {
+                  foreach (var g in Model.TopGames)
+                  {
+                    <tr>
+                      <td>@g.Game</td>
+                      <td class="text-end">@g.Purchases</td>
+                    </tr>
+                  }
+                }
+                else
+                {
+                  <tr><td colspan="2" class="text-muted">Aún no hay compras registradas en el rango.</td></tr>
+                }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+(function () {
+  const root = document.getElementById('stats-root');
+  const users = JSON.parse(root.dataset.users || "[]");
+  const games = JSON.parse(root.dataset.games || "[]");
+
+  // ===== Usuarios por grupo/rol =====
+  const uLabels = users.map(x => x.groupName);
+  const uValues = users.map(x => x.count);
+  const ctxU = document.getElementById('chartUsers').getContext('2d');
+  new Chart(ctxU, {
+    type: 'bar',
+    data: {
+      labels: uLabels,
+      datasets: [{ label: 'Usuarios', data: uValues }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { ticks: { autoSkip: false, maxRotation: 45, minRotation: 0 } },
+        y: { beginAtZero: true, precision: 0 }
+      },
+      plugins: {
+        tooltip: { mode: 'index', intersect: false },
+        legend: { display: false }
+      }
+    }
+  });
+
+  // ===== Juegos más comprados =====
+  const gLabels = games.map(x => x.game);
+  const gValues = games.map(x => x.purchases);
+  const ctxG = document.getElementById('chartGames').getContext('2d');
+  new Chart(ctxG, {
+    type: 'bar',
+    data: {
+      labels: gLabels,
+      datasets: [{ label: 'Compras', data: gValues }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { ticks: { autoSkip: false, maxRotation: 45, minRotation: 0 } },
+        y: { beginAtZero: true, precision: 0 }
+      },
+      plugins: {
+        tooltip: { mode: 'index', intersect: false },
+        legend: { display: false }
+      }
+    }
+  });
+})();
+</script>
