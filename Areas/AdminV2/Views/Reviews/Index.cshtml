@@ -1,0 +1,31 @@
+@model ReviewsPageViewModel
+
+@{
+    ViewData["Title"] = "Reseñas";
+
+    var filter = Context.Request.Query["filter"].ToString();
+    if (string.IsNullOrWhiteSpace(filter)) filter = "all";
+
+    string TabClass(string f, string current) => f == current ? "btn btn-primary" : "btn btn-outline-primary";
+
+    var totalPositive = Model.Positives?.Count() ?? 0;
+    var totalNegative = Model.Negatives?.Count() ?? 0;
+    var totalAll = totalPositive + totalNegative;
+
+    IEnumerable<ReviewListItem> items =
+        filter == "positive" ? (Model.Positives ?? Enumerable.Empty<ReviewListItem>()) :
+        filter == "negative" ? (Model.Negatives ?? Enumerable.Empty<ReviewListItem>()) :
+        (Model.Positives ?? Enumerable.Empty<ReviewListItem>())
+            .Concat(Model.Negatives ?? Enumerable.Empty<ReviewListItem>())
+            .OrderByDescending(x => x.CreatedAtUtc);
+}
+
+<h1 class="text-white mb-4"><i class="fa-solid fa-comments me-2"></i>Reseñas</h1>
+
+<div class="d-flex gap-2 mb-3">
+    <a asp-action="Index" asp-route-filter="all" class="@TabClass("all", filter)">Todas (@totalAll)</a>
+    <a asp-action="Index" asp-route-filter="positive" class="@TabClass("positive", filter)">Positivas (@totalPositive)</a>
+    <a asp-action="Index" asp-route-filter="negative" class="@TabClass("negative", filter)">Negativas (@totalNegative)</a>
+</div>
+
+<partial name="_ReviewsTable" model="items" />

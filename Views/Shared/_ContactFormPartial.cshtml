@@ -232,7 +232,7 @@
             <i class="fa-solid fa-envelope me-2"></i>Envíanos un Mensaje
         </h5>
 
-        <form asp-controller="Contact" asp-action="Send" method="post" novalidate>
+        <form asp-area="" asp-controller="Contact" asp-action="Send" method="post" novalidate>
             @Html.AntiForgeryToken()
 
             <div class="row g-3">

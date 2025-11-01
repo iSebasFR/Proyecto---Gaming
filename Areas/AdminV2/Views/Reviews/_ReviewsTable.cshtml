@@ -1,0 +1,32 @@
+@model IEnumerable<ReviewListItem>
+
+<table class="table table-striped table-dark align-middle">
+    <thead>
+    <tr>
+        <th>Fecha</th>
+        <th>Nombre</th>
+        <th>Email</th>
+        <th>Sentimiento</th>
+        <th>Mensaje</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var r in Model)
+    {
+        <tr>
+            <td>@r.CreatedAtUtc.ToLocalTime()</td>
+            <td>@r.Name</td>
+            <td>@r.Email</td>
+            <td>
+                @if ((r.Sentiment ?? "unknown") == "positive")
+                { <span class="badge bg-success">Positiva</span> }
+                else if ((r.Sentiment ?? "unknown") == "negative")
+                { <span class="badge bg-danger">Negativa</span> }
+                else
+                { <span class="badge bg-secondary">Unknown</span> }
+            </td>
+            <td>@(r.Message.Length > 100 ? r.Message.Substring(0,100) + "..." : r.Message)</td>
+        </tr>
+    }
+    </tbody>
+</table>
