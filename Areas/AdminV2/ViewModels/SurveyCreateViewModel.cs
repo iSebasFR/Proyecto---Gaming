@@ -12,13 +12,15 @@ namespace Proyecto_Gaming.Areas.AdminV2.ViewModels
 
         public string? Description { get; set; }
 
-        [Display(Name="Inicio (UTC)")]
+        [Display(Name = "Inicio (UTC)")]
+        [DataType(DataType.DateTime)]
         public DateTime StartDateUtc { get; set; } = DateTime.UtcNow;
 
-        [Display(Name="Fin (UTC)")]
+        [Display(Name = "Fin (UTC)")]
+        [DataType(DataType.DateTime)]
         public DateTime EndDateUtc { get; set; } = DateTime.UtcNow.AddDays(7);
 
-        [Display(Name="Medalla (recompensa)")]
+        [Display(Name = "Medalla (recompensa)")]
         public int? MedalId { get; set; }
 
         public List<QuestionVM> Questions { get; set; } = new();

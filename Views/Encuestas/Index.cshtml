@@ -1,0 +1,44 @@
+@using Proyecto_Gaming.ViewModels.Surveys
+@model List<SurveyListItemVM>
+
+@{
+    ViewData["Title"] = "Encuestas";
+}
+
+<h1 class="text-white mb-4"><i class="fa-solid fa-list-check me-2"></i>Encuestas disponibles</h1>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No hay encuestas abiertas por ahora.</div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var s in Model)
+        {
+            <div class="col-md-6">
+                <div class="card shadow-sm" style="background:#151530;border:1px solid rgba(139,44,230,.3)">
+                    <div class="card-body">
+                        <h5 class="card-title text-white">@s.Title</h5>
+                        @if (!string.IsNullOrWhiteSpace(s.Description))
+                        {
+                            <p class="text-muted">@s.Description</p>
+                        }
+                        <span class="badge bg-primary">Medalla: @s.MedalName</span>
+                        <div class="mt-3">
+                            <a asp-action="Responder" asp-route-id="@s.Id"
+                               class="btn btn-sm btn-gradient">Responder</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<style>
+.btn-gradient{
+    background: linear-gradient(135deg,#8b2ce6,#2c5be6);
+    border:none;color:#fff;font-weight:600;
+}
+</style>
