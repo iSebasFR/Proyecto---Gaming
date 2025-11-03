@@ -1,0 +1,517 @@
+@{
+    var title = ViewData["Title"] as string ?? "Panel Admin";
+    var routeArea = (ViewContext.RouteData.Values["area"]?.ToString() ?? "");
+    var routeController = (ViewContext.RouteData.Values["controller"]?.ToString() ?? "");
+    var routeAction = (ViewContext.RouteData.Values["action"]?.ToString() ?? "");
+    bool IsActive(string area, string controller)
+        => string.Equals(routeArea, area, StringComparison.OrdinalIgnoreCase)
+        && string.Equals(routeController, controller, StringComparison.OrdinalIgnoreCase);
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@title - Admin | GAMING</title>
+
+    <!-- Libs -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    @RenderSection("Styles", required: false)
+
+    <style>
+        :root{
+            --bg-dark:#070714;
+            --bg-primary:#0f0f1f;
+            --card-bg:#151530;
+            --accent-purple:#8b2ce6;
+            --accent-blue:#2c5be6;
+            --neon-purple:#b042ff;
+            --neon-blue:#428bff;
+            --text-primary:#fff;
+            --text-secondary:#b8b8d0;
+            --border: rgba(139,44,230,.3);
+            --shadow: 0 8px 25px rgba(139,44,230,.12);
+        }
+        *{box-sizing:border-box;font-family:'Montserrat','Segoe UI',sans-serif}
+        body{
+            min-height:100vh;
+            background:var(--bg-dark);
+            color:var(--text-primary);
+            background-image:
+                radial-gradient(circle at 20% 30%, rgba(139,44,230,.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(44,91,230,.15) 0%, transparent 40%);
+            overflow-x:hidden;
+        }
+        /* Header superior */
+        .admin-topbar{
+            position:fixed; top:0; left:0; right:0; height:64px;
+            background:rgba(15,15,31,.95);
+            backdrop-filter:blur(10px);
+            display:flex; align-items:center; justify-content:space-between;
+            padding:0 18px; z-index:1030; border-bottom:1px solid var(--border);
+        }
+        .brand{
+            font-weight:800; font-size:1.6rem; letter-spacing:1px;
+            background:linear-gradient(to right, var(--neon-purple), var(--neon-blue));
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+        }
+        .admin-top-actions{ display:flex; align-items:center; gap:10px; }
+        .top-user{
+            display:flex; align-items:center; gap:10px;
+            padding:6px 10px; border:1px solid var(--border);
+            border-radius:10px; background:rgba(21,21,48,.6);
+        }
+        .avatar{
+            width:36px; height:36px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            background:linear-gradient(135deg,var(--accent-purple),var(--accent-blue));
+            color:#fff; font-weight:700; border:2px solid rgba(255,255,255,.25);
+        }
+        .logout-btn{
+            background:transparent; color:var(--text-secondary);
+            border:1px solid var(--border); padding:6px 10px; border-radius:8px;
+        }
+        .logout-btn:hover{ color:#fff; border-color:var(--accent-purple); background:rgba(139,44,230,.1) }
+
+        /* Shell Admin: sidebar + content */
+        .admin-shell{ display:flex; margin-top:64px; }
+        .admin-sidebar{
+            width:260px; min-height:calc(100vh - 64px);
+            position:fixed; top:64px; left:0; bottom:0;
+            background:var(--bg-primary);
+            border-right:1px solid var(--border);
+            padding:18px 14px; overflow-y:auto;
+        }
+        .admin-content{
+            margin-left:260px; width:calc(100% - 260px);
+            padding:22px; min-height:calc(100vh - 64px);
+        }
+
+        /* Sidebar nav */
+        .side-title{
+            color:var(--text-secondary); font-size:.78rem;
+            text-transform:uppercase; letter-spacing:.8px; margin:6px 10px 12px;
+        }
+        .side-link{
+            display:flex; align-items:center; gap:10px;
+            color:var(--text-secondary); text-decoration:none;
+            padding:10px 12px; border-radius:10px; margin-bottom:6px;
+            border:1px solid transparent; transition:.2s;
+        }
+        .side-link:hover{ color:#fff; background:rgba(139,44,230,.08); border-color:var(--border); }
+        .side-link.active{
+            color:#fff; background:rgba(139,44,230,.18);
+            border-color:var(--accent-purple);
+            box-shadow:0 6px 16px rgba(139,44,230,.25) inset;
+        }
+        .side-link i{ width:20px; text-align:center; }
+        .side-divider{ height:1px; background:var(--border); margin:12px 0; }
+
+        /* Cards y tablas */
+        .card{
+            background:var(--card-bg) !important;
+            border:1px solid var(--border) !important;
+            border-radius:14px; box-shadow:var(--shadow);
+        }
+        .card-header{
+            background:rgba(139,44,230,.10) !important;
+            border-bottom:1px solid var(--border) !important;
+        }
+        .btn-gradient{
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            color:#fff; border:none; font-weight:700;
+        }
+        .btn-gradient:hover{
+            transform: translateY(-1px);
+            box-shadow: 0 8px 16px rgba(139,44,230,.35);
+            color:#fff;
+        }
+        .table{ color:var(--text-primary); }
+        .table thead th{ color:var(--text-secondary); border-bottom:1px solid var(--border); }
+        .table tbody td{ border-top:1px solid rgba(255,255,255,.06); }
+
+        /* Alerts */
+        .alert-container{
+            position:fixed; top:80px; right:20px; z-index:1050; min-width:300px;
+        }
+
+        /* Footer */
+        .admin-footer{
+            margin-top:24px; padding:12px 0; color:var(--text-secondary);
+            border-top:1px solid var(--border);
+        }
+
+        /* Responsive (ojo: escape @@ para Razor) */
+        @@media (max-width: 992px){
+            .admin-sidebar{ width: 230px; }
+            .admin-content{ margin-left:230px; width:calc(100% - 230px); }
+        }
+        @@media (max-width: 768px){
+            .admin-sidebar{
+                position:fixed; left:-260px; transition:.25s; z-index:1020;
+            }
+            .admin-sidebar.show{ left:0; }
+            .admin-content{ margin-left:0; width:100%; }
+        }
+
+        /* =========================================================
+           🔥 ENHANCEMENTS visuales para Usuarios / Stats / Reseñas / Encuestas
+           (solo estilos, no rompe vistas ni lógica)
+        ========================================================== */
+
+        /* Encabezados */
+        h1, .page-title {
+          font-weight: 800;
+          letter-spacing: .3px;
+          margin: 8px 0 18px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        h1::before, .page-title::before{
+          content: "";
+          display: inline-block;
+          width: 8px; height: 8px; border-radius: 50%;
+          background: linear-gradient(135deg,var(--accent-purple),var(--accent-blue));
+          box-shadow: 0 0 14px rgba(176,66,255,.7), 0 0 18px rgba(66,139,255,.5);
+        }
+
+        /* Cards extra */
+        .card { box-shadow: 0 10px 26px rgba(0,0,0,.35), var(--shadow); }
+        .card .card-title { font-weight: 700; }
+        .card .card-header .btn, .card .card-header .form-control { height: 40px; }
+
+        /* Filtros / toolbars (estadísticas) */
+        .filter-bar, .toolbar, .filters {
+          display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+          margin: 0 0 14px;
+        }
+        .filter-bar .form-control, .filters .form-control {
+          background: #101026; border: 1px solid var(--border); color: var(--text-primary);
+          border-radius: 10px; height: 40px;
+        }
+        .filter-bar .btn, .filters .btn { border-radius: 10px; }
+
+        /* Tablas mejoradas */
+        .table {
+          --row-hover: rgba(255,255,255,.06);
+          color: var(--text-primary);
+          border-collapse: separate; border-spacing: 0 8px;
+        }
+        .table thead th{
+          color: var(--text-secondary); font-weight: 700; text-transform: uppercase;
+          font-size: .78rem; letter-spacing: .6px; border: none;
+        }
+        .table tbody tr{
+          background: var(--card-bg); border: 1px solid var(--border);
+          transition: .15s; box-shadow: 0 2px 10px rgba(0,0,0,.25);
+        }
+        .table tbody tr:hover{ transform: translateY(-1px); background: var(--row-hover); }
+        .table tbody td{ border: none; vertical-align: middle; }
+
+        /* Botones “chip” para acciones */
+        .btn-chip{
+          padding: 6px 12px; border-radius: 10px; font-weight: 700; border: none;
+        }
+        .btn-chip.primary{
+          background: linear-gradient(135deg,var(--accent-purple),var(--accent-blue)); color:#fff;
+        }
+        .btn-chip.warn{ background:#FFB703; color:#0d0d1f; }
+        .btn-chip.soft{
+          background: rgba(139,44,230,.12); color:#e6dbff; border:1px solid var(--border);
+        }
+        .btn-chip:hover{ transform: translateY(-1px); box-shadow: 0 6px 16px rgba(139,44,230,.25); }
+
+        /* Acentos en botones Bootstrap existentes */
+        .table .btn, .card .btn { border-radius: 10px; font-weight: 700; }
+        .btn-primary { background: linear-gradient(135deg,var(--accent-purple),var(--accent-blue)); border: none; }
+        .btn-warning { background:#FFB703; border: none; color:#0d0d1f; }
+        .btn-outline-light{ border-color: var(--border); color: var(--text-secondary); }
+        .btn-outline-light:hover{ background: rgba(139,44,230,.15); color:#fff; }
+
+        /* Badges suaves (estado/sentimiento) */
+        .badge, .status-badge {
+          border-radius: 999px; padding: .45rem .7rem; font-weight: 800; font-size: .72rem;
+          letter-spacing: .3px; border: 1px solid transparent;
+        }
+        .badge-soft-success{ background: rgba(6,214,160,.15); color:#9ff1dc; border-color: rgba(6,214,160,.25); }
+        .badge-soft-danger{ background: rgba(255,80,80,.12); color:#ffc2c2; border-color: rgba(255,80,80,.2); }
+        .badge-soft-info{ background: rgba(66,139,255,.15); color:#cfe1ff; border-color: rgba(66,139,255,.25); }
+
+        /* Tabs tipo “píldora” (Reseñas) */
+        .pill-tabs, .segmented, .btn-group-tabs {
+          display: inline-flex; gap: 8px; margin-bottom: 14px;
+        }
+        .pill-tabs .btn, .segmented .btn, .btn-group-tabs .btn{
+          border-radius: 999px; padding: .45rem .9rem; font-weight: 700;
+          background: rgba(139,44,230,.12); border:1px solid var(--border); color: var(--text-secondary);
+        }
+        .pill-tabs .btn.active, .segmented .btn.active, .btn-group-tabs .btn.active{
+          color:#fff; background: linear-gradient(135deg,var(--accent-purple),var(--accent-blue)); border-color: transparent;
+          box-shadow: 0 6px 16px rgba(139,44,230,.25);
+        }
+
+        /* Listado de encuestas con acento al hover */
+        .table.encuestas tbody tr:hover{
+          box-shadow: 0 8px 22px rgba(139,44,230,.25);
+          border-color: var(--accent-purple);
+        }
+
+        /* Footer social feedback */
+        .footer-gaming .social-icon { opacity: .9; }
+        .footer-gaming .social-icon:hover{ transform: translateY(-3px) scale(1.04); }
+
+        /* Responsive de mejoras (escapar @@ en Razor) */
+        @@media (max-width: 1200px){
+          .card .card-body { padding: 1rem 1.1rem; }
+        }
+        @@media (max-width: 576px){
+          .table { border-spacing: 0 6px; }
+          .table tbody td { font-size: .92rem; }
+          .badge, .status-badge { font-size: .68rem; }
+        }
+
+
+        /* ========= Mejora visual global de secciones dentro del layout ========= */
+
+/* Títulos dentro del contenido */
+.admin-content h1,
+.admin-content .h1,
+.admin-content h2 {
+  font-weight: 800;
+  letter-spacing: .3px;
+  margin-bottom: 18px;
+  background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.admin-content h1::after,
+.admin-content .h1::after {
+  content:"";
+  display:block;
+  height:3px;
+  width:120px;
+  margin-top:10px;
+  border-radius:999px;
+  background: linear-gradient(90deg, var(--accent-purple), transparent);
+  opacity:.6;
+}
+
+/* “Tarjetizar” bloques principales (tablas, charts, listas) */
+.admin-content .table,
+.admin-content .card,
+.admin-content .chart,
+.admin-content .grid,
+.admin-content > .table-responsive {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+}
+
+/* Tablas: encabezado, filas y hover */
+.admin-content .table {
+  overflow: hidden;               /* mantiene el borde redondeado */
+  margin-top: 8px;
+}
+.admin-content .table thead th {
+  background: rgba(139,44,230,.10);
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border);
+  font-weight: 700;
+}
+.admin-content .table tbody tr {
+  transition: background .18s ease, transform .18s ease;
+}
+.admin-content .table tbody tr:hover {
+  background: rgba(139,44,230,.06);
+}
+
+/* Badges de estado (ej. Activo) */
+.badge,
+span.badge {
+  border: 1px solid rgba(255,255,255,.12);
+  font-weight: 700;
+  letter-spacing: .3px;
+  padding: .35rem .55rem;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.18);
+}
+.badge.bg-success,
+.badge.text-bg-success {
+  background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+  color:#fff !important;
+}
+.badge.bg-danger,
+.badge.text-bg-danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+  color:#fff !important;
+}
+
+/* Botones de acción en tablas (Ver Perfil / Bloquear) */
+.admin-content .btn,
+.admin-content .btn-sm {
+  border-radius: 10px;
+  font-weight: 700;
+}
+.admin-content .btn-primary,
+.admin-content .btn-outline-primary {
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+  border: none;
+  color:#fff;
+}
+.admin-content .btn-primary:hover,
+.admin-content .btn-outline-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(139,44,230,.35);
+  color:#fff;
+}
+.admin-content .btn-warning {
+  background: #f59e0b;
+  border: none;
+  color:#111827;
+  font-weight: 800;
+}
+.admin-content .btn-warning:hover {
+  filter: brightness(.95);
+}
+
+/* “Cabecera de sección” (línea/espacio) sin tocar vistas */
+.admin-content > *:first-child { margin-top: 8px; }
+.admin-content .section-toolbar {
+  display:flex; gap:8px; align-items:center; margin-bottom:12px;
+}
+
+/* Espaciado del contenedor general para que “respire” */
+.admin-content { padding-top: 18px; }
+
+/* Ajustes pequeños para móviles */
+@@media (max-width: 576px){
+  .admin-content h1, .admin-content .h1 { font-size: 1.35rem; }
+  .admin-content .table { font-size: .92rem; }
+}
+
+    </style>
+</head>
+<body>
+
+    <!-- Topbar -->
+    <div class="admin-topbar">
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-sm btn-outline-light d-md-none" id="toggleSidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <a class="text-decoration-none brand" asp-area="" asp-controller="Home" asp-action="Index">
+                <i class="fas fa-gamepad me-2"></i>GAMING
+            </a>
+            <span class="badge rounded-pill text-bg-dark ms-2">Admin</span>
+        </div>
+
+        <div class="admin-top-actions">
+            @if (User.Identity?.IsAuthenticated ?? false)
+            {
+                <div class="top-user">
+                    <div class="avatar"><i class="fas fa-user"></i></div>
+                    <span class="small text-secondary d-none d-md-inline">Hola, @User.Identity!.Name</span>
+                </div>
+                <form asp-area="Identity" asp-page="/Account/Logout" method="post" class="m-0">
+                    <button type="submit" class="logout-btn">
+                        <i class="fas fa-sign-out-alt me-1"></i>Salir
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+
+    <div class="admin-shell">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="side-title">Gestión</div>
+
+            <a class="side-link @(IsActive("AdminV2","Users") ? "active" : "")"
+               asp-area="AdminV2" asp-controller="Users" asp-action="Index">
+                <i class="fas fa-users-cog"></i> Usuarios
+            </a>
+
+            <a class="side-link @(IsActive("AdminV2","Stats") ? "active" : "")"
+               asp-area="AdminV2" asp-controller="Stats" asp-action="Index">
+                <i class="fas fa-chart-bar"></i> Informes y Estadísticas
+            </a>
+
+            <a class="side-link @(IsActive("AdminV2","Reviews") ? "active" : "")"
+               asp-area="AdminV2" asp-controller="Reviews" asp-action="Index">
+                <i class="fa-solid fa-comments"></i> Reseñas
+            </a>
+
+            <a class="side-link @(IsActive("AdminV2","Surveys") ? "active" : "")"
+               asp-area="AdminV2" asp-controller="Surveys" asp-action="Index">
+                <i class="fa-solid fa-list-check"></i> Encuestas
+            </a>
+
+            <div class="side-divider"></div>
+
+            <div class="side-title">Atajos</div>
+            <a class="side-link" asp-area="" asp-controller="Encuestas" asp-action="Index">
+                <i class="fas fa-paper-plane"></i> Ir a Encuestas (Usuario)
+            </a>
+            <a class="side-link" asp-area="" asp-controller="Perfil" asp-action="Index">
+                <i class="fas fa-user"></i> Mi Perfil
+            </a>
+        </aside>
+
+        <!-- Content -->
+        <main class="admin-content">
+            <!-- Alerts -->
+            <div class="alert-container">
+                @if (TempData["Ok"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>@TempData["Ok"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
+                }
+            </div>
+
+            @RenderBody()
+
+            <div class="admin-footer text-center">
+                <small>&copy; 2025 - GAMING · Panel de Administración</small>
+            </div>
+        </main>
+    </div>
+
+    <!-- JS libs -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Sidebar toggle (mobile) + auto-close alerts -->
+    <script>
+        (function () {
+            const btn = document.getElementById('toggleSidebar');
+            const aside = document.getElementById('adminSidebar');
+            if (btn && aside) {
+                btn.addEventListener('click', () => aside.classList.toggle('show'));
+            }
+            setTimeout(() => {
+                document.querySelectorAll('.alert').forEach(a => {
+                    const bsAlert = bootstrap.Alert.getOrCreateInstance(a);
+                    bsAlert.close();
+                });
+            }, 5000);
+        })();
+    </script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

@@ -20,3 +20,19 @@
 .bg-grad-blue  { background: linear-gradient(135deg, #4e73df, #224abe); }
 .bg-grad-orange{ background: linear-gradient(135deg, #f6c23e, #f4b619); }
 .bg-grad-red   { background: linear-gradient(135deg, #e74a3b, #be3226); }
+/* Responsive */
+@media (max-width: 992px) {
+  .admin-sidebar { width: 230px; }
+  .admin-content { margin-left: 230px; width: calc(100% - 230px); }
+}
+
+@media (max-width: 768px) {
+  .admin-sidebar {
+    position: fixed;
+    left: -260px;
+    transition: .25s;
+    z-index: 1020;
+  }
+  .admin-sidebar.show { left: 0; }
+  .admin-content { margin-left: 0; width: 100%; }
+}
