@@ -1,0 +1,43 @@
+@using Proyecto_Gaming.ViewModels.Perfil
+@model IEnumerable<PerfilUsuarioVM.MedallaVM>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="card bg-dark border-0 shadow-sm mt-3">
+        <div class="card-body text-center text-muted">
+            Aún no tienes medallas. ¡Participa en encuestas para conseguirlas! 🏅
+        </div>
+    </div>
+}
+else
+{
+    <div class="card bg-dark border-0 shadow-sm mt-3">
+        <div class="card-header bg-transparent border-0">
+            <h5 class="mb-0 text-white">Medallas obtenidas</h5>
+        </div>
+        <div class="card-body pt-0">
+            <div class="medal-grid">
+                @foreach (var m in Model)
+                {
+                    <div class="medal-card" title="@m.Nombre">
+                        <img src="@m.IconoUrl" alt="@m.Nombre" class="medal-img" />
+                        <div class="medal-name">@m.Nombre</div>
+
+                        @* Points es int, no nullable *@
+                        @if (m.Points > 0)
+                        {
+                            <div class="medal-points">+@m.Points pts</div>
+                        }
+
+                        @if (m.GrantedAtUtc.HasValue)
+                        {
+                            <div class="medal-date">
+                                @m.GrantedAtUtc.Value.ToLocalTime().ToString("dd/MM/yyyy")
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}

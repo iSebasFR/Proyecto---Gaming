@@ -6,6 +6,8 @@ using Proyecto_Gaming.Services;
 using Microsoft.Extensions.Caching.Distributed;
 // 🔧 Alias para distinguir el servicio de AdminV2
 using AdminV2Stats = Proyecto_Gaming.Areas.AdminV2.Services;
+using Proyecto_Gaming.Data;
+using Proyecto_Gaming.Models.Surveys;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -204,8 +206,28 @@ builder.Services.Configure<HttpClientHandler>(options =>
 {
     options.MaxConnectionsPerServer = 10;
 });
-
 var app = builder.Build();
+
+// ▼▼▼ SEED DE MEDALLAS (DESPUÉS de builder.Build())
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    if (!db.Medals.Any())
+    {
+        db.Medals.AddRange(new List<Medal>
+        {
+            new() { Name = "Protector",   Icon = "/img/medals/m1.png", Points = 10 },
+            new() { Name = "MVP",         Icon = "/img/medals/m2.png", Points = 20 },
+            new() { Name = "Escudo Real", Icon = "/img/medals/m3.png", Points = 30 },
+            new() { Name = "Guardían",    Icon = "/img/medals/m4.png", Points = 40 },
+            new() { Name = "Legendario",  Icon = "/img/medals/m5.png", Points = 50 },
+        });
+
+        db.SaveChanges();
+    }
+}
+// ▲▲▲ FIN SEED
 
 // ✅ INICIALIZACIÓN AUTOMÁTICA AL INICIAR
 app.Lifetime.ApplicationStarted.Register(() =>
