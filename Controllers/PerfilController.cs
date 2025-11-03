@@ -7,6 +7,9 @@ using Proyecto_Gaming.Data;
 using Proyecto_Gaming.Services;
 using System.Diagnostics;
 
+// Para PerfilUsuarioVM.MedallaVM
+using Proyecto_Gaming.ViewModels.Perfil;
+
 namespace Proyecto_Gaming.Controllers
 {
     public class PerfilController : Controller
@@ -17,9 +20,9 @@ namespace Proyecto_Gaming.Controllers
         private readonly IStatsService _statsService;
 
         public PerfilController(UserManager<Usuario> userManager,
-                              ApplicationDbContext context,
-                              IWebHostEnvironment environment,
-                              IStatsService statsService)
+                                ApplicationDbContext context,
+                                IWebHostEnvironment environment,
+                                IStatsService statsService)
         {
             _userManager = userManager;
             _context = context;
@@ -44,7 +47,7 @@ namespace Proyecto_Gaming.Controllers
             }
             else
             {
-                // Ver perfil de otro usuario (para futuro)
+                // Ver perfil de otro usuario
                 usuario = await _userManager.FindByIdAsync(userId);
                 if (usuario == null)
                 {
@@ -53,19 +56,40 @@ namespace Proyecto_Gaming.Controllers
             }
 
             var viewModel = await ConstruirPerfilViewModel(usuario);
+
+            // Medallas del usuario para mostrarlas en el perfil
+            ViewBag.Medallas = await _context.UserMedals
+                .Where(um => um.UsuarioId == usuario.Id)
+                .Include(um => um.Medal)
+                .OrderByDescending(um => um.GrantedAtUtc)
+                .Select(um => new PerfilUsuarioVM.MedallaVM
+                {
+                    Id           = um.MedalId,
+                    Nombre       = um.Medal != null ? um.Medal.Name : "Medalla",
+                    IconoUrl     = "/img/medals/" + (
+                                      um.Medal != null && !string.IsNullOrWhiteSpace(um.Medal.Icon)
+                                      ? um.Medal.Icon
+                                      : "m1.png"),
+                    Points       = um.Medal != null ? um.Medal.Points : 0,
+                    GrantedAtUtc = um.GrantedAtUtc
+                })
+                .AsNoTracking()
+                .ToListAsync();
+
+            // ⬇️ Faltaba devolver la vista
             return View(viewModel);
         }
 
         private async Task<PerfilViewModel> ConstruirPerfilViewModel(Usuario usuario)
         {
-            // Obtener biblioteca reciente (últimos 3 juegos) usando EF Core
+            // Obtener biblioteca reciente (últimos 3 juegos)
             var bibliotecaReciente = await _context.BibliotecaUsuario
                 .Where(b => b.UsuarioId == usuario.Id)
                 .OrderByDescending(b => b.Id)
                 .Take(3)
                 .ToListAsync();
 
-            // Datos visuales para amigos (no funcional aún)
+            // Datos visuales para amigos (placeholder)
             var amigosVisual = new List<UsuarioAmigoViewModel>
             {
                 new UsuarioAmigoViewModel { Nombre = "ProGamer99", Estado = "En Línea", Avatar = "PG" },
@@ -73,11 +97,10 @@ namespace Proyecto_Gaming.Controllers
                 new UsuarioAmigoViewModel { Nombre = "GameLover", Estado = "Jugando", Avatar = "GL" }
             };
 
-            // Obtener estadísticas generales del usuario
+            // Stats del usuario
             var stats = await _statsService.GetUserStatsAsync(usuario.Id);
-            var totalJuegos = stats.TotalGames;
 
-            // Contar grupos del usuario
+            // Contar grupos
             var groupsCount = await _context.MiembrosGrupo.CountAsync(m => m.UsuarioId == usuario.Id);
 
             return new PerfilViewModel

@@ -65,6 +65,14 @@
                 </div>
             </div>
 
+            <!-- ======= MEDALLAS DEL USUARIO (AÑADIDO) ======= -->
+            @{
+                var medallas = ViewBag.Medallas as IEnumerable<Proyecto_Gaming.ViewModels.Perfil.PerfilUsuarioVM.MedallaVM>
+                               ?? Enumerable.Empty<Proyecto_Gaming.ViewModels.Perfil.PerfilUsuarioVM.MedallaVM>();
+            }
+            @await Html.PartialAsync("_UserMedals", medallas)
+            <!-- ===== FIN MEDALLAS ===== -->
+
             <!-- Contenido Principal -->
             <div class="row g-4">
                 <!-- Columna Izquierda -->
@@ -529,5 +537,52 @@
         .empty-state, .empty-state-centered { text-align: center; padding: 3rem 2rem; color: var(--text-secondary); }
         .empty-state i, .empty-state-centered i { margin-bottom: 1rem; opacity: 0.5; }
         .empty-state p, .empty-state-centered p { margin-bottom: 1.5rem; }
+
+        /* ====== ESTILOS MEDALLAS (AÑADIDO) ====== */
+        .medal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 16px;
+        }
+        .medal-card {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            padding: 12px 10px;
+            text-align: center;
+            transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+        }
+        .medal-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--neon-purple);
+            box-shadow: 0 10px 25px rgba(139, 44, 230, 0.2);
+        }
+        .medal-img {
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,.35));
+        }
+        .medal-name {
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: .9rem;
+            line-height: 1.2;
+            min-height: 32px;
+        }
+        .medal-points {
+            margin-top: 6px;
+            font-size: .8rem;
+            color: #ffd166;
+            font-weight: 700;
+        }
+        .medal-date {
+            margin-top: 4px;
+            font-size: .75rem;
+            color: var(--text-secondary);
+            opacity: .8;
+        }
+        /* ===== FIN ESTILOS MEDALLAS ===== */
     </style>
 }

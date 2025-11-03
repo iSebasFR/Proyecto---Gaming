@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Proyecto_Gaming.ViewModels.Surveys;
+using Proyecto_Gaming.ViewModels.Surveys;   // ✅ Asegura el namespace correcto del VM
 using Proyecto_Gaming.Data;
 using Proyecto_Gaming.Models;
 using Proyecto_Gaming.Models.Surveys;
@@ -48,6 +48,7 @@ namespace Proyecto_Gaming.Controllers
         }
 
         // GET: /Encuestas/Responder/5
+        [HttpGet]
         public async Task<IActionResult> Responder(int id)
         {
             var user = await GetUserAsync();
@@ -63,6 +64,7 @@ namespace Proyecto_Gaming.Controllers
             }
 
             var survey = await _db.Surveys
+                .AsNoTracking() // ✅ evita tracking innecesario
                 .Include(s => s.Questions)
                     .ThenInclude(q => q.Options)
                 .FirstOrDefaultAsync(s => s.Id == id);
@@ -73,22 +75,22 @@ namespace Proyecto_Gaming.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var vm = new TakeSurveyVM
+            // ✅ Usamos SIEMPRE el tipo totalmente calificado para evitar choques con otras clases iguales
+            var vm = new Proyecto_Gaming.ViewModels.Surveys.TakeSurveyVM
             {
                 SurveyId = survey.Id,
                 Title = survey.Title,
                 Description = survey.Description,
                 Questions = survey.Questions
                     .OrderBy(q => q.Id)
-                    .Select(q => new TakeQuestionVM
+                    .Select(q => new Proyecto_Gaming.ViewModels.Surveys.TakeQuestionVM
                     {
                         QuestionId = q.Id,
                         Text = q.Text,
-                        // 👇 enum directamente
-                        Type = q.Type,
+                        Type = q.Type, // enum
                         Options = q.Options
                             .OrderBy(o => o.Id)
-                            .Select(o => new TakeOptionVM
+                            .Select(o => new Proyecto_Gaming.ViewModels.Surveys.TakeOptionVM
                             {
                                 OptionId = o.Id,
                                 Text = o.Text
@@ -96,13 +98,13 @@ namespace Proyecto_Gaming.Controllers
                     }).ToList()
             };
 
-            return View(vm);
+            return View("Responder", vm); // ✅ forzamos la vista correcta
         }
 
         // POST: /Encuestas/Responder
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Responder(TakeSurveyVM model)
+        public async Task<IActionResult> Responder(Proyecto_Gaming.ViewModels.Surveys.TakeSurveyVM model) // ✅ firma totalmente calificada
         {
             var user = await GetUserAsync();
             if (user is null) return Challenge();
@@ -169,7 +171,7 @@ namespace Proyecto_Gaming.Controllers
 
             _db.SurveyResponses.Add(response);
 
-            // ✅ Ajuste mínimo para evitar el error (EndDate es nullable):
+            // Ajuste UTC defensivo (si el modelo lo necesita)
             survey.StartDate = DateTime.SpecifyKind(survey.StartDate, DateTimeKind.Utc);
             if (survey.EndDate.HasValue)
                 survey.EndDate = DateTime.SpecifyKind(survey.EndDate.Value, DateTimeKind.Utc);
