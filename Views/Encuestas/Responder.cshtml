@@ -1,5 +1,6 @@
-@model Proyecto_Gaming.ViewModels.Surveys.TakeSurveyVM
+@model Proyecto_Gaming.Areas.AdminV2.ViewModels.Surveys.TakeSurveyVM
 @using Proyecto_Gaming.Models.Surveys
+
 
 @{
     ViewData["Title"] = "Responder encuesta";
@@ -19,44 +20,42 @@
         {
             var q = Model.Questions[i];
             <div class="p-3 rounded" style="background:#0f0f1f">
-                <h6 class="text-white mb-3">@(i + 1). @q.Text</h6>
+                <h6 class="text-white mb-3">@(i+1). @q.Text</h6>
 
-                @* Texto abierto *@
-                @if (q.Type == QuestionType.OpenText)
-                {
-                    <textarea class="form-control" asp-for="Questions[@i].OpenAnswer" rows="3"
-                              placeholder="Escribe tu respuesta..."></textarea>
-                }
-                @* Sí/No (asume 2 opciones) *@
-                else if (q.Type == QuestionType.YesNo)
-                {
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio"
-                               asp-for="Questions[@i].SelectedOptionId"
-                               value="@q.Options.First().OptionId" id="q@i_opt1" />
-                        <label class="form-check-label" for="q@i_opt1">@q.Options.First().Text</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio"
-                               asp-for="Questions[@i].SelectedOptionId"
-                               value="@q.Options.Last().OptionId" id="q@i_opt2" />
-                        <label class="form-check-label" for="q@i_opt2">@q.Options.Last().Text</label>
-                    </div>
-                }
-                @* Opción múltiple *@
-                else if (q.Type == QuestionType.MultipleChoice)
-                {
-                    @for (var j = 0; j < q.Options.Count; j++)
-                    {
-                        var opt = q.Options[j];
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio"
-                                   asp-for="Questions[@i].SelectedOptionId"
-                                   value="@opt.OptionId" id="q@i_opt@j" />
-                            <label class="form-check-label" for="q@i_opt@j">@opt.Text</label>
-                        </div>
-                    }
-                }
+             @if (q.Type == QuestionType.OpenText)
+{
+    <textarea class="form-control" asp-for="Questions[@i].OpenAnswer" rows="3"
+              placeholder="Escribe tu respuesta..."></textarea>
+}
+else if (q.Type == QuestionType.YesNo)
+{
+    <div class="form-check">
+        <input class="form-check-input" type="radio"
+               asp-for="Questions[@i].SelectedOptionId"
+               value="@q.Options.First().OptionId" id="q@i_opt1" />
+        <label class="form-check-label" for="q@i_opt1">@q.Options.First().Text</label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio"
+               asp-for="Questions[@i].SelectedOptionId"
+               value="@q.Options.Last().OptionId" id="q@i_opt2" />
+        <label class="form-check-label" for="q@i_opt2">@q.Options.Last().Text</label>
+    </div>
+}
+else if (q.Type == QuestionType.MultipleChoice)
+{
+    @for (var j = 0; j < q.Options.Count; j++)
+    {
+        var opt = q.Options[j];
+        <div class="form-check">
+            <input class="form-check-input" type="radio"
+                   asp-for="Questions[@i].SelectedOptionId"
+                   value="@opt.OptionId" id="q@i_opt@j" />
+            <label class="form-check-label" for="q@i_opt@j">@opt.Text</label>
+        </div>
+    }
+}
+
 
                 <input type="hidden" asp-for="Questions[@i].QuestionId" />
                 <input type="hidden" asp-for="Questions[@i].Type" />
