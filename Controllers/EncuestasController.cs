@@ -6,10 +6,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Proyecto_Gaming.ViewModels.Surveys;   // ✅ Asegura el namespace correcto del VM
+
 using Proyecto_Gaming.Data;
 using Proyecto_Gaming.Models;
 using Proyecto_Gaming.Models.Surveys;
+using Proyecto_Gaming.ViewModels.Surveys;   // SurveyListItemVM, etc. (mantener)
+                                             // OJO: NO agregar usings de AdminV2 aquí
 
 namespace Proyecto_Gaming.Controllers
 {
@@ -28,6 +30,7 @@ namespace Proyecto_Gaming.Controllers
         private Task<Usuario?> GetUserAsync() => _userManager.GetUserAsync(User);
 
         // GET: /Encuestas
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             var now = DateTime.UtcNow;
@@ -37,10 +40,10 @@ namespace Proyecto_Gaming.Controllers
                 .Where(s => s.StartDate <= now && (s.EndDate == null || s.EndDate >= now))
                 .Select(s => new SurveyListItemVM
                 {
-                    Id = s.Id,
-                    Title = s.Title,
+                    Id          = s.Id,
+                    Title       = s.Title,
                     Description = s.Description,
-                    MedalName = s.Medal != null ? s.Medal.Name : "Participación"
+                    MedalName   = s.Medal != null ? s.Medal.Name : "Participación"
                 })
                 .ToListAsync();
 
@@ -64,7 +67,7 @@ namespace Proyecto_Gaming.Controllers
             }
 
             var survey = await _db.Surveys
-                .AsNoTracking() // ✅ evita tracking innecesario
+                .AsNoTracking()
                 .Include(s => s.Questions)
                     .ThenInclude(q => q.Options)
                 .FirstOrDefaultAsync(s => s.Id == id);
@@ -75,36 +78,40 @@ namespace Proyecto_Gaming.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // ✅ Usamos SIEMPRE el tipo totalmente calificado para evitar choques con otras clases iguales
+            // ✅ Usamos los tipos TOTALMENTE CALIFICADOS del VM correcto
             var vm = new Proyecto_Gaming.ViewModels.Surveys.TakeSurveyVM
             {
-                SurveyId = survey.Id,
-                Title = survey.Title,
+                SurveyId    = survey.Id,
+                Title       = survey.Title,
                 Description = survey.Description,
+
                 Questions = survey.Questions
                     .OrderBy(q => q.Id)
-                    .Select(q => new Proyecto_Gaming.ViewModels.Surveys.TakeQuestionVM
+                    .Select(q => new Proyecto_Gaming.ViewModels.Surveys.TakeSurveyQuestionVM
                     {
                         QuestionId = q.Id,
-                        Text = q.Text,
-                        Type = q.Type, // enum
+                        Text       = q.Text,
+                        Type       = q.Type,
+
                         Options = q.Options
                             .OrderBy(o => o.Id)
-                            .Select(o => new Proyecto_Gaming.ViewModels.Surveys.TakeOptionVM
+                            .Select(o => new Proyecto_Gaming.ViewModels.Surveys.TakeSurveyOptionVM
                             {
                                 OptionId = o.Id,
-                                Text = o.Text
-                            }).ToList()
-                    }).ToList()
+                                Text     = o.Text
+                            })
+                            .ToList()
+                    })
+                    .ToList()
             };
 
-            return View("Responder", vm); // ✅ forzamos la vista correcta
+            return View("Responder", vm);
         }
 
         // POST: /Encuestas/Responder
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Responder(Proyecto_Gaming.ViewModels.Surveys.TakeSurveyVM model) // ✅ firma totalmente calificada
+        public async Task<IActionResult> Responder(Proyecto_Gaming.ViewModels.Surveys.TakeSurveyVM model)
         {
             var user = await GetUserAsync();
             if (user is null) return Challenge();
@@ -132,10 +139,10 @@ namespace Proyecto_Gaming.Controllers
             // Guardar respuesta principal
             var response = new SurveyResponse
             {
-                SurveyId = survey.Id,
-                UsuarioId = user.Id,
-                SubmittedAtUtc = DateTime.UtcNow,
-                Answers = new List<SurveyAnswer>()
+                SurveyId        = survey.Id,
+                UsuarioId       = user.Id,
+                SubmittedAtUtc  = DateTime.UtcNow,
+                Answers         = new List<SurveyAnswer>()
             };
 
             // Mapear respuestas por pregunta
@@ -151,7 +158,7 @@ namespace Proyecto_Gaming.Controllers
                         response.Answers.Add(new SurveyAnswer
                         {
                             SurveyQuestionId = dbq.Id,
-                            AnswerText = q.OpenAnswer
+                            AnswerText       = q.OpenAnswer
                         });
                     }
                 }
@@ -171,14 +178,14 @@ namespace Proyecto_Gaming.Controllers
 
             _db.SurveyResponses.Add(response);
 
-            // Ajuste UTC defensivo (si el modelo lo necesita)
+            // (Defensivo) Asegurar UTC coherente
             survey.StartDate = DateTime.SpecifyKind(survey.StartDate, DateTimeKind.Utc);
             if (survey.EndDate.HasValue)
                 survey.EndDate = DateTime.SpecifyKind(survey.EndDate.Value, DateTimeKind.Utc);
 
             await _db.SaveChangesAsync();
 
-            // Otorgar medalla si la encuesta tiene
+            // Otorgar medalla si corresponde
             if (survey.MedalId.HasValue)
             {
                 var medalId = survey.MedalId.Value;
@@ -190,15 +197,15 @@ namespace Proyecto_Gaming.Controllers
                 {
                     _db.UserMedals.Add(new UserMedal
                     {
-                        UsuarioId = user.Id,
-                        MedalId = medalId,
-                        GrantedAtUtc = DateTime.UtcNow
+                        UsuarioId   = user.Id,
+                        MedalId     = medalId,
+                        GrantedAtUtc= DateTime.UtcNow
                     });
                     await _db.SaveChangesAsync();
                 }
             }
 
-            TempData["Ok"] = "¡Gracias por participar! Se registraron tus respuestas y tu medalla fue otorgada.";
+            TempData["Ok"] = "¡Gracias por participar! Se registraron tus respuestas.";
             return RedirectToAction(nameof(Index));
         }
     }

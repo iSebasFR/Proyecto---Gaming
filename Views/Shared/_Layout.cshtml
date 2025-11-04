@@ -328,8 +328,6 @@
             animation: fadeInUp 0.4s ease-out;
         }
 
-        
-
         /* CONTENEDOR PRINCIPAL */
         .container {
             max-width: 1200px;
@@ -346,9 +344,178 @@
         .navbar-toggler:focus {
             box-shadow: 0 0 0 0.25rem rgba(139, 44, 230, 0.25);
         }
+
+        /* ===================================================
+           🔥 POLISH VISUAL SOLO PARA ADMIN (area AdminV2)
+           =================================================== */
+        .admin-area{
+            --card-bg:#171734;
+            --bg-primary:#0c0c1b;
+        }
+        .admin-area .card{
+            border-color: rgba(176,66,255,.28) !important;
+            box-shadow: 0 10px 30px rgba(176,66,255,.08);
+        }
+        .admin-area .card-header{
+            background: linear-gradient(180deg, rgba(176,66,255,.08), rgba(44,91,230,.06)) !important;
+            border-bottom-color: rgba(176,66,255,.25) !important;
+        }
+        .admin-area .admin-toolbar{
+            display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; margin-bottom:1rem;
+        }
+        .admin-area .admin-toolbar .form-control,
+        .admin-area .admin-toolbar .form-select{
+            background:#0f0f1f; color:var(--text-primary);
+            border:1px solid rgba(176,66,255,.25);
+        }
+        .admin-area .admin-toolbar .form-control:focus,
+        .admin-area .admin-toolbar .form-select:focus{
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 0 .2rem rgba(176,66,255,.2);
+        }
+        .admin-area .btn-admin-primary{
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            color:#fff; border:0; font-weight:700;
+        }
+        .admin-area .btn-admin-primary:hover{
+            filter: brightness(1.05);
+            box-shadow: 0 10px 22px rgba(139,44,230,.35);
+            transform: translateY(-1px);
+        }
+        .admin-area .btn-admin-ghost{
+            background: transparent; color: var(--text-secondary);
+            border:1px solid rgba(176,66,255,.35);
+        }
+        .admin-area .btn-admin-ghost:hover{
+            color:var(--text-primary);
+            border-color: var(--accent-purple);
+            background: rgba(176,66,255,.12);
+        }
+        .admin-area .table-admin{
+            color: var(--text-primary);
+            border-color: rgba(255,255,255,.08);
+        }
+        .admin-area .table-admin thead th{
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            font-size:.8rem;
+            background: rgba(176,66,255,.08);
+            border-bottom-color: rgba(176,66,255,.25);
+        }
+        .admin-area .table-admin tbody tr:nth-child(even){ background: rgba(255,255,255,.03); }
+        .admin-area .table-admin tbody tr:hover{ background: rgba(176,66,255,.08); }
+        .admin-area .table-admin .table-actions{ display:flex; gap:.4rem; justify-content:flex-end; }
+        .admin-area .form-control,
+        .admin-area .form-select,
+        .admin-area .form-check-input{
+            background:#0f0f1f; color:var(--text-primary);
+            border:1px solid rgba(176,66,255,.25);
+        }
+        .admin-area .form-control::placeholder{ color:#8c8caf; }
+        .admin-area .form-control:focus,
+        .admin-area .form-select:focus{
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 0 .2rem rgba(176,66,255,.2);
+        }
+        .admin-area .badge-status{
+            font-weight:700; border-radius:999px; padding:.35rem .6rem; font-size:.75rem;
+        }
+        .admin-area .badge-status.success{ background: rgba(6,214,160,.18); color:#06d6a0; border:1px solid rgba(6,214,160,.3); }
+        .admin-area .badge-status.warn{ background: rgba(255,184,0,.18); color:#ffb800; border:1px solid rgba(255,184,0,.35); }
+        .admin-area .badge-status.danger{ background: rgba(255,71,87,.18); color:#ff4757; border:1px solid rgba(255,71,87,.35); }
+        .admin-area .badge-status.info{ background: rgba(66,139,255,.18); color:#428bff; border:1px solid rgba(66,139,255,.35); }
+        .admin-area .pagination .page-link{
+            background:#0f0f1f; color:var(--text-secondary);
+            border-color: rgba(176,66,255,.25);
+        }
+        .admin-area .pagination .page-item.active .page-link{
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            color:#fff; border:0;
+        }
+        .admin-area .admin-sidebar{
+            background:#0b0b18; border-right:1px solid rgba(176,66,255,.25);
+        }
+        .admin-area .admin-sidebar a{
+            color:var(--text-secondary); border-radius:8px;
+        }
+        .admin-area .admin-sidebar a.active,
+        .admin-area .admin-sidebar a:hover{
+            color:var(--text-primary);
+            background: rgba(176,66,255,.12);
+            border-color: rgba(176,66,255,.35);
+        }
+
+        /* ====== COMPAT ADMIN: aplica sobre clases Bootstrap existentes ====== */
+        .admin-area .table thead th{
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            font-size:.8rem;
+            background: rgba(176,66,255,.08);
+            border-bottom-color: rgba(176,66,255,.25);
+        }
+        .admin-area .table tbody tr:nth-child(even){ background: rgba(255,255,255,.03); }
+        .admin-area .table tbody tr:hover{ background: rgba(176,66,255,.08); }
+        .admin-area td:last-child{ text-align: right; }
+
+        .admin-area .btn.btn-primary{
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            border: 0;
+            font-weight: 700;
+            color:#fff;
+        }
+        .admin-area .btn.btn-primary:hover{
+            filter: brightness(1.05);
+            box-shadow: 0 10px 22px rgba(139,44,230,.35);
+            transform: translateY(-1px);
+        }
+        .admin-area .btn.btn-outline-secondary{
+            color: var(--text-secondary);
+            border-color: rgba(176,66,255,.35);
+            background: transparent;
+        }
+        .admin-area .btn.btn-outline-secondary:hover{
+            color: var(--text-primary);
+            border-color: var(--accent-purple);
+            background: rgba(176,66,255,.12);
+        }
+
+        .admin-area .badge.bg-success{
+            background: rgba(6,214,160,.18) !important;
+            color:#06d6a0 !important;
+            border:1px solid rgba(6,214,160,.3);
+        }
+        .admin-area .badge.bg-warning{
+            background: rgba(255,184,0,.18) !important;
+            color:#ffb800 !important;
+            border:1px solid rgba(255,184,0,.35);
+        }
+        .admin-area .badge.bg-danger{
+            background: rgba(255,71,87,.18) !important;
+            color:#ff4757 !important;
+            border:1px solid rgba(255,71,87,.35);
+        }
+        .admin-area .badge.bg-info{
+            background: rgba(66,139,255,.18) !important;
+            color:#428bff !important;
+            border:1px solid rgba(66,139,255,.35);
+        }
     </style>
 </head>
-<body>
+
+@{
+    // Detecta el área tanto por RouteData como por RouteValues del ActionDescriptor
+    var areaValue =
+        (ViewContext.RouteData.Values["area"] as string)
+        ?? (ViewContext.ActionDescriptor.RouteValues.ContainsKey("area")
+            ? ViewContext.ActionDescriptor.RouteValues["area"]
+            : null);
+
+    var isAdminArea = string.Equals(areaValue, "AdminV2", StringComparison.OrdinalIgnoreCase);
+}
+
+<body class="@(isAdminArea ? "admin-area" : "")">
     <header>
         <nav class="navbar navbar-expand-lg navbar-gaming">
             <div class="container-fluid">

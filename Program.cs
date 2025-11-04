@@ -9,6 +9,8 @@ using AdminV2Stats = Proyecto_Gaming.Areas.AdminV2.Services;
 using Proyecto_Gaming.Data;
 using Proyecto_Gaming.Models.Surveys;
 
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ✅ AGREGAR ESTA LÍNEA (DbContext)
@@ -84,6 +86,11 @@ builder.Services.AddSession(options =>
 
 // ✅ MANTENER CACHÉ EN MEMORIA PARA DATOS LOCALES
 builder.Services.AddMemoryCache();
+builder.Services.AddScoped<IStatsService, StatsService>();
+builder.Services.AddScoped<IUserService, UserService>();   // o el nombre real de tu interfaz
+builder.Services.AddScoped<IRewardService, RewardService>();
+
+
 
 // ✅ CONFIGURAR RAWG SERVICE
 builder.Services.AddHttpClient<IRawgService, RawgService>(client =>

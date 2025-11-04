@@ -61,6 +61,28 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- Medallas / Logros -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title">
+            <i class="fas fa-award me-2"></i>Logros y Medallas
+        </h5>
+    </div>
+    <div class="card-body">
+        @if (Model.Medallas != null && Model.Medallas.Any())
+        {
+            @await Html.PartialAsync("_UserMedals", Model.Medallas)
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-medal fa-2x"></i>
+                <p>Todavía no tienes medallas. ¡Participa en encuestas y eventos para ganar algunas!</p>
+            </div>
+        }
+    </div>
+</div>
+
                     </div><!-- row -->
                 </div>
             </div>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace Proyecto_Gaming.Areas.AdminV2.ViewModels
 {
+    // ⬇️ ESTA es la única definición que debe quedar en todo el proyecto
     public class ReviewListItem
     {
         public int Id { get; set; }
