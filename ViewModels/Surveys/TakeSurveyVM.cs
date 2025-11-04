@@ -1,43 +1,31 @@
-using System.Collections.Generic;
-using Proyecto_Gaming.Models.Surveys;
-
 namespace Proyecto_Gaming.ViewModels.Surveys
 {
-    /// <summary>
-    /// VM que la vista Responder.cshtml espera como @model.
-    /// </summary>
+    using System.Collections.Generic;
+    using Proyecto_Gaming.Models.Surveys;
+
     public class TakeSurveyVM
     {
         public int SurveyId { get; set; }
-        public string Title { get; set; } = "";
+        public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
-
-        // Preguntas a renderizar en la vista (y a bindear en el POST)
-        public List<TakeQuestionVM> Questions { get; set; } = new();
+        public List<TakeSurveyQuestionVM> Questions { get; set; } = new();
     }
 
-    public class TakeQuestionVM
+    public class TakeSurveyQuestionVM
     {
         public int QuestionId { get; set; }
-        public string Text { get; set; } = "";
-
-        // Enum del dominio (Proyecto_Gaming.Models.Surveys.QuestionType)
+        public string Text { get; set; } = string.Empty;
         public QuestionType Type { get; set; }
+        public List<TakeSurveyOptionVM> Options { get; set; } = new();
 
-        // Campos para binding del POST:
-        // - Si Type == OpenText, usar OpenAnswer
-        public string? OpenAnswer { get; set; }
-
-        // - Si Type == YesNo o MultipleChoice, usar SelectedOptionId
+        // respuestas
         public int? SelectedOptionId { get; set; }
-
-        // Opciones para YesNo / MultipleChoice
-        public List<TakeOptionVM> Options { get; set; } = new();
+        public string? OpenAnswer { get; set; }
     }
 
-    public class TakeOptionVM
+    public class TakeSurveyOptionVM
     {
         public int OptionId { get; set; }
-        public string Text { get; set; } = "";
+        public string Text { get; set; } = string.Empty;
     }
 }

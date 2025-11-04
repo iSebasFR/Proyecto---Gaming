@@ -1,5 +1,6 @@
 @using Proyecto_Gaming.ViewModels.Perfil
-@model IEnumerable<PerfilUsuarioVM.MedallaVM>
+@model IEnumerable<Proyecto_Gaming.ViewModels.Perfil.PerfilUsuarioVM.MedallaVM>
+
 
 @if (Model == null || !Model.Any())
 {
@@ -13,15 +14,43 @@ else
 {
     <div class="card bg-dark border-0 shadow-sm mt-3">
         <div class="card-header bg-transparent border-0">
-            <h5 class="mb-0 text-white">Medallas obtenidas</h5>
+            <h5 class="mb-0 text-white"><i class="fas fa-award me-2"></i>Medallas obtenidas</h5>
         </div>
+
         <div class="card-body pt-0">
             <div class="medal-grid">
                 @foreach (var m in Model)
                 {
+                    // --- SOLO AJUSTADO ESTE BLOQUE: sin @{ ... } ---
+
+                    // Nombre base (si viene vacío, usa m1.png.jpeg como default)
+                    var baseName = string.IsNullOrWhiteSpace(m.IconoUrl) ? "m1.png.jpeg" : m.IconoUrl.Trim();
+
+                    // Si viene con ruta absoluta, quítala; nos quedamos con el archivo
+                    if (baseName.StartsWith("/")) baseName = baseName.Substring(1);
+                    if (baseName.StartsWith("img/medals/", StringComparison.OrdinalIgnoreCase))
+                        baseName = baseName.Substring("img/medals/".Length);
+
+                    // Normalizar a la convención real de tu carpeta: *.png.jpeg
+                    if (baseName.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
+                        baseName += ".jpeg";
+                    else if (!baseName.EndsWith(".png.jpeg", StringComparison.OrdinalIgnoreCase)
+                             && !baseName.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
+                        baseName += ".png.jpeg";
+
+                    var icono = Url.Content("~/img/medals/" + baseName);
+                    var fallback = Url.Content("~/img/medals/m1.png.jpeg");
+
                     <div class="medal-card" title="@m.Nombre">
-                        <img src="@m.IconoUrl" alt="@m.Nombre" class="medal-img" />
-                        <div class="medal-name">@m.Nombre</div>
+                        <div class="medal-icon">
+                            <img src="@icono"
+                                 alt="@m.Nombre"
+                                 class="medal-img"
+                                 loading="lazy"
+                                 onerror="this.onerror=null;this.src='@fallback';" />
+                        </div>
+
+                        <div class="medal-name text-truncate" title="@m.Nombre">@m.Nombre</div>
 
                         @* Points es int, no nullable *@
                         @if (m.Points > 0)
@@ -41,3 +70,49 @@ else
         </div>
     </div>
 }
+
+<style>
+    /* Grid responsivo */
+    .medal-grid{
+        display:grid;
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap:14px;
+        align-items:start;
+    }
+
+    .medal-card{
+        background: rgba(255,255,255,.05);
+        border: 1px solid rgba(255,255,255,.1);
+        border-radius: 12px;
+        padding: 12px 10px;
+        text-align:center;
+        color:#e7e7ff;
+        transition:.25s ease;
+    }
+    .medal-card:hover{
+        transform: translateY(-4px);
+        border-color: rgba(139,44,230,.5);
+        box-shadow: 0 10px 24px rgba(139,44,230,.18);
+    }
+
+    .medal-icon{
+        width:64px;height:64px;margin:0 auto 8px auto;
+        border-radius:14px;
+        background: rgba(255,255,255,.06);
+        border:1px solid rgba(255,255,255,.12);
+        display:flex;align-items:center;justify-content:center;
+        box-shadow:0 6px 18px rgba(0,0,0,.25);
+    }
+    .medal-img{width:44px;height:44px;object-fit:contain;
+        filter: drop-shadow(0 2px 6px rgba(0,0,0,.35));
+    }
+
+    .medal-name{font-size:.85rem;font-weight:600;line-height:1.2;margin-bottom:4px}
+    .medal-points{
+        display:inline-block;margin-bottom:4px;
+        background: linear-gradient(135deg,#8b2ce6,#2c5be6);
+        border-radius:10px;padding:3px 8px;
+        font-size:.75rem;font-weight:700;color:#fff;
+    }
+    .medal-date{font-size:.75rem;color:#b8b8d0;opacity:.85}
+</style>

@@ -21,13 +21,11 @@
             <div class="p-3 rounded" style="background:#0f0f1f">
                 <h6 class="text-white mb-3">@(i + 1). @q.Text</h6>
 
-                @* Texto abierto *@
                 @if (q.Type == QuestionType.OpenText)
                 {
                     <textarea class="form-control" asp-for="Questions[@i].OpenAnswer" rows="3"
                               placeholder="Escribe tu respuesta..."></textarea>
                 }
-                @* Sí/No (asume 2 opciones) *@
                 else if (q.Type == QuestionType.YesNo)
                 {
                     <div class="form-check">
@@ -43,7 +41,6 @@
                         <label class="form-check-label" for="q@i_opt2">@q.Options.Last().Text</label>
                     </div>
                 }
-                @* Opción múltiple *@
                 else if (q.Type == QuestionType.MultipleChoice)
                 {
                     @for (var j = 0; j < q.Options.Count; j++)
