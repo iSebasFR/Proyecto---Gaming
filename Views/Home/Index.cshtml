@@ -1,10 +1,8 @@
-﻿<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GamerHub - Tu Plataforma Definitiva de Gaming</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+﻿@{
+    ViewData["Title"] = "GamerHub - Tu Plataforma Definitiva de Gaming";
+}
+
+@section Styles {
     <style>
         /* PALETA DE COLORES GAMING */
         :root {
@@ -20,113 +18,11 @@
             --navbar-bg: rgba(15, 15, 31, 0.95);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Montserrat', 'Segoe UI', sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-primary);
-            min-height: 100vh;
-            background-image: 
-                radial-gradient(circle at 20% 30%, rgba(139, 44, 230, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(44, 91, 230, 0.15) 0%, transparent 40%);
-            padding: 20px;
-            overflow-x: hidden;
-        }
-
-        .container {
+        /* ESTILOS ESPECÍFICOS PARA LA PÁGINA DE INICIO */
+        .home-container {
             max-width: 1200px;
             margin: 0 auto;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-            margin-bottom: 40px;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-        }
-
-        .logo-text {
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: linear-gradient(to right, var(--neon-purple), var(--neon-blue));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            text-shadow: 0 2px 10px rgba(139, 44, 230, 0.3);
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            color: var(--text-secondary);
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
-        nav ul {
-            display: flex;
-            list-style: none;
-            gap: 30px;
-        }
-
-        nav a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            padding: 8px 15px;
-            border-radius: 8px;
-            position: relative;
-        }
-
-        nav a:hover {
-            color: var(--text-primary);
-            background: rgba(139, 44, 230, 0.15);
-        }
-
-        nav a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 3px;
-            background: linear-gradient(to right, var(--accent-purple), var(--accent-blue));
-            transition: width 0.3s;
-            border-radius: 2px;
-        }
-
-        nav a:hover::after {
-            width: 80%;
-        }
-
-        .auth-buttons {
-            display: flex;
-            gap: 15px;
+            padding: 20px;
         }
 
         .btn {
@@ -412,6 +308,7 @@
             border: 1px solid rgba(139, 44, 230, 0.2);
             transition: all 0.3s ease;
             text-align: center;
+            cursor: pointer;
         }
 
         .game-card:hover {
@@ -533,25 +430,6 @@
             flex-wrap: wrap;
         }
 
-        footer {
-            text-align: center;
-            padding: 40px 0;
-            margin-top: 60px;
-            border-top: 1px solid rgba(139, 44, 230, 0.3);
-            color: var(--text-secondary);
-        }
-
-        footer a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        footer a:hover {
-            color: var(--neon-purple);
-            text-decoration: underline;
-        }
-
         /* BENEFITS SECTION PARA USUARIOS NO LOGUEADOS */
         .benefits {
             display: grid;
@@ -591,295 +469,290 @@
             line-height: 1.6;
         }
     </style>
-</head>
-<body>
-    <div class="container">
-        
+}
 
-        @if (User.Identity.IsAuthenticated)
-        {
-            <!-- VISTA PARA USUARIOS LOGUEADOS -->
-            <section class="hero">
-                <h1>Bienvenido a Tu Hub Gaming</h1>
-                <p>Gestiona tu biblioteca, conecta con amigos, únete a grupos y lleva tu experiencia gaming al siguiente nivel.</p>
-                <div class="hero-buttons">
-                    <a href="/Biblioteca" class="btn btn-primary" style="padding: 15px 35px; font-size: 1.1rem;">
-                        <i class="fas fa-gamepad"></i> Explorar Catálogo
-                    </a>
-                    <a href="/Comunidad" class="btn btn-secondary">
-                        <i class="fas fa-users"></i> Ver Comunidad
-                    </a>
-                </div>
-            </section>
-            
-            <section class="quick-actions">
-                <div class="action-card" onclick="window.location.href='/Amigos?seccion=Conocer'">
-                    <div class="action-icon">
-                        <i class="fas fa-user-plus"></i>
-                    </div>
-                    <h3>Conocer Amigos</h3>
-                    <p>Descubre y conecta con nuevos jugadores que comparten tus intereses</p>
-                    <a href="/Amigos?seccion=Conocer" class="btn btn-primary">Explorar</a>
-                </div>
-                
-                <div class="action-card" onclick="window.location.href='/Grupos'">
-                    <div class="action-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <h3>Unirse a Grupos</h3>
-                    <p>Encuentra comunidades de gamers con tus mismos gustos y preferencias</p>
-                    <a href="/Grupos" class="btn btn-primary">Descubrir</a>
-                </div>
-                
-                
-                
-                <div class="action-card" onclick="window.location.href='/Biblioteca/Recomendaciones'">
-                    <div class="action-icon">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <h3>Recomendaciones</h3>
-                    <p>Descubre juegos personalizados basados en tu historial</p>
-                    <a href="/Biblioteca/Recomendaciones" class="btn btn-primary">Ver Sugerencias</a>
-                </div>
-            </section>
-        }
-        else
-        {
-            <!-- VISTA PARA USUARIOS NO LOGUEADOS -->
-            <section class="hero">
-                <h1>Transforma Tu Experiencia Gaming</h1>
-                <p>Únete a la comunidad gaming más completa. Gestiona tu biblioteca, conecta con jugadores y descubre nuevos mundos.</p>
-                <div class="hero-buttons">
-                    <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-success" style="padding: 15px 40px; font-size: 1.1rem;">
-                        <i class="fas fa-rocket"></i> Comenzar Gratis
-                    </a>
-                    <a href="#features" class="btn btn-secondary">
-                        <i class="fas fa-play-circle"></i> Ver Demo
-                    </a>
-                </div>
-            </section>
-
-            <section id="benefits" class="benefits">
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="fas fa-gamepad"></i>
-                    </div>
-                    <h3>90,000+ Juegos</h3>
-                    <p>Accede a uno de los catálogos más grandes de videojuegos con información detallada de cada título</p>
-                </div>
-                
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <h3>Comunidad Activa</h3>
-                    <p>Conecta con miles de gamers, forma equipos y comparte tus experiencias de juego</p>
-                </div>
-                
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <h3>Seguimiento Inteligente</h3>
-                    <p>Lleva el control de tu progreso, horas jugadas y logros desbloqueados</p>
-                </div>
-                
-                
-            </section>
-        }
-
-        <!-- STATS SECTION (COMÚN PARA AMBOS) -->
-        <section class="stats-section">
-            <div class="stat-item">
-                <div class="stat-number">90K+</div>
-                <div class="stat-label">Juegos Disponibles</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">50K+</div>
-                <div class="stat-label">Jugadores Activos</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">1K+</div>
-                <div class="stat-label">Grupos Activos</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">24/7</div>
-                <div class="stat-label">Comunidad Online</div>
+<div class="home-container">
+    @if (User.Identity.IsAuthenticated)
+    {
+        <!-- VISTA PARA USUARIOS LOGUEADOS -->
+        <section class="hero">
+            <h1>Bienvenido a Tu Hub Gaming</h1>
+            <p>Gestiona tu biblioteca, conecta con amigos, únete a grupos y lleva tu experiencia gaming al siguiente nivel.</p>
+            <div class="hero-buttons">
+                <a href="/Biblioteca" class="btn btn-primary" style="padding: 15px 35px; font-size: 1.1rem;">
+                    <i class="fas fa-gamepad"></i> Explorar Catálogo
+                </a>
+                <a href="/Comunidad" class="btn btn-secondary">
+                    <i class="fas fa-users"></i> Ver Comunidad
+                </a>
             </div>
         </section>
         
-        <!-- FEATURES SECTION (COMÚN PARA AMBOS) -->
-        <section id="features" class="features">
-            <div class="feature-card">
-                <div class="feature-icon">
+        <section class="quick-actions">
+            <div class="action-card" onclick="window.location.href='/Amigos?seccion=Conocer'">
+                <div class="action-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h3>Conocer Amigos</h3>
+                <p>Descubre y conecta con nuevos jugadores que comparten tus intereses</p>
+                <a href="/Amigos?seccion=Conocer" class="btn btn-primary">Explorar</a>
+            </div>
+            
+            <div class="action-card" onclick="window.location.href='/Grupos'">
+                <div class="action-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>Unirse a Grupos</h3>
+                <p>Encuentra comunidades de gamers con tus mismos gustos y preferencias</p>
+                <a href="/Grupos" class="btn btn-primary">Descubrir</a>
+            </div>
+            
+            <div class="action-card" onclick="window.location.href='/Biblioteca/Recomendaciones'">
+                <div class="action-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <h3>Recomendaciones</h3>
+                <p>Descubre juegos personalizados basados en tu historial</p>
+                <a href="/Biblioteca/Recomendaciones" class="btn btn-primary">Ver Sugerencias</a>
+            </div>
+        </section>
+    }
+    else
+    {
+        <!-- VISTA PARA USUARIOS NO LOGUEADOS -->
+        <section class="hero">
+            <h1>Transforma Tu Experiencia Gaming</h1>
+            <p>Únete a la comunidad gaming más completa. Gestiona tu biblioteca, conecta con jugadores y descubre nuevos mundos.</p>
+            <div class="hero-buttons">
+                <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-success" style="padding: 15px 40px; font-size: 1.1rem;">
+                    <i class="fas fa-rocket"></i> Comenzar Gratis
+                </a>
+                <a href="#features" class="btn btn-secondary">
+                    <i class="fas fa-play-circle"></i> Ver Demo
+                </a>
+            </div>
+        </section>
+
+        <section id="benefits" class="benefits">
+            <div class="benefit-card">
+                <div class="benefit-icon">
                     <i class="fas fa-gamepad"></i>
                 </div>
-                <h3>Biblioteca Inteligente</h3>
-                <p>Organiza tu colección completa de juegos con filtros avanzados, categorías personalizadas y seguimiento de progreso en tiempo real.</p>
+                <h3>90,000+ Juegos</h3>
+                <p>Accede a uno de los catálogos más grandes de videojuegos con información detallada de cada título</p>
             </div>
             
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-chart-bar"></i>
-                </div>
-                <h3>Análisis Detallado</h3>
-                <p>Visualiza tus estadísticas de juego con gráficos interactivos, seguimiento de horas y comparativas con la comunidad.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-trophy"></i>
-                </div>
-                <h3>Sistema de Logros</h3>
-                <p>Desbloquea insignias exclusivas, compite con amigos y muestra tus conquistas gaming en tu perfil personalizado.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">
+            <div class="benefit-card">
+                <div class="benefit-icon">
                     <i class="fas fa-users"></i>
                 </div>
                 <h3>Comunidad Activa</h3>
-                <p>Conecta con jugadores de todo el mundo, forma equipos, comparte estrategias y descubre nuevos juegos.</p>
+                <p>Conecta con miles de gamers, forma equipos y comparte tus experiencias de juego</p>
             </div>
             
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-mobile-alt"></i>
+            <div class="benefit-card">
+                <div class="benefit-icon">
+                    <i class="fas fa-chart-line"></i>
                 </div>
-                <h3>Multiplataforma</h3>
-                <p>Accede a tu perfil desde cualquier dispositivo - PC, móvil o tablet - con sincronización en la nube.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-bell"></i>
-                </div>
-                <h3>Notificaciones Inteligentes</h3>
-                <p>Recibe alertas personalizadas sobre nuevos lanzamientos, eventos especiales y actividad de tus amigos.</p>
+                <h3>Seguimiento Inteligente</h3>
+                <p>Lleva el control de tu progreso, horas jugadas y logros desbloqueados</p>
             </div>
         </section>
-        
-        @if (!User.Identity.IsAuthenticated)
-        {
-            <!-- GAME SHOWCASE SOLO PARA NO LOGUEADOS -->
-            <section class="game-showcase">
-                <h2 class="showcase-title">Descubre Mundos Increíbles</h2>
-                <div class="game-grid">
-                    <div class="game-card">
-                        <div class="game-icon">
-                            <i class="fas fa-dragon"></i>
-                        </div>
-                        <h4>Aventuras Épicas</h4>
-                        <p>Sumérgete en historias fascinantes y mundos fantásticos llenos de magia y misterio</p>
-                    </div>
-                    <div class="game-card">
-                        <div class="game-icon">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <h4>Acción Intensa</h4>
-                        <p>Vive la adrenalina de combates épicos y desafíos que pondrán a prueba tus habilidades</p>
-                    </div>
-                    <div class="game-card">
-                        <div class="game-icon">
-                            <i class="fas fa-puzzle-piece"></i>
-                        </div>
-                        <h4>Desafíos Mentales</h4>
-                        <p>Resuelve enigmas complejos y planifica estrategias para superar cada obstáculo</p>
-                    </div>
-                    <div class="game-card">
-                        <div class="game-icon">
-                            <i class="fas fa-globe-americas"></i>
-                        </div>
-                        <h4>Mundos Abiertos</h4>
-                        <p>Explora vastos territorios llenos de secretos, misiones y personajes memorables</p>
-                    </div>
-                </div>
-            </section>
-        }
-        else
-        {
-            <!-- GAME SHOWCASE PARA USUARIOS LOGUEADOS -->
-            <section class="game-showcase">
-                <h2 class="showcase-title">Explora por Categorías</h2>
-                <div class="game-grid">
-                    <div class="game-card" onclick="window.location.href='/Biblioteca?genre=action'">
-                        <div class="game-icon">
-                            <i class="fas fa-fist-raised"></i>
-                        </div>
-                        <h4>Acción</h4>
-                        <p>Juegos llenos de adrenalina y combates intensos</p>
-                    </div>
-                    <div class="game-card" onclick="window.location.href='/Biblioteca?genre=rpg'">
-                        <div class="game-icon">
-                            <i class="fas fa-dragon"></i>
-                        </div>
-                        <h4>RPG</h4>
-                        <p>Sumérgete en mundos fantásticos y vive aventuras épicas</p>
-                    </div>
-                    <div class="game-card" onclick="window.location.href='/Biblioteca?genre=strategy'">
-                        <div class="game-icon">
-                            <i class="fas fa-chess"></i>
-                        </div>
-                        <h4>Estrategia</h4>
-                        <p>Planifica tus movimientos y domina el campo de batalla</p>
-                    </div>
-                    <div class="game-card" onclick="window.location.href='/Biblioteca?genre=sports'">
-                        <div class="game-icon">
-                            <i class="fas fa-running"></i>
-                        </div>
-                        <h4>Deportes</h4>
-                        <p>Competencia y habilidad en tus deportes favoritos</p>
-                    </div>
-                </div>
-            </section>
-        }
-        
-        <!-- ABOUT SECTION (COMÚN PARA AMBOS) -->
-        <section id="about" class="about">
-            <h2>Más Que Una Plataforma, Una Comunidad</h2>
-            <p>En GamerHub, creemos que los videojuegos son más que solo entretenimiento: son experiencias que nos conectan, historias que nos inspiran y desafíos que nos unen. Nuestra misión es crear el espacio perfecto donde los gamers puedan compartir su pasión, descubrir nuevas aventuras y llevar su experiencia gaming al siguiente nivel.</p>
-            <p style="margin-top: 20px; font-style: italic; color: var(--neon-purple);">"Donde cada jugador encuentra su lugar en el universo gaming"</p>
-        </section>
-        
-        <!-- CTA SECTION DIFERENTE PARA CADA TIPO DE USUARIO -->
-        @if (User.Identity.IsAuthenticated)
-        {
-            <section class="cta-section">
-                <h2>¿Listo Para Explorar Más?</h2>
-                <p>Descubre todas las funcionalidades que tenemos para ofrecerte.</p>
-                <div class="cta-buttons">
-                    <a href="/Grupos/Crear" class="btn btn-primary" style="padding: 15px 40px; font-size: 1.1rem;">
-                        <i class="fas fa-plus-circle"></i> Crear Grupo
-                    </a>
-                    <a href="/Amigos" class="btn btn-primary">
-                        <i class="fas fa-user-friends"></i> Gestionar Amigos
-                    </a>
-                    <a href="/Biblioteca/Pendientes" class="btn btn-secondary">
-                        <i class="fas fa-clock"></i> Ver Pendientes
-                    </a>
-                </div>
-            </section>
-        }
-        else
-        {
-            <section class="cta-section">
-                <h2>¿Listo Para Unirte a la Aventura?</h2>
-                <p>Regístrate ahora y descubre por qué miles de gamers eligen GamerHub</p>
-                <div class="cta-buttons">
-                    <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-success" style="padding: 15px 40px; font-size: 1.1rem;">
-                        <i class="fas fa-crown"></i> Crear Cuenta Gratis
-                    </a>
-                    <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary">
-                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-                    </a>
-                    <a href="#features" class="btn btn-secondary">
-                        <i class="fas fa-info-circle"></i> Saber Más
-                    </a>
-                </div>
-            </section>
-        }
-    </div>
+    }
 
+    <!-- STATS SECTION (COMÚN PARA AMBOS) -->
+    <section class="stats-section">
+        <div class="stat-item">
+            <div class="stat-number">90K+</div>
+            <div class="stat-label">Juegos Disponibles</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">50K+</div>
+            <div class="stat-label">Jugadores Activos</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">1K+</div>
+            <div class="stat-label">Grupos Activos</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">24/7</div>
+            <div class="stat-label">Comunidad Online</div>
+        </div>
+    </section>
+    
+    <!-- FEATURES SECTION (COMÚN PARA AMBOS) -->
+    <section id="features" class="features">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-gamepad"></i>
+            </div>
+            <h3>Biblioteca Inteligente</h3>
+            <p>Organiza tu colección completa de juegos con filtros avanzados, categorías personalizadas y seguimiento de progreso en tiempo real.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-chart-bar"></i>
+            </div>
+            <h3>Análisis Detallado</h3>
+            <p>Visualiza tus estadísticas de juego con gráficos interactivos, seguimiento de horas y comparativas con la comunidad.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h3>Sistema de Logros</h3>
+            <p>Desbloquea insignias exclusivas, compite con amigos y muestra tus conquistas gaming en tu perfil personalizado.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h3>Comunidad Activa</h3>
+            <p>Conecta con jugadores de todo el mundo, forma equipos, comparte estrategias y descubre nuevos juegos.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-mobile-alt"></i>
+            </div>
+            <h3>Multiplataforma</h3>
+            <p>Accede a tu perfil desde cualquier dispositivo - PC, móvil o tablet - con sincronización en la nube.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-bell"></i>
+            </div>
+            <h3>Notificaciones Inteligentes</h3>
+            <p>Recibe alertas personalizadas sobre nuevos lanzamientos, eventos especiales y actividad de tus amigos.</p>
+        </div>
+    </section>
+    
+    @if (!User.Identity.IsAuthenticated)
+    {
+        <!-- GAME SHOWCASE SOLO PARA NO LOGUEADOS -->
+        <section class="game-showcase">
+            <h2 class="showcase-title">Descubre Mundos Increíbles</h2>
+            <div class="game-grid">
+                <div class="game-card">
+                    <div class="game-icon">
+                        <i class="fas fa-dragon"></i>
+                    </div>
+                    <h4>Aventuras Épicas</h4>
+                    <p>Sumérgete en historias fascinantes y mundos fantásticos llenos de magia y misterio</p>
+                </div>
+                <div class="game-card">
+                    <div class="game-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h4>Acción Intensa</h4>
+                    <p>Vive la adrenalina de combates épicos y desafíos que pondrán a prueba tus habilidades</p>
+                </div>
+                <div class="game-card">
+                    <div class="game-icon">
+                        <i class="fas fa-puzzle-piece"></i>
+                    </div>
+                    <h4>Desafíos Mentales</h4>
+                    <p>Resuelve enigmas complejos y planifica estrategias para superar cada obstáculo</p>
+                </div>
+                <div class="game-card">
+                    <div class="game-icon">
+                        <i class="fas fa-globe-americas"></i>
+                    </div>
+                    <h4>Mundos Abiertos</h4>
+                    <p>Explora vastos territorios llenos de secretos, misiones y personajes memorables</p>
+                </div>
+            </div>
+        </section>
+    }
+    else
+    {
+        <!-- GAME SHOWCASE PARA USUARIOS LOGUEADOS -->
+        <section class="game-showcase">
+            <h2 class="showcase-title">Explora por Categorías</h2>
+            <div class="game-grid">
+                <div class="game-card" onclick="window.location.href='/Biblioteca?genre=action'">
+                    <div class="game-icon">
+                        <i class="fas fa-fist-raised"></i>
+                    </div>
+                    <h4>Acción</h4>
+                    <p>Juegos llenos de adrenalina y combates intensos</p>
+                </div>
+                <div class="game-card" onclick="window.location.href='/Biblioteca?genre=rpg'">
+                    <div class="game-icon">
+                        <i class="fas fa-dragon"></i>
+                    </div>
+                    <h4>RPG</h4>
+                    <p>Sumérgete en mundos fantásticos y vive aventuras épicas</p>
+                </div>
+                <div class="game-card" onclick="window.location.href='/Biblioteca?genre=strategy'">
+                    <div class="game-icon">
+                        <i class="fas fa-chess"></i>
+                    </div>
+                    <h4>Estrategia</h4>
+                    <p>Planifica tus movimientos y domina el campo de batalla</p>
+                </div>
+                <div class="game-card" onclick="window.location.href='/Biblioteca?genre=sports'">
+                    <div class="game-icon">
+                        <i class="fas fa-running"></i>
+                    </div>
+                    <h4>Deportes</h4>
+                    <p>Competencia y habilidad en tus deportes favoritos</p>
+                </div>
+            </div>
+        </section>
+    }
+    
+    <!-- ABOUT SECTION (COMÚN PARA AMBOS) -->
+    <section id="about" class="about">
+        <h2>Más Que Una Plataforma, Una Comunidad</h2>
+        <p>En GamerHub, creemos que los videojuegos son más que solo entretenimiento: son experiencias que nos conectan, historias que nos inspiran y desafíos que nos unen. Nuestra misión es crear el espacio perfecto donde los gamers puedan compartir su pasión, descubrir nuevas aventuras y llevar su experiencia gaming al siguiente nivel.</p>
+        <p style="margin-top: 20px; font-style: italic; color: var(--neon-purple);">"Donde cada jugador encuentra su lugar en el universo gaming"</p>
+    </section>
+    
+    <!-- CTA SECTION DIFERENTE PARA CADA TIPO DE USUARIO -->
+    @if (User.Identity.IsAuthenticated)
+    {
+        <section class="cta-section">
+            <h2>¿Listo Para Explorar Más?</h2>
+            <p>Descubre todas las funcionalidades que tenemos para ofrecerte.</p>
+            <div class="cta-buttons">
+                <a href="/Grupos/Crear" class="btn btn-primary" style="padding: 15px 40px; font-size: 1.1rem;">
+                    <i class="fas fa-plus-circle"></i> Crear Grupo
+                </a>
+                <a href="/Amigos" class="btn btn-primary">
+                    <i class="fas fa-user-friends"></i> Gestionar Amigos
+                </a>
+                <a href="/Biblioteca/Pendientes" class="btn btn-secondary">
+                    <i class="fas fa-clock"></i> Ver Pendientes
+                </a>
+            </div>
+        </section>
+    }
+    else
+    {
+        <section class="cta-section">
+            <h2>¿Listo Para Unirte a la Aventura?</h2>
+            <p>Regístrate ahora y descubre por qué miles de gamers eligen GamerHub</p>
+            <div class="cta-buttons">
+                <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-success" style="padding: 15px 40px; font-size: 1.1rem;">
+                    <i class="fas fa-crown"></i> Crear Cuenta Gratis
+                </a>
+                <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                </a>
+                <a href="#features" class="btn btn-secondary">
+                    <i class="fas fa-info-circle"></i> Saber Más
+                </a>
+            </div>
+        </section>
+    }
+</div>
+
+@section Scripts {
     <script>
         // Animación de scroll suave para enlaces
         document.addEventListener('DOMContentLoaded', function() {
@@ -905,29 +778,6 @@
                     }
                 });
             });
-
-            @if (User.Identity.IsAuthenticated)
-            {
-                <text>
-                // Simular datos de usuario para logueados
-                const userAvatar = document.querySelector('.user-avatar');
-                const userName = document.querySelector('.user-info span');
-                
-                // Aquí puedes integrar con tu sistema de autenticación
-                const userData = {
-                    name: '@User.Identity.Name',
-                    avatar: '@User.Identity.Name'.charAt(0).toUpperCase()
-                };
-                
-                if(userName) {
-                    userName.textContent = `¡Hola, ${userData.name}!`;
-                }
-                if(userAvatar) {
-                    userAvatar.textContent = userData.avatar;
-                }
-                </text>
-            }
         });
     </script>
-</body>
-</html>
+}
