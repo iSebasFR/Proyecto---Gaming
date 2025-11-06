@@ -6,7 +6,6 @@ using Proyecto_Gaming.Services;
 using Microsoft.Extensions.Caching.Distributed;
 // 🔧 Alias para distinguir el servicio de AdminV2
 using AdminV2Stats = Proyecto_Gaming.Areas.AdminV2.Services;
-using Proyecto_Gaming.Data;
 using Proyecto_Gaming.Models.Surveys;
 
 
@@ -207,6 +206,17 @@ builder.Services.AddHttpClient<IGamePriceService, CheapSharkPriceService>(client
     client.DefaultRequestHeaders.Add("User-Agent", "GamingApp/1.0");
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
+
+// ✅ CONFIGURAR HTTPCLIENT PARA EL CHATBOT (Ollama local)
+builder.Services.AddHttpClient<IChatbotService, OllamaChatService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:11434/");
+    client.Timeout = TimeSpan.FromSeconds(60);
+    client.DefaultRequestHeaders.Add("User-Agent", "GamingApp-Chatbot/1.0");
+});
+
+// Fallback service para cuando Ollama no esté disponible
+builder.Services.AddScoped<IFallbackService, FallbackService>();
 
 // ✅ LIMITAR CONCURRENCIA
 builder.Services.Configure<HttpClientHandler>(options =>

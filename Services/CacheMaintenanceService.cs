@@ -30,7 +30,15 @@ namespace Proyecto_Gaming.Services
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "⚠️ Error en mantenimiento de caché");
-                    await Task.Delay(TimeSpan.FromMinutes(30), stoppingToken);
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromMinutes(30), stoppingToken);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // shutdown requested - swallow and exit loop gracefully
+                        break;
+                    }
                 }
             }
         }
