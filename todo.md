@@ -1,0 +1,4 @@
+- [x] Habilitar modo híbrido combinando respuesta Ollama con contexto local
+- [x] Documentar cómo configurar Ollama para el chatbot
+- [x] Añadir respuesta local para preguntas de fecha/hora
+- [x] Responder preguntas sobre registro y acceso

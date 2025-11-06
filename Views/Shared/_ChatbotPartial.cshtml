@@ -1,0 +1,23 @@
+@using Proyecto_Gaming.ViewModels
+<div id="chatbot-widget" style="position:fixed;right:20px;bottom:20px;z-index:1055;">
+    <div id="chatbot-button" class="btn btn-primary" style="border-radius:50px;padding:12px 18px;box-shadow:0 8px 24px rgba(0,0,0,.35);">
+        <i class="fas fa-robot"></i> Chat
+    </div>
+
+    <div id="chatbot-panel" style="display:none;width:360px;max-width:90vw;background:linear-gradient(180deg,#0f0f1f,#151530);border-radius:12px;padding:12px;margin-top:12px;color:#ddd;box-shadow:0 20px 60px rgba(0,0,0,.5);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <strong>Asistente Gaming</strong>
+            <button id="chatbot-close" class="btn btn-sm btn-outline-light">X</button>
+        </div>
+        <div id="chatbot-messages" style="height:300px;overflow:auto;padding:8px;background:rgba(255,255,255,0.02);border-radius:8px;margin-bottom:8px;"> 
+            <!-- mensajes -->
+        </div>
+        <div style="display:flex;gap:8px;">
+            <input id="chatbot-input" type="text" placeholder="Escribe tu pregunta..." class="form-control form-control-sm" />
+            <button id="chatbot-send" class="btn btn-success btn-sm">Enviar</button>
+        </div>
+        <div id="chatbot-status" style="font-size:12px;color:#9aa0b4;margin-top:6px;display:none;">Conectando...</div>
+    </div>
+</div>
+
+<script src="~/js/chatbot.js" asp-append-version="true"></script>
