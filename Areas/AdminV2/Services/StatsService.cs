@@ -11,6 +11,7 @@ namespace Proyecto_Gaming.Areas.AdminV2.Services
 {
     public interface IStatsService
     {
+        // Mantengo la firma original para NO romper llamadas existentes
         Task<StatsViewModel> GetAsync(DateTime? from, DateTime? to);
     }
 
@@ -21,58 +22,116 @@ namespace Proyecto_Gaming.Areas.AdminV2.Services
 
         public async Task<StatsViewModel> GetAsync(DateTime? from, DateTime? to)
         {
-            // Rango por defecto: últimos 30 días (UTC)
-            var toDt = (to ?? DateTime.UtcNow.Date).Date.AddDays(1).AddTicks(-1);
-            var fromDt = (from ?? toDt.Date.AddDays(-30)).Date;
+            // =========================
+            // 1) RANGO DE FECHAS (UTC)
+            // =========================
+            // - from: inicio del día (00:00)
+            // - to:   fin del día (23:59:59.9999999) => inclusivo
+            // - por defecto, últimos 30 días
 
-            // ------ Usuarios por rol (Identity) ------
+            static DateTime ToUtcStartOfDay(DateTime? d, DateTime fallbackUtcToday)
+            {
+                if (d is null) return fallbackUtcToday.AddDays(-30); // default: 30 días antes del to
+                var local = d.Value.Date;
+                // si vino Unspecified/Local, lo fijamos como UTC de forma segura
+                return DateTime.SpecifyKind(local, DateTimeKind.Utc);
+            }
+            static DateTime ToUtcEndOfDay(DateTime? d, DateTime fallbackUtcToday)
+            {
+                var baseDate = d is null ? fallbackUtcToday : DateTime.SpecifyKind(d.Value.Date, DateTimeKind.Utc);
+                return baseDate.AddDays(1).AddTicks(-1); // fin de día inclusivo
+            }
+
+            var todayUtc         = DateTime.UtcNow.Date;
+            var toUtcInclusive   = ToUtcEndOfDay(to, todayUtc);
+            var fromUtcInclusive = ToUtcStartOfDay(from, toUtcInclusive.Date);
+
+            // Para el ViewModel (usa DateTime)
+            var uiFrom = fromUtcInclusive;
+            var uiTo   = toUtcInclusive;
+
+            // ==================================
+            // 2) USUARIOS POR ROL (TODOS, incluye "Sin rol")
+            // ==================================
             List<UsersByGroupItem> usersByGroup;
             try
             {
-                var userRoles = _db.Set<IdentityUserRole<string>>();
-                var roles     = _db.Set<IdentityRole>();
-
-                usersByGroup = await userRoles
-                    .GroupBy(ur => ur.RoleId)
-                    .Join(roles, g => g.Key, r => r.Id, (g, r) => new UsersByGroupItem
+                var query =
+                    from u in _db.Users.AsNoTracking()
+                    join ur in _db.UserRoles.AsNoTracking()
+                        on u.Id equals ur.UserId into urj
+                    from ur in urj.DefaultIfEmpty()
+                    join r in _db.Roles.AsNoTracking()
+                        on ur.RoleId equals r.Id into rj
+                    from r in rj.DefaultIfEmpty()
+                    group u by (r != null ? r.Name : "Sin rol") into g
+                    select new UsersByGroupItem
                     {
-                        GroupName = r.Name ?? "Sin grupo",
-                        Count = g.Count()
-                    })
+                        GroupName = g.Key!,
+                        Count = g.Select(x => x.Id).Distinct().Count()
+                    };
+
+                usersByGroup = await query
                     .OrderByDescending(x => x.Count)
                     .ToListAsync();
             }
             catch
             {
-                // Si no tienes Identity configurado, deja la lista vacía
                 usersByGroup = new List<UsersByGroupItem>();
             }
 
-            // ------ Top juegos más comprados en el rango ------
-            // Dejado vacío a propósito para compilar sin tu entidad de compras.
-            // Cuando me confirmes la entidad/namespace y campos reales, activo el query.
+            // ==================================
+            // 3) TOP JUEGOS MÁS COMPRADOS — TODOS
+            // ==================================
+            // Dejo tres ejemplos listos; activa el que calce con tu entidad real.
             var topGames = new List<TopGameItem>();
 
-            // EJEMPLO (actívalo cuando tengas la entidad real):
+            // // EJEMPLO A: entidad Purchase con fecha OccurredAtUtc y navegación Game.Title
             // try
             // {
-            //     var purchases = _db.Set<Proyecto_Gaming.Models.Purchase>(); // <-- CAMBIA al tipo real
-            //     topGames = await purchases
-            //         .AsNoTracking()
-            //         .Where(p => p.OccurredAtUtc >= fromDt && p.OccurredAtUtc <= toDt) // <-- CAMBIA campos si difieren
-            //         .Select(p => p.Sku) // <-- CAMBIA a GameName/GameCode/ProductName si corresponde
-            //         .GroupBy(sku => sku)
+            //     topGames = await _db.Set<Purchase>().AsNoTracking()
+            //         .Where(p => p.OccurredAtUtc >= fromUtcInclusive && p.OccurredAtUtc <= toUtcInclusive)
+            //         .GroupBy(p => p.Game.Title)
             //         .Select(g => new TopGameItem { Game = g.Key ?? "N/D", Purchases = g.Count() })
             //         .OrderByDescending(x => x.Purchases)
             //         .Take(10)
             //         .ToListAsync();
             // }
-            // catch { /* la vista soporta vacío */ }
+            // catch { topGames = new List<TopGameItem>(); }
 
+            // // EJEMPLO B: entidad Order con fecha CreatedAt y campo GameName
+            // try
+            // {
+            //     topGames = await _db.Set<Order>().AsNoTracking()
+            //         .Where(o => o.CreatedAt >= fromUtcInclusive && o.CreatedAt <= toUtcInclusive)
+            //         .GroupBy(o => o.GameName)
+            //         .Select(g => new TopGameItem { Game = g.Key ?? "N/D", Purchases = g.Count() })
+            //         .OrderByDescending(x => x.Purchases)
+            //         .Take(10)
+            //         .ToListAsync();
+            // }
+            // catch { topGames = new List<TopGameItem>(); }
+
+            // // EJEMPLO C: entidad GameSale con fecha CreatedAt y navegación Game.Title
+            // try
+            // {
+            //     topGames = await _db.Set<GameSale>().AsNoTracking()
+            //         .Where(s => s.CreatedAt >= fromUtcInclusive && s.CreatedAt <= toUtcInclusive)
+            //         .GroupBy(s => s.Game.Title)
+            //         .Select(g => new TopGameItem { Game = g.Key ?? "N/D", Purchases = g.Count() })
+            //         .OrderByDescending(x => x.Purchases)
+            //         .Take(10)
+            //         .ToListAsync();
+            // }
+            // catch { topGames = new List<TopGameItem>(); }
+
+            // =========================
+            // 4) RETORNO AL VIEWMODEL
+            // =========================
             return new StatsViewModel
             {
-                From = fromDt.Date,
-                To   = toDt.Date,
+                From = uiFrom, // 00:00 UTC
+                To   = uiTo,   // 23:59:59.9999999 UTC (inclusivo)
                 UsersByGroup = usersByGroup,
                 TopGames     = topGames
             };
