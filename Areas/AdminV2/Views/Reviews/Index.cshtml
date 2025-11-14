@@ -20,12 +20,192 @@
             .OrderByDescending(x => x.CreatedAtUtc);
 }
 
-<h1 class="text-white mb-4"><i class="fa-solid fa-comments me-2"></i>Reseñas</h1>
+<div class="container-fluid">
+    <!-- Header Profesional -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="text-white mb-2">📊 Panel de Reseñas</h1>
+            <p class="text-muted mb-0">Gestión y análisis de feedback de usuarios</p>
+        </div>
+        <div class="text-end">
+            <div class="btn-group">
+                <button class="btn btn-outline-light btn-sm">
+                    <i class="fa-solid fa-download me-1"></i>Exportar
+                </button>
+                <button class="btn btn-outline-light btn-sm">
+                    <i class="fa-solid fa-filter me-1"></i>Filtros Avanzados
+                </button>
+            </div>
+        </div>
+    </div>
 
-<div class="d-flex gap-2 mb-3">
-    <a asp-action="Index" asp-route-filter="all" class="@TabClass("all", filter)">Todas (@totalAll)</a>
-    <a asp-action="Index" asp-route-filter="positive" class="@TabClass("positive", filter)">Positivas (@totalPositive)</a>
-    <a asp-action="Index" asp-route-filter="negative" class="@TabClass("negative", filter)">Negativas (@totalNegative)</a>
+    <!-- Tarjetas de Métricas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-dark border-left-primary border-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="text-primary fw-bold fs-4">@totalAll</div>
+                            <div class="text-light small">Total Reseñas</div>
+                        </div>
+                        <div class="text-primary fs-2">
+                            <i class="fa-solid fa-comments"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark border-left-success border-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="text-success fw-bold fs-4">@totalPositive</div>
+                            <div class="text-light small">Reseñas Positivas</div>
+                        </div>
+                        <div class="text-success fs-2">
+                            <i class="fa-solid fa-thumbs-up"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark border-left-danger border-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="text-danger fw-bold fs-4">@totalNegative</div>
+                            <div class="text-light small">Reseñas Negativas</div>
+                        </div>
+                        <div class="text-danger fs-2">
+                            <i class="fa-solid fa-thumbs-down"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark border-left-info border-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="text-info fw-bold fs-4">@(totalAll > 0 ? ((totalPositive * 100) / totalAll) : 0)%</div>
+                            <div class="text-light small">Tasa de Satisfacción</div>
+                        </div>
+                        <div class="text-info fs-2">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros Mejorados -->
+    <div class="card bg-dark border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="d-flex gap-2 align-items-center">
+                        <span class="text-light fw-medium me-2">Filtrar por:</span>
+                        <a asp-action="Index" asp-route-filter="all" class="@TabClass("all", filter) px-3 py-2">
+                            <i class="fa-solid fa-table-cells me-1"></i>
+                            Todas <span class="badge bg-secondary ms-1">@totalAll</span>
+                        </a>
+                        <a asp-action="Index" asp-route-filter="positive" class="@TabClass("positive", filter) px-3 py-2">
+                            <i class="fa-solid fa-face-smile me-1"></i>
+                            Positivas <span class="badge bg-success ms-1">@totalPositive</span>
+                        </a>
+                        <a asp-action="Index" asp-route-filter="negative" class="@TabClass("negative", filter) px-3 py-2">
+                            <i class="fa-solid fa-face-frown me-1"></i>
+                            Negativas <span class="badge bg-danger ms-1">@totalNegative</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="text-muted small">
+                        <i class="fa-solid fa-user-shield me-1"></i>
+                        Sesión: admin@gaming.com
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido Original Mantenido -->
+    <partial name="_ReviewsTable" model="items" />
+
+    <!-- Footer Informativo -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card bg-dark border-secondary">
+                <div class="card-body">
+                    <h6 class="text-light mb-3">
+                        <i class="fa-solid fa-chart-pie me-2"></i>Resumen de Métricas
+                    </h6>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end border-secondary">
+                                <div class="text-success fw-bold fs-5">@totalPositive</div>
+                                <small class="text-muted">Aprobadas</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-warning fw-bold fs-5">@totalNegative</div>
+                            <small class="text-muted">Por Revisar</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card bg-dark border-secondary">
+                <div class="card-body">
+                    <h6 class="text-light mb-3">
+                        <i class="fa-solid fa-clock-rotate-left me-2"></i>Información del Sistema
+                    </h6>
+                    <div class="small">
+                        <div class="text-muted mb-1">
+                            <i class="fa-solid fa-database me-2"></i>Total registros: @totalAll
+                        </div>
+                        <div class="text-muted mb-1">
+                            <i class="fa-solid fa-calendar me-2"></i>Actualizado: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
+                        </div>
+                        <div class="text-muted">
+                            <i class="fa-solid fa-percentage me-2"></i>Tasa positiva: @(totalAll > 0 ? ((totalPositive * 100) / totalAll) : 0)%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<partial name="_ReviewsTable" model="items" />
+<style>
+    .border-left-primary { border-left-color: #0d6efd !important; }
+    .border-left-success { border-left-color: #198754 !important; }
+    .border-left-danger { border-left-color: #dc3545 !important; }
+    .border-left-info { border-left-color: #0dcaf0 !important; }
+    
+    .card {
+        border: 1px solid #2d3748 !important;
+        transition: transform 0.2s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .btn {
+        border-radius: 6px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .badge {
+        font-size: 0.7em;
+    }
+</style>
